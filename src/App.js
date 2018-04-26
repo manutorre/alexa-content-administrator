@@ -74,8 +74,7 @@ class App extends Component {
 
         <div>
           <br/>
-          <textarea rows="5" cols="25" v
-          alue={this.state.str}/>
+          <textarea rows="5" cols="25" value={this.state.str}/>
         </div>
         }
 
