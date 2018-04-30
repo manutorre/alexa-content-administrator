@@ -12,7 +12,6 @@ class App extends Component {
   }
 
   changeSection(section){
-    console.log(section)
     this.setState({section: section})
   }
 

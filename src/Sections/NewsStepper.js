@@ -4,7 +4,6 @@ import React from 'react'
 export default class NewsStepper extends React.Component{
 
   componentDidMount(){
-    console.log("escondeteee")
     window.parent.postMessage("hideMask", "*");
   }
 
@@ -13,7 +12,7 @@ export default class NewsStepper extends React.Component{
     return(
       <div>
         <div>Manu</div>
-        <button onClick={() => this.props.changeSection("entry")}>Crear noticia</button>
+        <button onClick={() => this.props.changeSection("entry")}>Volver</button>
       </div>
     )
   }
