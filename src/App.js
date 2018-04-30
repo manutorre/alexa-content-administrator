@@ -14,10 +14,20 @@ class App extends Component {
       selected:"",
     }
   }
+
+  onMessageReceive(e){
+    if (typeof e.data === "string"){
+      this.setState({str:e.data})
+    }
+    else{
+      this.setState({array:e.data})
+    }
+  }
+
   onSelectAction(event){
     var e = document.getElementById("selectAction");
     var valor = e.options[e.selectedIndex].value;
-    
+
     if(valor==="notice"){
       this.setState({selected:"selectNotice"});
       alert("Ahora arrastre el titulo de una noticia");
@@ -36,8 +46,7 @@ class App extends Component {
     //document.getElementById("iframe").contentWindow.postMessage(data, "*");
   }
   componentDidMount(){
-    console.log("manu")
-    window.addEventListener('message', (e) => (typeof e.data === "string") ? this.setState({str:e.data}) : this.setState({array:e.data})   );//console.log(e.data)
+    window.addEventListener('message', (e) => this.onMessageReceive());//console.log(e.data)
   }
 
   render() {
@@ -50,15 +59,15 @@ class App extends Component {
         <p className="App-intro">
           To get started, edit <code>src/App.js</code> and save to reload.
         </p>
-      <label >Accion a realizar</label> 
+      <label >Accion a realizar</label>
       <select defaultValue="-" id="selectAction" onChange={(event) => { this.onSelectAction(event) }}>
           <option disabled value="-">-Seleccionar accion</option>
           <option value="notice">Create notice</option>
           <option value="section">Create section</option>
       </select>
 
-        
-        {(this.state.selected === "selectSection" && this.state.array.length > 0 )?        
+
+        {(this.state.selected === "selectSection" && this.state.array.length > 0 )?
         <div>
         <label >Numero de noticia</label>
           <select id="select" onChange={(event) => { this.myFunction(event) }}>
@@ -69,7 +78,7 @@ class App extends Component {
           <br/>
           <textarea rows="5" cols="25" value={this.state.array[this.state.value]}/>
         </div>
-        
+
         :
 
         <div>
