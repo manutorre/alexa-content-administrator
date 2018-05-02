@@ -1,6 +1,8 @@
 import React, { Component } from 'react';
 import Entry from './Sections/Entry'
-import NewsStepper from './Sections/NewsStepper'
+import NewsStepper from './Sections/Stepper/NewsStepper'
+import 'antd/dist/antd.css'
+import '../App.css';
 
 class App extends Component {
 

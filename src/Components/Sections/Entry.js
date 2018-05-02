@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
-import logo from '../logo.svg';
-import '../App.css';
+import logo from '../../logo.svg';
+import {Button} from 'antd'
+
 
 export default class Entry extends Component {
 
@@ -46,7 +47,8 @@ export default class Entry extends Component {
     //document.getElementById("iframe").contentWindow.postMessage(data, "*");
   }
   componentDidMount(){
-    window.parent.postMessage("showMask","*");
+    // window.parent.postMessage("showMask","*");
+    window.parent.postMessage("hideMask", "*")
     window.addEventListener('message', (e) => this.onMessageReceive(e));//console.log(e.data)
   }
 
@@ -88,7 +90,7 @@ export default class Entry extends Component {
         </div>
         }
 
-        <button onClick={() => this.props.changeSection("stepper")}>Crear noticia</button>
+        <Button onClick={() => this.props.changeSection("stepper")}>Crear noticia</Button>
 
       </div>
     );
