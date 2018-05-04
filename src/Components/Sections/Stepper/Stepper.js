@@ -7,49 +7,49 @@ export default class Stepper extends React.Component{
   constructor(props){
     super(props)
     this.state = {
+      titleAndLinkStatus: false,
       title:{
         xpath:"",
-        text: "",
-        state: "Esperando"
+        text: ""
       },
       link:{
         xpath:"",
-        text:"",
-        state: false
+        text:""
       },
     }
   }
 
-  assignProperty(property, text,xpath){
-    const newProperty = Object.assign(this.state[property], {xpath:xpath, text:text, state: false})
+  assignTitleAndLink(titleObject, linkObject){
+    const newTitle = Object.assign(this.state.title, {xpath: titleObject.xpath, text: titleObject.text})
+    const newLink = Object.assign(this.state.link, {xpath: linkObject.xpath, text: linkObject.text})
     this.setState({
-      [property]: newProperty
+      titleAndLinkStatus: false,
+      title:newTitle,
+      link: newLink
     })
   }
 
-  confirmProperty(property){
-    const newProperty = Object.assign(this.state[property], {state: "Confirmado"})
+  confirmTitleAndLink(){
     this.setState({
-      [property]: newProperty
+      titleAndLinkStatus: "Confirmado"
     })
-    this.props.nextStep()
-    property === "title" && this.getLink()
+    this.props.nextTwoSteps();
   }
 
-  cancelProperty(property){
+  cancelTitleAndLink(){
     this.setState({
-      [property]: {xpath:"", text: "", state: "Esperando"}
+      title: {xpath:"", text: ""},
+      link: {xpath:"", text: ""},
+      titleAndLinkStatus: "Esperando"
     })
     window.parent.postMessage("maskForNewContent", "*");
-    window.parent.postMessage("titleRecognizing", "*");
-    window.addEventListener('message', (e) => this.onMessageReceive(e));
+    window.parent.postMessage("titleAndLinkRecognizing", "*");
   }
 
-  askForPropertyConfirm(property){
-    const newProperty = Object.assign(this.state[property], {state:"Esperando confirmación"})
+  askForConfirmTitleAndLink(){
     this.setState({
-      [property]: newProperty
-    }, console.log(this.state))
+      titleAndLinkStatus: "Esperando confirmación"
+    })
   }
 
   onMessageReceive(e){
@@ -59,10 +59,10 @@ export default class Stepper extends React.Component{
     else{
       this.setState({array:e.data})
     }
-    if (e.data.type === "title" || e.data.type === "link" ) {
-      this.assignProperty(e.data.type, e.data.text, e.data.data)
+    if (e.data.type === "titleAndLink") {
+      this.assignTitleAndLink(e.data.title, e.data.link)
       window.parent.postMessage("hideMask", "*")
-      this.askForPropertyConfirm(e.data.type)
+      this.askForConfirmTitleAndLink()
     }
   }
 
@@ -73,7 +73,7 @@ export default class Stepper extends React.Component{
 
   componentDidMount(){
     window.parent.postMessage("maskForNewContent", "*");
-    window.parent.postMessage("titleRecognizing", "*");
+    window.parent.postMessage("titleAndLinkRecognizing", "*");
     window.addEventListener('message', (e) => this.onMessageReceive(e));
   }
 
@@ -97,31 +97,31 @@ export default class Stepper extends React.Component{
 
     return(
       <div>
-        <Steps current={this.props.currentStep}>
-          <ConfirmPopover
-            titleState = {this.state.title.state}
-            linkState = {this.state.link.state}
-            confirmProperty = {(property) => this.confirmProperty(property)}
-            cancelProperty = {(property) => this.cancelProperty(property)}
+        <Steps current={this.props.currentStep - 1}>
+          <Step
+            size="small"
+            title={this.state.titleAndLinkStatus}
+            icon={this.iconKind(this.state.titleAndLinkStatus)}
+            description={this.state.titleAndLinkStatus == "Confirmado" ? "Título: " + this.state.title.text : "Por favor, arrastre el título del contenido hacia la caja de contenido."}
           />
           <Step
             size="small"
-            title={this.state.title.state}
-            icon={this.iconKind(this.state.title.state)}
-            description={this.state.title.state == "Confirmado" ? "Título: " + this.state.title.text : "Por favor, arrastre el título del contenido hacia la caja de contenido."}
-          />
-          <Step
-            size="small"
-            title={ this.state.link.state ? this.state.link.state : "Obtener link"}
-            description={this.state.link.state == "Confirmado" ? "Link: " + this.state.link.text : "Por favor, arrastre el título del contenido hacia la caja de contenido."}
-            icon={this.iconKind(this.state.link.state)}
+            title={ this.state.titleAndLinkStatus != "Esperando" ? this.state.titleAndLinkStatus : "Obtener link"}
+            description={this.state.titleAndLinkStatus == "Confirmado" ? "Link: " + this.state.link.text : "Por favor, arrastre el título del contenido hacia la caja de contenido."}
+            icon={this.iconKind(this.state.titleAndLinkStatus)}
           />
           <Step title={"Confirmar"}
             size="small"
             description="This is a description."
           />
         </Steps>
-        <div className="steps-content">{this.state.title.text}</div>
+        <ConfirmPopover
+          titleAndLinkStatus = {this.state.titleAndLinkStatus}
+          confirmTitleAndLink = {() => this.confirmTitleAndLink()}
+          cancelTitleAndLink = {() => this.cancelTitleAndLink()}
+          title={this.state.title.text}
+        />
+        <div className="steps-content"></div>
         <br/>
         {/* {canBack && <Button type="primary" onClick={() => this.props.previousStep()}>Anterior</Button>}
         {canNext && <Button type="primary" onClick={() => this.props.nextStep()}>Siguiente</Button>} */}

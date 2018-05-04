@@ -37,8 +37,12 @@
 }
 
 .ant-popover-placement-top{
-  top:280px !important;
+  top:240px !important;
   left:10px !important;
+}
+
+.ant-popover-arrow{
+  display:none;
 }
 
 .ant-steps-item-description{

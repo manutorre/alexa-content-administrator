@@ -17,6 +17,10 @@ export default class NewsStepper extends React.Component{
     this.setState({currentStep: this.state.currentStep + 1})
   }
 
+  nextTwoSteps(){
+    this.setState({currentStep: this.state.currentStep + 2})
+  }
+
   previousStep(){
     this.setState({currentStep: this.state.currentStep -1})
   }
@@ -24,7 +28,11 @@ export default class NewsStepper extends React.Component{
   render(){
     return(
       <div style={{width:"210px",margin:"20px auto"}}>
-        <Stepper currentStep={this.state.currentStep} nextStep={() => this.nextStep()} previousStep={() => this.previousStep()}/>
+        <Stepper
+          currentStep={this.state.currentStep}
+          nextStep={() => this.nextStep()}
+          nextTwoSteps={() => this.nextTwoSteps()} 
+          previousStep={() => this.previousStep()}/>
         <Button onClick={() => this.props.changeSection("entry")}>
           Volver
         </Button>
