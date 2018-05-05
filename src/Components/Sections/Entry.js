@@ -91,6 +91,7 @@ export default class Entry extends Component {
         }
 
         <Button onClick={() => this.props.changeSection("stepper")}>Crear noticia</Button>
+        <Button onClick={() => this.props.changeSection("categories")}>Crear categoría</Button>
 
       </div>
     );
