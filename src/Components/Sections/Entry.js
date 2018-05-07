@@ -47,8 +47,8 @@ export default class Entry extends Component {
     //document.getElementById("iframe").contentWindow.postMessage(data, "*");
   }
   componentDidMount(){
-    // window.parent.postMessage("showMask","*");
-    window.parent.postMessage("hideMask", "*")
+    window.parent.postMessage("showMask","*");
+    //window.parent.postMessage("hideMask", "*")
     window.addEventListener('message', (e) => this.onMessageReceive(e));//console.log(e.data)
   }
 
@@ -91,7 +91,6 @@ export default class Entry extends Component {
         }
 
         <Button onClick={() => this.props.changeSection("stepper")}>Crear noticia</Button>
-        <Button onClick={() => this.props.changeSection("categories")}>Crear categoría</Button>
 
       </div>
     );
