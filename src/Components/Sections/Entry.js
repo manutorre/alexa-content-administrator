@@ -47,8 +47,8 @@ export default class Entry extends Component {
     //document.getElementById("iframe").contentWindow.postMessage(data, "*");
   }
   componentDidMount(){
-    window.parent.postMessage("showMask","*");
-    //window.parent.postMessage("hideMask", "*")
+    //window.parent.postMessage("showMask","*");
+    window.parent.postMessage("hideMask", "*")
     window.addEventListener('message', (e) => this.onMessageReceive(e));//console.log(e.data)
   }
 
