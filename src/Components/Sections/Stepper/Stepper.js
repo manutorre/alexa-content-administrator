@@ -122,7 +122,8 @@ export default class Stepper extends React.Component{
           />
           <Step title={"Seleccionar categoría"}
             size="small"
-            description="Elige una categoría para el contenido."
+            description={this.props.selectedCategory ? this.props.selectedCategory : "Elige una categoría para el contenido."}
+            icon={this.props.selectedCategory ? this.iconKind("Confirmado") : this.props.currentStep == 3 ? this.iconKind("Esperando confirmación") : ""}
           />
         </Steps>
         <ConfirmPopover

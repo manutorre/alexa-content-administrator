@@ -35,11 +35,16 @@ export default class NewsStepper extends React.Component{
   confirmContent(content){
     this.setState({
       confirmedContent:Object.assign(this.state.confirmedContent, content)
-    }, console.log(this.state))
+    }, console.log(JSON.stringify(this.state.confirmedContent)))
   }
 
   showState(){
     console.log(this.state)
+  }
+
+  showAdmin(){
+    const win = window.open("http://localhost:3000/admin", '_blank');
+    win.focus();
   }
 
   render(){
@@ -52,14 +57,20 @@ export default class NewsStepper extends React.Component{
           previousStep={() => this.previousStep()}
           selectCategory={(value) => this.selectCategory(value)}
           confirmContent={(content) => this.confirmContent(content)}
+          selectedCategory={this.state.selectedCategory}
         />
         <Button style={{display:"inline-block", margin: "5px"}} onClick={() => this.props.changeSection("entry")}>
           Volver
         </Button>
         {this.state.selectedCategory != "" &&
-          <Button onClick={() => this.showState()}type="danger" style={{display:"inline-block", margin: "5px"}}>
-            Confirmar
-          </Button>
+          <div>
+            <Button onClick={() => this.showState()}type="danger" style={{display:"inline-block", margin: "5px"}}>
+              Confirmar
+            </Button>
+            <Button style={{display:"inline-block", margin: "5px"}} onClick={() => this.showAdmin()}>
+              Administrar contenidos
+            </Button>
+          </div>
         }
       </div>
     )
