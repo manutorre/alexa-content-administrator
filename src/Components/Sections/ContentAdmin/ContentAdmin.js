@@ -1,5 +1,5 @@
 import React from 'react'
-import {Card, List} from 'antd'
+import {Card, List, Icon} from 'antd'
 
 export default class ContentAdmin extends React.Component{
 
@@ -7,6 +7,50 @@ export default class ContentAdmin extends React.Component{
     super(props)
     this.state = {
       confirmedContents: [
+        {
+          category:"Deportes",
+          title:{
+            xpath:"body/div[1]/section[1]/section[1]/article[1]/a[1]/div[1]/h1[1]",
+            text:"Benítez: “Lo del ADN, que no se malinterprete, es secundario"
+          },
+          link:{
+            xpath:"body/div[1]/section[1]/section[1]/article[1]/a[1]",
+            text:"nota/79920/benitez_lo_del_adn_que_no_se_malinterprete_es_secundario/"
+          }
+        },
+        {
+          category:"Deportes",
+          title:{
+            xpath:"body/div[1]/section[1]/section[1]/article[1]/a[1]/div[1]/h1[1]",
+            text:"Benítez: “Lo del ADN, que no se malinterprete, es secundario"
+          },
+          link:{
+            xpath:"body/div[1]/section[1]/section[1]/article[1]/a[1]",
+            text:"nota/79920/benitez_lo_del_adn_que_no_se_malinterprete_es_secundario/"
+          }
+        },
+        {
+          category:"Deportes",
+          title:{
+            xpath:"body/div[1]/section[1]/section[1]/article[1]/a[1]/div[1]/h1[1]",
+            text:"Benítez: “Lo del ADN, que no se malinterprete, es secundario"
+          },
+          link:{
+            xpath:"body/div[1]/section[1]/section[1]/article[1]/a[1]",
+            text:"nota/79920/benitez_lo_del_adn_que_no_se_malinterprete_es_secundario/"
+          }
+        },
+        {
+          category:"Deportes",
+          title:{
+            xpath:"body/div[1]/section[1]/section[1]/article[1]/a[1]/div[1]/h1[1]",
+            text:"Benítez: “Lo del ADN, que no se malinterprete, es secundario"
+          },
+          link:{
+            xpath:"body/div[1]/section[1]/section[1]/article[1]/a[1]",
+            text:"nota/79920/benitez_lo_del_adn_que_no_se_malinterprete_es_secundario/"
+          }
+        },
         {
           category:"Deportes",
           title:{
@@ -58,7 +102,14 @@ export default class ContentAdmin extends React.Component{
       width:"20%"
     }
 
-    const allCategories = this.state.confirmedContents.map(content => content.category)
+    const contentsContainer = {margin: "20px auto",
+      display:"flex",
+      flexWrap:"wrap",
+      justifyContent:"flex-start",
+      width:"100%"
+    }
+
+    const allCategories = [...new Set(this.state.confirmedContents.map(content => content.category))]
     const contentsToShow = this.state.filteredContents.length > 0 ? this.state.filteredContents : this.state.confirmedContents
 
     return(
@@ -74,14 +125,17 @@ export default class ContentAdmin extends React.Component{
               renderItem={item => (<List.Item onClick={() => this.filterByCategory(item)}><a>{item}</a></List.Item>)}
             />
           </div>
-          <div style={{margin: "20px auto"}}>
+          <div style={contentsContainer}>
             {contentsToShow.map( content => {
               return(
-                <Card
-                  style={{ width: 300 }}
-                  title={content.title.text}
-                  cover={<img alt="example" src="https://gw.alipayobjects.com/zos/rmsportal/JiqGstEfoWAOHiTxclqi.png" />}
-                />
+                <div>
+                  <Card
+                    style={{ width: 250, margin:"20px" }}
+                    title={content.title.text}
+                    cover={<img alt="example" src="https://gw.alipayobjects.com/zos/rmsportal/JiqGstEfoWAOHiTxclqi.png" />}
+                    actions={[<Icon type="setting" />, <Icon type="edit" />, <Icon type="ellipsis" />]}
+                  />
+                </div>
               )
             })}
           </div>
