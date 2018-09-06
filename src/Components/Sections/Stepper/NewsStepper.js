@@ -27,6 +27,7 @@ export default class NewsStepper extends React.Component{
   }
 
   selectCategory(categoria){
+    console.log(categoria)
     this.setState({
       selectedCategory: categoria
     })

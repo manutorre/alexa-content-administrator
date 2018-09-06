@@ -1,7 +1,35 @@
+.administrator__global__container{
+  height:800px;
+}
+
+.watermark__cover{
+  position:absolute;
+  top:0px;
+  left:0px;
+  height:200px;
+  width:300px;
+  background-color:white;
+  z-index:2;
+}
+
+.diagram{
+  position:relative;
+}
+
+
+.no-assigned__cards__container{
+  padding: 62px 0px 0px 20px;
+  height: 500px;
+  overflow: auto;
+}
+
 .srd-diagram{
   position:inherit;
 }
 
+.srd-link-layer{
+  background-color:darkgrey !important;
+}
 
 .App {
   text-align: center;

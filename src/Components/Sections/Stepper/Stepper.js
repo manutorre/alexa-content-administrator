@@ -67,6 +67,7 @@ export default class Stepper extends React.Component{
       this.setState({array:e.data})
     }
     if (e.data.type === "titleAndLink") {
+      console.log(e)
       this.assignTitleAndLink(e.data.title, e.data.link)
       window.parent.postMessage("hideMask", "*")
       this.askForConfirmTitleAndLink()
@@ -80,6 +81,7 @@ export default class Stepper extends React.Component{
   }
 
   selectCategory(e){
+    console.log(e)
     this.props.selectCategory(e)
     this.props.confirmContent({
       title: this.state.title,
@@ -137,7 +139,12 @@ export default class Stepper extends React.Component{
           <Select placeholder="categoría" onChange={(e) => this.selectCategory(e)} style={{ width: 120, display: "block", margin: "0 auto" }}>
             {this.state.categories.map( (category, index) => {
               return(
-                <Option key={index} selected={this.state.selectedCategory == category} value={category}>{category}</Option>
+                <Option 
+                  key={index} 
+                  selected={(this.state.selectedCategory == category).toString()} 
+                  value={category.toString()}>
+                    {category.toString()}
+                </Option>
               )
             })}
           </Select>
