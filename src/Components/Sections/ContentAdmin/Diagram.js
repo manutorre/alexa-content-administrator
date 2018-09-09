@@ -16,7 +16,14 @@ const data = [
     title:"noticia",
     from:null,
     to:null
-  }
+  },
+  {
+    url:"",
+    xpath:"",
+    category:"",
+    state:"",
+    metainfo:""
+  }  
 ]
 
 export default class GoJs extends Component {
@@ -63,7 +70,14 @@ export default class GoJs extends Component {
       new go.Binding('location'),
       goObj(
         go.Shape, "Rectangle",
-        {portId: "", fromLinkable: true, toLinkable: true},
+        {
+          portId: "", 
+          fromLinkable: true, 
+          toLinkable: true,
+          toMaxLinks:1,
+          fromMaxLinks:1,
+          toLinkableSelfNode: false
+        },
         new go.Binding("fill", "color")
       ),
       goObj(
@@ -77,6 +91,7 @@ export default class GoJs extends Component {
 
   generateLinkTemplate(){
     let linkTemplate = goObj(go.Link,
+      { curve: go.Link.Bezier },
       {relinkableFrom: true, relinkableTo: true},
       goObj(go.Shape),  // the link shape
       goObj(go.Shape,   // the arrowhead
@@ -90,14 +105,15 @@ export default class GoJs extends Component {
     let that = this
     let model = goObj(go.TreeModel)
     let diagram = goObj(go.Diagram, this.refs.goJsDiv, {initialContentAlignment: go.Spot.Center});
-    diagram.addDiagramListener("ObjectDoubleClicked",  (ev) => {
-      console.log(ev); //Successfully logs the node you clicked.
-      console.log(ev.subject.part); //Successfully logs the node's name.
-      ev.diagram.model.addLinkData({from:ev.subject.part.key, to:ev.diagram.model.nodeDataArray[0].key})
-      console.log(ev.diagram.model.linkDataArray)
-      data.push(ev.subject.part.key)
-      console.log(data)
-    });
+    // DOUBLE CLICK EVENT LISTENER
+    // diagram.addDiagramListener("ObjectDoubleClicked",  (ev) => {
+    //   console.log(ev); //Successfully logs the node you clicked.
+    //   console.log(ev.subject.part); //Successfully logs the node's name.
+    //   ev.diagram.model.addLinkData({from:ev.subject.part.key, to:ev.diagram.model.nodeDataArray[0].key})
+    //   console.log(ev.diagram.model.linkDataArray)
+    //   data.push(ev.subject.part.key)
+    //   console.log(data)
+    // });
     this.setModelAndDiagram(model, diagram)
   
   }
@@ -125,9 +141,10 @@ export default class GoJs extends Component {
   setModelAndDiagram(model, diagram){
     model.nodeDataArray = this.props.data
     let linksArray = this.generateLinksArray()
-    diagram.model = new go.GraphLinksModel(this.props.data, linksArray);
+    diagram.model = new go.GraphLinksModel([],[]);
     diagram.nodeTemplate = this.generateNodeTemplate()
     diagram.linkTemplate = this.generateLinkTemplate()
+    diagram.validCycle = go.Diagram.CycleDestinationTree;
     this.setState({
       myModel: model, 
       myDiagram: diagram

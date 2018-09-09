@@ -10,7 +10,7 @@ export default class LeftPanel extends React.Component {
 
   onContentDragEnd(event,content){
      // reset the border of the dragged element
-     
+     event.target.style.display = "none"
      event.target.style.border = "";
   }
 
