@@ -12,81 +12,23 @@ export default class ContentAdmin extends React.Component{
   constructor(props){
     super(props)
     this.state = {
-      confirmedContents: [
-        {
-          category:"Deportes",
-          title:{
-            xpath:"body/div[1]/section[1]/section[1]/article[1]/a[1]/div[1]/h1[1]",
-            text:"Noticia 1"
-          },
-          link:{
-            xpath:"body/div[1]/section[1]/section[1]/article[1]/a[1]",
-            text:"nota/79920/benitez_lo_del_adn_que_no_se_malinterprete_es_secundario/"
-          }
-        },
-        {
-          category:"Deportes",
-          title:{
-            xpath:"body/div[1]/section[1]/section[1]/article[1]/a[1]/div[1]/h1[1]",
-            text:"Noticia 2"
-          },
-          link:{
-            xpath:"body/div[1]/section[1]/section[1]/article[1]/a[1]",
-            text:"nota/79920/benitez_lo_del_adn_que_no_se_malinterprete_es_secundario/"
-          }
-        },
-        {
-          category:"Deportes",
-          title:{
-            xpath:"body/div[1]/section[1]/section[1]/article[1]/a[1]/div[1]/h1[1]",
-            text:"Noticia 3"
-          },
-          link:{
-            xpath:"body/div[1]/section[1]/section[1]/article[1]/a[1]",
-            text:"nota/79920/benitez_lo_del_adn_que_no_se_malinterprete_es_secundario/"
-          }
-        },
-        {
-          category:"Deportes",
-          title:{
-            xpath:"body/div[1]/section[1]/section[1]/article[1]/a[1]/div[1]/h1[1]",
-            text:"Noticia 4"
-          },
-          link:{
-            xpath:"body/div[1]/section[1]/section[1]/article[1]/a[1]",
-            text:"nota/79920/benitez_lo_del_adn_que_no_se_malinterprete_es_secundario/"
-          }
-        },
-        {
-          category:"Deportes",
-          title:{
-            xpath:"body/div[1]/section[1]/section[1]/article[1]/a[1]/div[1]/h1[1]",
-            text:"Noticia 5"
-          },
-          link:{
-            xpath:"body/div[1]/section[1]/section[1]/article[1]/a[1]",
-            text:"nota/79920/benitez_lo_del_adn_que_no_se_malinterprete_es_secundario/"
-          }
-        },
-        {
-          category:"Ciencia",
-          title:{
-            xpath:"body/div[1]/section[1]/section[1]/article[1]/a[1]/div[1]/h1[1]",
-            text:"Noticia 6"
-          },
-          link:{
-            xpath:"body/div[1]/section[1]/section[1]/article[1]/a[1]",
-            text:"nota/79920/benitez_lo_del_adn_que_no_se_malinterprete_es_secundario/"
-          }
-        }
-      ],
+      confirmedContents:[],
       filteredContents:[]
     }
   }
 
   componentDidMount(){
+    fetch("https://alexa-apirest.herokuapp.com/users/noticesByState/new/gonza")
+      .then(res => res.json())
+      .then(
+        (result) => {
+          this.setState({
+            confirmedContents: result
+          });
+        })
     console.log(this.props)
   }
+
 
   render(){
 
@@ -98,6 +40,7 @@ export default class ContentAdmin extends React.Component{
       margin:"20px auto",
       backgroundColor:"grey"
     }
+
 
     // 1) setup the diagram engine
     var engine = new SRD.DiagramEngine();
@@ -113,7 +56,7 @@ export default class ContentAdmin extends React.Component{
     const nodes = []
     let link;
     this.state.confirmedContents.map( (content, index) => {
-      nodes[index] = new SRD.DefaultNodeModel(content.title.text, "rgb(0,192,255)");
+      nodes[index] = new SRD.DefaultNodeModel(content.idInc, "rgb(0,192,255)");
       portsOut[index] = nodes[index].addOutPort("Out");
       portsIn[index] = nodes[index].addInPort("In");
       if(index > 0){
@@ -186,14 +129,14 @@ export default class ContentAdmin extends React.Component{
       <div>
         <Layout>
         <Sider>
-          <LeftPanel data={this.state.confirmedContents}/>
+          <LeftPanel data={this.state.confirmedContents} />
         </Sider>
         <Layout>
           <Header>Header</Header>
           <Content>
             <Diagram 
               data={this.state.confirmedContents.map(
-                (content) => { return{key:content.title.text, color:go.Brush.randomColor()}}
+                (content) => { return{key:content.idInc, color:go.Brush.randomColor()}}
               )}/>
             </Content>
         </Layout>

@@ -15,7 +15,7 @@ export default class LeftPanel extends React.Component {
   }
 
   onContentDragStart(event,content){
-    event.dataTransfer.setData(content.title.text, 'foo');
+    event.dataTransfer.setData(content.idInc, 'foo');
     event.dataTransfer.setData("text", "");
     // store a reference to the dragged element
     let dragged = event.target;
@@ -38,8 +38,8 @@ export default class LeftPanel extends React.Component {
               style={{ width:"80%" }}
                 >
                   <Meta
-                    title={content.title.text}
-                    description={content.link.text}
+                    title={content.idInc}
+                    description={content.url}
                   />
               </Card>
             </div>
