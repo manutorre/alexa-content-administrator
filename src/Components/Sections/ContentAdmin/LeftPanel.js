@@ -15,8 +15,13 @@ export default class LeftPanel extends React.Component {
   }
 
   onContentDragStart(event,content){
-    event.dataTransfer.setData(content.idInc, 'foo');
-    event.dataTransfer.setData("text", "");
+
+    console.log(content)
+    event.dataTransfer.setData(JSON.stringify({titleText:content.url}), 'titleText');
+    event.dataTransfer.setData(JSON.stringify({linkText:content.category}), 'linkText');
+    // event.dataTransfer.setData(JSON.stringify({titleXpath:content.title.xpath}), 'titleXpath');
+    // event.dataTransfer.setData(JSON.stringify({linkXpath:content.link.xpath}), 'linkXpath');    
+
     // store a reference to the dragged element
     let dragged = event.target;
     // Objects during drag will have a red border
@@ -27,7 +32,7 @@ export default class LeftPanel extends React.Component {
     const { Meta } = Card;
     return(
       <div className="no-assigned__cards__container">
-        {this.props.data.map( (content, index) => {
+        {this.props.data && this.props.data.map( (content, index) => {
           return(
             <div 
             key={index}
@@ -38,8 +43,12 @@ export default class LeftPanel extends React.Component {
               style={{ width:"80%" }}
                 >
                   <Meta
-                    title={content.idInc}
-                    description={content.url}
+
+                    title={content.url}
+                    description={content.category}
+                    // title={content.title.text}
+                    // description={content.link.text}
+
                   />
               </Card>
             </div>
