@@ -28,7 +28,7 @@ export default class Stepper extends React.Component{
 
   assignTitleAndLink(titleObject, linkObject){
     const newTitle = Object.assign(this.state.title, {xpath: titleObject.data, text: titleObject.text})
-    const newLink = Object.assign(this.state.link, {xpath: linkObject.data, text: linkObject.text})
+    const newLink = Object.assign(this.state.link, {xpath: linkObject.data, text: linkObject.text, url: linkObject.url})
     this.setState({
       titleAndLinkStatus: false,
       title:newTitle,

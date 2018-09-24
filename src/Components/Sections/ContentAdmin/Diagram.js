@@ -2,49 +2,15 @@ import React, {Component} from 'react';
 import go from 'gojs';
 const goObj = go.GraphObject.make;
 
-const funcionn = () => {
-  console.log("jejeje")
-}
-
-const data = [
-  {
-    title:"noticia",
-    from:null,
-    to:null
-  },
-  {
-    title:"noticia",
-    from:null,
-    to:null
-  },
-  {
-    url:"",
-    xpath:"",
-    category:"",
-    state:"",
-    metainfo:""
-  }  
-]
-
 export default class GoJs extends Component {
 
   constructor (props) {
     super (props);
-    console.log(this.props.data)
     this.renderCanvas = this.renderCanvas.bind (this);
     this.state = {
-      actualData: [
-        {
-          title:"noticia",
-          from:null,
-          to:null
-        },
-        {
-          title:"noticia",
-          from:null,
-          to:null
-        }
-      ],
+      orderedNodes: [],
+      contents:[],
+      links:[],
       myModel: null, 
       myDiagram: null
     }
@@ -56,12 +22,6 @@ export default class GoJs extends Component {
   componentDidMount () {
     this.renderCanvas ();
   }
-  
-  addContent(content){
-    let currentData = this.state.actualData
-    currentData.push(content)
-    this.setState({actualData:currentData})
-  }
 
   generateNodeTemplate(){
     let nodeTemplate = goObj(
@@ -69,7 +29,7 @@ export default class GoJs extends Component {
      "Auto",
       new go.Binding('location'),
       goObj(
-        go.Shape, "Rectangle",
+        go.Shape, "RoundedRectangle",
         {
           portId: "", 
           fromLinkable: true, 
@@ -83,7 +43,7 @@ export default class GoJs extends Component {
       goObj(
         go.TextBlock,
         { margin: 6, font: "18px sans-serif" },
-        new go.Binding("text", "key")
+        new go.Binding("text", "titleText")
       )
     )
     return nodeTemplate;    
@@ -114,9 +74,54 @@ export default class GoJs extends Component {
     //   data.push(ev.subject.part.key)
     //   console.log(data)
     // });
+
+    diagram.addDiagramListener("LinkDrawn", (ev) => {
+      // console.log(diagram.model.toJson());
+      let {links} = this.state
+      links.push({from:ev.subject.fromNode.data.titleText, to: ev.subject.toNode.data.titleText})
+      this.setState({links})
+      // console.log(this.state.links)
+      // console.log(ev.diagram.findTreeLabel())
+      this.reorderNodes()
+      // console.log(this.primero())
+    })
     this.setModelAndDiagram(model, diagram)
   
   }
+
+  primero(){
+    let primero = this.state.contents.filter((content) => {
+      if (this.state.links.filter((link) => link.to == content.titletext).length == 0)
+        return true
+    })
+    return primero[0]
+  }
+
+
+  
+
+  reorderNodes(){
+    let primerNodo = this.primero()
+    let primerLink = this.state.links.filter( link => link.from == primerNodo.titletext)
+    let orderedNodes = [primerNodo]
+    let lastNodo = primerNodo
+    for (let index = 0; index < this.state.links.length; index++) {
+      let properLink = this.state.links.filter( link => link.from == lastNodo.titletext)[0]
+      lastNodo = this.state.contents.filter( content => content.titletext == properLink.to)[0]
+      orderedNodes.push(lastNodo)
+    }
+    console.log(orderedNodes)
+    // let contenidos = [] 
+    // this.state.links.map( (link, index) => {
+    //   if (index != this.state.links.length - 1) {
+    //     contenidos.push(this.state.contents.filter( contenido => contenido.titletext == link.from )[0])
+    //   }
+    // })
+    // contenidos.push(this.state.contents.filter(contenido => contenido.titletext == this.state.links[this.state.links.length - 1].from)[0])
+    // contenidos.push(this.state.contents.filter(contenido => contenido.titletext == this.state.links[this.state.links.length - 1].to)[0])
+    // return contenidos
+  }
+
 
   generateLinksArray(){
     let linksArray = []
@@ -156,6 +161,19 @@ export default class GoJs extends Component {
       // Here you could also set effects on the Diagram,
       // such as changing the background color to indicate an acceptable drop zone
       // Requirement in some browsers, such as Internet Explorer
+  }
+
+  getContentStructure(content1,content2,content3,content4){ //crea el content object
+    let parsedContent1 = JSON.parse(content1)
+    let parsedContent2 = JSON.parse(content2)
+    // let parsedContent3 = JSON.parse(content3)
+    // let parsedContent4 = JSON.parse(content4)
+    let content = ({...parsedContent1,...parsedContent2})
+    // let content = ({...parsedContent1,...parsedContent2,...parsedContent3,...parsedContent4})
+    let contents = this.state.contents
+    contents.push(content)
+    this.setState({contents})
+    return content.titletext
     }
 
 
@@ -178,15 +196,19 @@ export default class GoJs extends Component {
     diagram.startTransaction('new node');
     diagram.model.addNodeData({
       location: point,
-      key: event.dataTransfer.items[0].type,
-      color: "lightyellow"
+      titleText: this.getContentStructure(
+        event.dataTransfer.items[0].type, 
+        event.dataTransfer.items[1].type),
+        // event.dataTransfer.items[2].type, 
+        // event.dataTransfer.items[3].type),
+        color:go.Brush.randomColor()
     });
     diagram.commitTransaction('new node');
     this.setState({
       myDiagram:diagram,
       myModel:diagram.model
     })
-    console.log(this.state)
+    // console.log(diagram.model.toJson());
     // remove dragged element from its old location
     // if (remove.checked) dragged.parentNode.removeChild(dragged);    
   }
@@ -194,23 +216,6 @@ export default class GoJs extends Component {
   onDragOver(event){
     event.stopPropagation();
     event.preventDefault();
-    // var can = event.target;
-    
-    // window.PIXELRATIO = this.state.myDiagram.computePixelRatio();
-    // let pixelratio = window.PIXELRATIO;
-
-    // // if the target is not the canvas, we may have trouble, so just quit:
-    // if (!(can instanceof HTMLCanvasElement)) return;
-
-    // var bbox = can.getBoundingClientRect();
-    // var bbw = bbox.width;
-    // if (bbw === 0) bbw = 0.001;
-    // var bbh = bbox.height;
-    // if (bbh === 0) bbh = 0.001;
-    // var mx = event.clientX - bbox.left * ((can.width / pixelratio) / bbw);
-    // var my = event.clientY - bbox.top * ((can.height / pixelratio) / bbh);
-    // var point = this.state.myDiagram.transformViewToDoc(new go.Point(mx, my));
-    // var curnode = this.state.myDiagram.findPartAt(point, true);
   }
   
   render () {

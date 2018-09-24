@@ -1,6 +1,7 @@
 import React from 'react'
 import { Button } from 'antd';
 import Stepper from './Stepper'
+import axios from 'axios'
 
 export default class NewsStepper extends React.Component{
 
@@ -41,6 +42,12 @@ export default class NewsStepper extends React.Component{
 
   showState(){
     console.log(this.state)
+    axios.put('https://alexa-apirest.herokuapp.com/users/addContent/user/gonza',{
+      url:this.state.confirmedContent.link.url,
+      xpath:this.state.confirmedContent.title.xpath,
+      category:this.state.selectedCategory,
+      state:"new"
+    })
   }
 
   showAdmin(){
