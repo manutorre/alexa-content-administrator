@@ -55,7 +55,7 @@ export default class ContentAdmin extends React.Component{
 
       this.state.confirmedContents.map( (content, index) => {
       // nodes[index] = new SRD.DefaultNodeModel(content.title.text, "rgb(0,192,255)");
-      nodes[index] = new SRD.DefaultNodeModel(content.idInc, "rgb(0,192,255)");
+      nodes[index] = new SRD.DefaultNodeModel(content.idContent, "rgb(0,192,255)");
 
       portsOut[index] = nodes[index].addOutPort("Out");
       portsIn[index] = nodes[index].addInPort("In");
@@ -102,7 +102,7 @@ export default class ContentAdmin extends React.Component{
             <Diagram 
               data={this.state.confirmedContents.map(
 
-                (content) => { return{key:content.idInc, color:go.Brush.randomColor()}}
+                (content) => { return{key:content.idContent, color:go.Brush.randomColor()}}
 
               )}/>
             </Content>
