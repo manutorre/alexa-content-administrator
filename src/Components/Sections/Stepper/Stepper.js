@@ -138,7 +138,7 @@ export default class Stepper extends React.Component{
           title={this.state.title.text}
         />
         {/* <div className="steps-content"></div> */}
-        {this.props.currentStep == 3 && this.state.titleAndLinkStatus == "Confirmado" &&
+        {this.props.currentStep == 3 && this.state.titleAndLinkStatus == "Confirmado" && this.state.categories.length > 0 &&
           <Select placeholder="categoría" onChange={(e) => this.selectCategory(e)} style={{ width: 120, display: "block", margin: "0 auto" }}>
             {this.state.categories.map( (category, index) => {
               return(
