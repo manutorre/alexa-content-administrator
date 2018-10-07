@@ -60,8 +60,16 @@ export default class Entry extends Component {
           <h1 className="App-title">Welcome to React</h1>
         </header>
         <p className="App-intro">
-          To get started, edit <code>src/App.js</code> and save to reload.
         </p>
+
+        <Button onClick={() => this.props.changeSection("stepper")}>Crear noticia</Button>
+
+      </div>
+    );
+  }
+}
+
+/*
       <label >Accion a realizar</label>
       <select defaultValue="-" id="selectAction" onChange={(event) => { this.onSelectAction(event) }}>
           <option disabled value="-">-Seleccionar accion</option>
@@ -90,9 +98,4 @@ export default class Entry extends Component {
         </div>
         }
 
-        <Button onClick={() => this.props.changeSection("stepper")}>Crear noticia</Button>
-
-      </div>
-    );
-  }
-}
+*/

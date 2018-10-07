@@ -15,8 +15,8 @@ export default class ContentAdmin extends React.Component{
   constructor(props){
     super(props)
     this.state = {
-      confirmedContents: [],
-      contentsToSend:[]
+      confirmedContents:[],
+      filteredContents:[]
     }
   }
 
@@ -30,29 +30,7 @@ export default class ContentAdmin extends React.Component{
     console.log(this.props)
   }
 
-  processContents(contents){
-    let contenidos = []
-    // let contenidos = contents
-    contents.map((content)=> {
-      let contentCopy = Object.assign({},content)
-      let idContent = contentCopy.idcontent
-      delete contentCopy.idcontent
-      contentCopy.idContent = idContent
-      contentCopy.state = "edited"
-      contenidos.push(contentCopy)
-      console.log(contentCopy)
-    })
-    console.log(contenidos)
-    this.setState({
-      contentsToSend:contenidos
-    })
-    return contents
-  }
 
-
-  sendData(){
-    axios.put('https://alexa-apirest.herokuapp.com/users/addContent/user/gonza', this.state.contentsToSend)
-  }
 
   render(){
 
@@ -65,6 +43,7 @@ export default class ContentAdmin extends React.Component{
       backgroundColor:"grey"
     }
 
+
     var engine = new SRD.DiagramEngine();
     engine.installDefaultFactories();
 
@@ -75,9 +54,11 @@ export default class ContentAdmin extends React.Component{
     const portsOut = []
     const nodes = []
     let link;
+
       this.state.confirmedContents.map( (content, index) => {
       // nodes[index] = new SRD.DefaultNodeModel(content.title.text, "rgb(0,192,255)");
-      nodes[index] = new SRD.DefaultNodeModel(content.url, "rgb(0,192,255)");
+      nodes[index] = new SRD.DefaultNodeModel(content.idContent, "rgb(0,192,255)");
+
       portsOut[index] = nodes[index].addOutPort("Out");
       portsIn[index] = nodes[index].addInPort("In");
       if(index > 0){
@@ -115,17 +96,15 @@ export default class ContentAdmin extends React.Component{
       <div>
         <Layout>
         <Sider>
-          <LeftPanel data={this.state.confirmedContents}/>
+          <LeftPanel data={this.state.confirmedContents} />
         </Sider>
         <Layout>
           <Header>Header</Header>
           <Content>
             <Diagram 
               data={this.state.confirmedContents.map(
-                (content) => { return{key:content.url, color:go.Brush.randomColor()}}
-              )}
-              updateContents={ orderedContents => this.processContents(orderedContents)}
-              />
+                (content) => { return{key:content.idContent, color:go.Brush.randomColor()}}
+              )}/>
             </Content>
         </Layout>
         <Sider>

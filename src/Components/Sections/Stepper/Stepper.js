@@ -18,13 +18,7 @@ export default class Stepper extends React.Component{
         xpath:"",
         text:""
       },
-      categories:[
-        "Deportes",
-        "Política",
-        "Turismo",
-        "Ciencia",
-        "Tecnología"
-      ]
+      categories:[]
     }
   }
 
@@ -77,6 +71,15 @@ export default class Stepper extends React.Component{
   }
 
   componentDidMount(){
+    
+    fetch("https://alexa-apirest.herokuapp.com/users/categories/gonza")
+      .then(res => res.json())
+      .then(
+        (result) => {
+          this.setState({
+            categories: result
+          });
+        })
     window.parent.postMessage("maskForNewContent", "*");
     window.parent.postMessage("titleAndLinkRecognizing", "*");
     window.addEventListener('message', (e) => this.onMessageReceive(e));
@@ -104,7 +107,7 @@ export default class Stepper extends React.Component{
   }
 
   render(){
-    const {Step} = Steps
+    const {Step} = Steps //destructing assignament: me guardo en Step el campo Step del objeto Steps
     const canNext = this.props.currentStep < 2
     const canBack = this.props.currentStep > 0
     const Option = {Select}
