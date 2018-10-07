@@ -2,6 +2,7 @@ import React from 'react'
 import {Card, List, Icon, Layout} from 'antd'
 import * as SRD from "storm-react-diagrams"
 import LeftPanel from './LeftPanel'
+import RightPanel from './RightPanel'
 import Diagram from './Diagram'
 import go from 'gojs';
 import axios from 'axios'
@@ -14,75 +15,8 @@ export default class ContentAdmin extends React.Component{
   constructor(props){
     super(props)
     this.state = {
-      confirmedContents: [
-        {
-          category:"Deportes",
-          title:{
-            xpath:"body/div[1]/section[1]/section[1]/article[1]/a[1]/div[1]/h1[1]",
-            text:"Noticia 1"
-          },
-          link:{
-            xpath:"body/div[1]/section[1]/section[1]/article[1]/a[1]",
-            text:"nota/79920/benitez_lo_del_adn_que_no_se_malinterprete_es_secundario/"
-          }
-        },
-        {
-          category:"Deportes",
-          title:{
-            xpath:"body/div[1]/section[1]/section[1]/article[1]/a[1]/div[1]/h1[1]",
-            text:"Noticia 2"
-          },
-          link:{
-            xpath:"body/div[1]/section[1]/section[1]/article[1]/a[1]",
-            text:"nota/79920/benitez_lo_del_adn_que_no_se_malinterprete_es_secundario/"
-          }
-        },
-        {
-          category:"Deportes",
-          title:{
-            xpath:"body/div[1]/section[1]/section[1]/article[1]/a[1]/div[1]/h1[1]",
-            text:"Noticia 3"
-          },
-          link:{
-            xpath:"body/div[1]/section[1]/section[1]/article[1]/a[1]",
-            text:"nota/79920/benitez_lo_del_adn_que_no_se_malinterprete_es_secundario/"
-          }
-        },
-        {
-          category:"Deportes",
-          title:{
-            xpath:"body/div[1]/section[1]/section[1]/article[1]/a[1]/div[1]/h1[1]",
-            text:"Noticia 4"
-          },
-          link:{
-            xpath:"body/div[1]/section[1]/section[1]/article[1]/a[1]",
-            text:"nota/79920/benitez_lo_del_adn_que_no_se_malinterprete_es_secundario/"
-          }
-        },
-        {
-          category:"Deportes",
-          title:{
-            xpath:"body/div[1]/section[1]/section[1]/article[1]/a[1]/div[1]/h1[1]",
-            text:"Noticia 5"
-          },
-          link:{
-            xpath:"body/div[1]/section[1]/section[1]/article[1]/a[1]",
-            text:"nota/79920/benitez_lo_del_adn_que_no_se_malinterprete_es_secundario/"
-          }
-        },
-        {
-          category:"Ciencia",
-          title:{
-            xpath:"body/div[1]/section[1]/section[1]/article[1]/a[1]/div[1]/h1[1]",
-            text:"Noticia 6"
-          },
-          link:{
-            xpath:"body/div[1]/section[1]/section[1]/article[1]/a[1]",
-            text:"nota/79920/benitez_lo_del_adn_que_no_se_malinterprete_es_secundario/"
-          }
-        }
-      ],
-      filteredContents:[]
+      confirmedContents: [],
+      contentsToSend:[]
     }
   }
 
@@ -94,6 +28,30 @@ export default class ContentAdmin extends React.Component{
 
   componentDidMount(){
     console.log(this.props)
+  }
+
+  processContents(contents){
+    let contenidos = []
+    // let contenidos = contents
+    contents.map((content)=> {
+      let contentCopy = Object.assign({},content)
+      let idContent = contentCopy.idcontent
+      delete contentCopy.idcontent
+      contentCopy.idContent = idContent
+      contentCopy.state = "edited"
+      contenidos.push(contentCopy)
+      console.log(contentCopy)
+    })
+    console.log(contenidos)
+    this.setState({
+      contentsToSend:contenidos
+    })
+    return contents
+  }
+
+
+  sendData(){
+    axios.put('https://alexa-apirest.herokuapp.com/users/addContent/user/gonza', this.state.contentsToSend)
   }
 
   render(){
@@ -165,11 +123,13 @@ export default class ContentAdmin extends React.Component{
             <Diagram 
               data={this.state.confirmedContents.map(
                 (content) => { return{key:content.url, color:go.Brush.randomColor()}}
-              )}/>
+              )}
+              updateContents={ orderedContents => this.processContents(orderedContents)}
+              />
             </Content>
         </Layout>
         <Sider>
-          <LeftPanel/>
+          {/* <RightPanel sendData={() => this.sendData()}/> */}
         </Sider>
         </Layout>
       </div>

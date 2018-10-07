@@ -1,6 +1,8 @@
 import React from 'react'
-import { Steps, Button, Icon, Popconfirm, Select } from 'antd';
+import { Steps, Button, Icon, Popconfirm, Select, Input } from 'antd';
 import ConfirmPopover from './ConfirmPopover'
+import axios from 'axios'
+
 
 export default class Stepper extends React.Component{
 
@@ -136,6 +138,7 @@ export default class Stepper extends React.Component{
         />
         {/* <div className="steps-content"></div> */}
         {this.props.currentStep == 3 && this.state.titleAndLinkStatus == "Confirmado" &&
+          <div>
           <Select placeholder="categoría" onChange={(e) => this.selectCategory(e)} style={{ width: 120, display: "block", margin: "0 auto" }}>
             {this.state.categories.map( (category, index) => {
               return(
@@ -148,6 +151,9 @@ export default class Stepper extends React.Component{
               )
             })}
           </Select>
+          <br/>
+          <Input placeholder="Nombre de la noticia" onChange={(e) => this.props.changeIdentifier(e)}/>
+          </div>
         }
         <br/>
         {/* {canBack && <Button type="primary" onClick={() => this.props.previousStep()}>Anterior</Button>}

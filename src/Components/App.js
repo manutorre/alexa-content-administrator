@@ -20,7 +20,7 @@ class App extends Component {
 
   render(){
     console.log(window.location.href)
-    if (window.location.href == "http://localhost:3000/admin") {
+    if (window.location.href.endsWith("/admin")) {
       return <ContentAdmin/>
     }
     switch (this.state.section) {
