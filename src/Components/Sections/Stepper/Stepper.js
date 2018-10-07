@@ -1,6 +1,7 @@
 import React from 'react'
-import { Steps, Button, Icon, Popconfirm, Select } from 'antd';
+import { Steps, Button, Icon, Popconfirm, Select, Modal } from 'antd';
 import ConfirmPopover from './ConfirmPopover'
+import SiblingsModal from './SiblingsModal'
 
 export default class Stepper extends React.Component{
 
@@ -15,8 +16,7 @@ export default class Stepper extends React.Component{
       link:{
         xpath:"",
         text:""
-      },
-      categories:[]
+      }
     }
   }
 
@@ -69,28 +69,11 @@ export default class Stepper extends React.Component{
   }
 
   componentDidMount(){
-    
-    fetch("https://alexa-apirest.herokuapp.com/users/categories/gonza")
-      .then(res => res.json())
-      .then(
-        (result) => {
-          this.setState({
-            categories: result
-          });
-        })
     window.parent.postMessage("maskForNewContent", "*");
     window.parent.postMessage("titleAndLinkRecognizing", "*");
     window.addEventListener('message', (e) => this.onMessageReceive(e));
   }
 
-  selectCategory(e){
-    console.log(e)
-    this.props.selectCategory(e)
-    this.props.confirmContent({
-      title: this.state.title,
-      link: this.state.link
-    })
-  }
 
   iconKind(state){
     if (state == "Confirmado") {
@@ -104,11 +87,19 @@ export default class Stepper extends React.Component{
     }
   }
 
+  selectCategory(e){
+    console.log(e)
+    this.props.selectCategory(e)
+    this.props.confirmContent({
+      title: this.state.title,
+      link: this.state.link
+    })
+  }
+
   render(){
     const {Step} = Steps //destructing assignament: me guardo en Step el campo Step del objeto Steps
     const canNext = this.props.currentStep < 2
     const canBack = this.props.currentStep > 0
-    const Option = {Select}
 
     return(
       <div>
@@ -125,9 +116,9 @@ export default class Stepper extends React.Component{
             description={this.state.titleAndLinkStatus == "Confirmado" ? "Link: " + this.state.link.text : "Por favor, arrastre el título del contenido hacia la caja de contenido."}
             icon={this.iconKind(this.state.titleAndLinkStatus)}
           />
-          <Step title={"Seleccionar categoría"}
+          <Step title={"Reconocer contenidos hermanos"}
             size="small"
-            description={this.props.selectedCategory ? this.props.selectedCategory : "Elige una categoría para el contenido."}
+            description={this.props.selectedCategory ? "Aca poner el idContent o category de los contenidos" : "Selecciona un criterio para reconocer contenidos hermanos."}
             icon={this.props.selectedCategory ? this.iconKind("Confirmado") : this.props.currentStep == 3 ? this.iconKind("Esperando confirmación") : ""}
           />
         </Steps>
@@ -137,21 +128,13 @@ export default class Stepper extends React.Component{
           cancelTitleAndLink = {() => this.cancelTitleAndLink()}
           title={this.state.title.text}
         />
-        {/* <div className="steps-content"></div> */}
-        {this.props.currentStep == 3 && this.state.titleAndLinkStatus == "Confirmado" && this.state.categories.length > 0 &&
-          <Select placeholder="categoría" onChange={(e) => this.selectCategory(e)} style={{ width: 120, display: "block", margin: "0 auto" }}>
-            {this.state.categories.map( (category, index) => {
-              return(
-                <Option 
-                  key={index} 
-                  selected={(this.state.selectedCategory == category).toString()} 
-                  value={category.toString()}>
-                    {category.toString()}
-                </Option>
-              )
-            })}
-          </Select>
-        }
+        <SiblingsModal
+          currentStep = {this.props.currentStep}
+          titleAndLinkStatus = {this.state.titleAndLinkStatus}
+          selectCategory = {(value) => {this.selectCategory(value)}}
+          selectedCategory = {this.props.selectedCategory}
+        />
+        
         <br/>
         {/* {canBack && <Button type="primary" onClick={() => this.props.previousStep()}>Anterior</Button>}
         {canNext && <Button type="primary" onClick={() => this.props.nextStep()}>Siguiente</Button>} */}
