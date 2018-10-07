@@ -2,6 +2,7 @@ import React from 'react'
 import {Card, List, Icon, Layout} from 'antd'
 import * as SRD from "storm-react-diagrams"
 import LeftPanel from './LeftPanel'
+import RightPanel from './RightPanel'
 import Diagram from './Diagram'
 import go from 'gojs';
 import axios from 'axios'
@@ -28,6 +29,7 @@ export default class ContentAdmin extends React.Component{
   componentDidMount(){
     console.log(this.props)
   }
+
 
 
   render(){
@@ -101,14 +103,12 @@ export default class ContentAdmin extends React.Component{
           <Content>
             <Diagram 
               data={this.state.confirmedContents.map(
-
                 (content) => { return{key:content.idContent, color:go.Brush.randomColor()}}
-
               )}/>
             </Content>
         </Layout>
         <Sider>
-          <LeftPanel/>
+          {/* <RightPanel sendData={() => this.sendData()}/> */}
         </Sider>
         </Layout>
       </div>

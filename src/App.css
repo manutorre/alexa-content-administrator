@@ -86,3 +86,41 @@
   from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }
 }
+
+.sendButton{
+  position: absolute;
+  right:30px;
+  top:64px;
+  z-index: 1;
+}
+
+.example {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 79.3%;
+  height: 93%;
+  position: absolute;
+  z-index: 3;
+  text-align: center;
+  background: rgba(147, 169, 191, 0.81);
+  border-radius: 4px;  
+}
+
+.example-stepper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 110%;
+  position: absolute;
+  z-index: 3;
+  text-align: center;
+  background: rgba(147, 169, 191, 0.81);
+  border-radius: 4px;  
+}
+
+span.ant-spin-dot.ant-spin-dot-spin{
+    width: 72px;
+    height: 72px;
+}

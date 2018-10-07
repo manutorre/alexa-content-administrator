@@ -1,5 +1,5 @@
 import React from 'react'
-import { Button } from 'antd';
+import { Button, Spin } from 'antd';
 import Stepper from './Stepper'
 import axios from 'axios'
 
@@ -11,8 +11,17 @@ export default class NewsStepper extends React.Component{
       showSteps: false,
       currentStep: 1,
       confirmedContent: {},
-      selectedCategory: ""
+      selectedCategory: "",
+      identifier:"",
+      loading:false,
+      done: false
     }
+  }
+
+  changeIdentifier(e){
+    this.setState({
+      identifier: e.target.value
+    })
   }
 
   nextStep(){
@@ -40,14 +49,19 @@ export default class NewsStepper extends React.Component{
     }, console.log(JSON.stringify(this.state.confirmedContent)))
   }
 
-  showState(){
+  confirm(){
+    this.setState({loading:true})
     console.log(this.state)
     axios.put('https://alexa-apirest.herokuapp.com/users/addContent/user/gonza',{
       url:this.state.confirmedContent.link.url,
       xpath:this.state.confirmedContent.title.xpath,
       category:this.state.selectedCategory,
-      state:"new"
-    })
+      state:"new",
+      idContent:this.state.identifier
+    }).then(() => this.setState({
+      loading:false,
+      done: true
+    }))
   }
 
   showAdmin(){
@@ -58,6 +72,11 @@ export default class NewsStepper extends React.Component{
   render(){
     return(
       <div style={{width:"210px",margin:"20px auto"}}>
+        {this.state.loading && 
+          <div className="example-stepper">
+            <Spin className="diagram-spin" size="large"/>
+          </div>        
+        }
         <Stepper
           currentStep={this.state.currentStep}
           nextStep={() => this.nextStep()}
@@ -66,15 +85,18 @@ export default class NewsStepper extends React.Component{
           selectCategory={(value) => this.selectCategory(value)}
           confirmContent={(content) => this.confirmContent(content)}
           selectedCategory={this.state.selectedCategory}
+          changeIdentifier={(e) => this.changeIdentifier(e)}
         />
         <Button style={{display:"inline-block", margin: "5px"}} onClick={() => this.props.changeSection("entry")}>
           Volver
         </Button>
         {this.state.selectedCategory != "" &&
           <div>
-            <Button onClick={() => this.showState()}type="danger" style={{display:"inline-block", margin: "5px"}}>
-              Confirmar
-            </Button>
+            {!this.state.done && 
+              <Button onClick={() => this.confirm()}type="danger" style={{display:"inline-block", margin: "5px"}}>
+                Confirmar
+              </Button>
+            }
             <Button style={{display:"inline-block", margin: "5px"}} onClick={() => this.showAdmin()}>
               Administrar contenidos
             </Button>

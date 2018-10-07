@@ -1,7 +1,9 @@
 import React from 'react'
-import { Steps, Button, Icon, Popconfirm, Select, Modal } from 'antd';
+import { Steps, Button, Icon, Popconfirm, Select, Input, Modal } from 'antd';
 import ConfirmPopover from './ConfirmPopover'
 import SiblingsModal from './SiblingsModal'
+import axios from 'axios'
+
 
 export default class Stepper extends React.Component{
 
@@ -128,6 +130,7 @@ export default class Stepper extends React.Component{
           cancelTitleAndLink = {() => this.cancelTitleAndLink()}
           title={this.state.title.text}
         />
+
         <SiblingsModal
           currentStep = {this.props.currentStep}
           titleAndLinkStatus = {this.state.titleAndLinkStatus}
@@ -135,6 +138,13 @@ export default class Stepper extends React.Component{
           selectedCategory = {this.props.selectedCategory}
         />
         
+
+        {this.props.currentStep == 3 && this.state.titleAndLinkStatus == "Confirmado" &&
+
+          <Input placeholder="Nombre de la noticia" onChange={(e) => this.props.changeIdentifier(e)}/>
+          
+        }
+
         <br/>
         {/* {canBack && <Button type="primary" onClick={() => this.props.previousStep()}>Anterior</Button>}
         {canNext && <Button type="primary" onClick={() => this.props.nextStep()}>Siguiente</Button>} */}

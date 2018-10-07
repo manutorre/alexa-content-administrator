@@ -17,10 +17,12 @@ export default class LeftPanel extends React.Component {
   onContentDragStart(event,content){
 
     console.log(content)
-    event.dataTransfer.setData(JSON.stringify({titleText:content.idContent}), 'titleText');
-    event.dataTransfer.setData(JSON.stringify({linkText:content.url}), 'linkText');
-    // event.dataTransfer.setData(JSON.stringify({titleXpath:content.title.xpath}), 'titleXpath');
-    // event.dataTransfer.setData(JSON.stringify({linkXpath:content.link.xpath}), 'linkXpath');    
+
+    event.dataTransfer.setData(JSON.stringify({idContent:content.idContent}), 'idContent');
+    event.dataTransfer.setData(JSON.stringify({category:content.category}), 'category');
+    event.dataTransfer.setData(JSON.stringify({state:content.state}), 'state');
+    event.dataTransfer.setData(JSON.stringify({url:content.url}), 'url');
+    event.dataTransfer.setData(JSON.stringify({xpath:content.xpath}), 'xpath');    
 
     // store a reference to the dragged element
     let dragged = event.target;
@@ -45,7 +47,8 @@ export default class LeftPanel extends React.Component {
                   <Meta
 
                     title={content.idContent}
-                    description={content.url}
+                    description={content.category}
+
                     // title={content.title.text}
                     // description={content.link.text}
 
