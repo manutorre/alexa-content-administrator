@@ -126,7 +126,7 @@ export default class GoJs extends Component {
       loading:true
     })
     let contentsToSend = this.reorderNodes()
-    axios.put('https://alexa-apirest.herokuapp.com/users/addContent/user/gonza', contentsToSend).then(() => {
+    axios.put('https://alexa-apirest.herokuapp.com/users/addListContent/user/gonza', contentsToSend).then(() => {
       this.setState({loading:false})
       this.state.myDiagram.div = null
       this.renderCanvas()
