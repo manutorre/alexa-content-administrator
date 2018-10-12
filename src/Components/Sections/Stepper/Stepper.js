@@ -1,5 +1,5 @@
 import React from 'react'
-import { Steps, Button, Icon, Popconfirm, Select, Input, Modal } from 'antd';
+import { Steps, Button, Icon, Popconfirm, Select, Modal } from 'antd';
 import ConfirmPopover from './ConfirmPopover'
 import SiblingsModal from './SiblingsModal'
 import axios from 'axios'
@@ -16,15 +16,20 @@ export default class Stepper extends React.Component{
         text: ""
       },
       link:{
+        urlPagina:"",
         xpath:"",
-        text:""
-      }
+        url:"",
+        className:"",
+        tagName:""
+      },
+      siblings:[]
     }
   }
 
   assignTitleAndLink(titleObject, linkObject){
     const newTitle = Object.assign(this.state.title, {xpath: titleObject.data, text: titleObject.text})
-    const newLink = Object.assign(this.state.link, {xpath: linkObject.data, text: linkObject.text, url: linkObject.url})
+    const newLink = Object.assign(this.state.link, {xpath: linkObject.data, url: linkObject.url, urlPagina:linkObject.urlPagina,  
+                                                    className:linkObject.className, tagName:linkObject.tagName})
     this.setState({
       titleAndLinkStatus: false,
       title:newTitle,
@@ -42,11 +47,11 @@ export default class Stepper extends React.Component{
   cancelTitleAndLink(){
     this.setState({
       title: {xpath:"", text: ""},
-      link: {xpath:"", text: ""},
+      link: {xpath:"", url: "",className:"",tagName:"",urlPagina:""},
       titleAndLinkStatus: "Esperando"
     })
-    window.parent.postMessage("maskForNewContent", "*");
-    window.parent.postMessage("titleAndLinkRecognizing", "*");
+    window.parent.postMessage({"mge":"maskForNewContent"}, "*");
+    window.parent.postMessage({"mge":"titleAndLinkRecognizing"}, "*");
   }
 
   askForConfirmTitleAndLink(){
@@ -57,7 +62,7 @@ export default class Stepper extends React.Component{
 
   onMessageReceive(e){
     if (typeof e.data === "string"){
-      window.parent.postMessage("hideMask", "*")
+      window.parent.postMessage({"mge":"hideMask"}, "*")
     }
     else{
       this.setState({array:e.data})
@@ -65,14 +70,21 @@ export default class Stepper extends React.Component{
     if (e.data.type === "titleAndLink") {
       console.log(e)
       this.assignTitleAndLink(e.data.title, e.data.link)
-      window.parent.postMessage("hideMask", "*")
+      window.parent.postMessage({"mge":"hideMask"}, "*")
       this.askForConfirmTitleAndLink()
     }
+    if(e.data.type === "className" || e.data.type === "tagName"  ){
+      console.log("Mensaje desde el stepper ",e.data)
+      this.setState({
+        siblings:e.data.pathsElem
+      })
+    }
+
   }
 
   componentDidMount(){
-    window.parent.postMessage("maskForNewContent", "*");
-    window.parent.postMessage("titleAndLinkRecognizing", "*");
+    window.parent.postMessage({"mge":"maskForNewContent"}, "*");
+    window.parent.postMessage({"mge":"titleAndLinkRecognizing"}, "*");
     window.addEventListener('message', (e) => this.onMessageReceive(e));
   }
 
@@ -92,10 +104,30 @@ export default class Stepper extends React.Component{
   selectCategory(e){
     console.log(e)
     this.props.selectCategory(e)
+  }
+
+  confirmContent(){
     this.props.confirmContent({
       title: this.state.title,
       link: this.state.link
-    })
+    },this.state.siblings)
+  }
+
+  returnSiblings(e){
+    const link = this.state.link
+    console.log(e,link)
+    switch (e) {
+      case "className":
+        //console.log(window.parent.document.getElementsByClassName(link.className))
+        window.parent.postMessage({"mge":"className","elem":link.className}, "*");
+        break;
+      case "tagName":
+        //console.log(window.parent.document.getElementsByTagName(link.tagName))
+        window.parent.postMessage({"mge":"tagName","elem":link.tagName}, "*");
+        break;
+      default:
+        break;
+    }
   }
 
   render(){
@@ -115,12 +147,12 @@ export default class Stepper extends React.Component{
           <Step
             size="small"
             title={ this.state.titleAndLinkStatus != "Esperando" ? this.state.titleAndLinkStatus : "Obtener link"}
-            description={this.state.titleAndLinkStatus == "Confirmado" ? "Link: " + this.state.link.text : "Por favor, arrastre el título del contenido hacia la caja de contenido."}
+            description={this.state.titleAndLinkStatus == "Confirmado" ? "Link: " + this.state.link.url : "Por favor, arrastre el título del contenido hacia la caja de contenido."}
             icon={this.iconKind(this.state.titleAndLinkStatus)}
           />
           <Step title={"Reconocer contenidos hermanos"}
             size="small"
-            description={this.props.selectedCategory ? "Aca poner el idContent o category de los contenidos" : "Selecciona un criterio para reconocer contenidos hermanos."}
+            description={this.props.selectedIdentifier ? "Identificador de contenidos: "+this.props.selectedIdentifier : "Selecciona un criterio para reconocer contenidos hermanos."}
             icon={this.props.selectedCategory ? this.iconKind("Confirmado") : this.props.currentStep == 3 ? this.iconKind("Esperando confirmación") : ""}
           />
         </Steps>
@@ -134,16 +166,13 @@ export default class Stepper extends React.Component{
         <SiblingsModal
           currentStep = {this.props.currentStep}
           titleAndLinkStatus = {this.state.titleAndLinkStatus}
-          selectCategory = {(value) => {this.selectCategory(value)}}
+          selectCategory = {(value) => this.selectCategory(value)}
           selectedCategory = {this.props.selectedCategory}
+          changeIdentifier = {(e) => this.props.changeIdentifier(e)}
+          returnSiblings = {(e) => this.returnSiblings(e) }
+          confirmContent = {() => this.confirmContent() }
+          clearCategory = {() => this.props.clearCategory() }
         />
-        
-
-        {this.props.currentStep == 3 && this.state.titleAndLinkStatus == "Confirmado" &&
-
-          <Input placeholder="Nombre de la noticia" onChange={(e) => this.props.changeIdentifier(e)}/>
-          
-        }
 
         <br/>
         {/* {canBack && <Button type="primary" onClick={() => this.props.previousStep()}>Anterior</Button>}

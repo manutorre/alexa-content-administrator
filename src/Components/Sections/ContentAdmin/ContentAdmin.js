@@ -99,7 +99,7 @@ export default class ContentAdmin extends React.Component{
           <LeftPanel data={this.state.confirmedContents} />
         </Sider>
         <Layout>
-          <Header>Header</Header>
+          <Header></Header>
           <Content>
             <Diagram 
               data={this.state.confirmedContents.map(

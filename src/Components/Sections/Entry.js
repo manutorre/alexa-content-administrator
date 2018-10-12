@@ -48,7 +48,7 @@ export default class Entry extends Component {
   }
   componentDidMount(){
     //window.parent.postMessage("showMask","*");
-    window.parent.postMessage("hideMask", "*")
+    window.parent.postMessage({"mge":"hideMask"}, "*")
     window.addEventListener('message', (e) => this.onMessageReceive(e));//console.log(e.data)
   }
 

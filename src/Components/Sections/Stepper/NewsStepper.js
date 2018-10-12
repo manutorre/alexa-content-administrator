@@ -14,7 +14,8 @@ export default class NewsStepper extends React.Component{
       selectedCategory: "",
       identifier:"",
       loading:false,
-      done: false
+      done: false,
+      contentSiblings:[]    
     }
   }
 
@@ -43,22 +44,47 @@ export default class NewsStepper extends React.Component{
     })
   }
 
-  confirmContent(content){
+  clearCategory(){
     this.setState({
-      confirmedContent:Object.assign(this.state.confirmedContent, content)
+      selectedCategory: ""
+    })
+  }
+
+  confirmContent(content,contentSiblings){
+    const array=[]
+    console.log("identifier ",this.state.identifier)
+    if(contentSiblings.length > 0){
+      contentSiblings.map((path)=>{
+        const obj = {
+          url:content.link.urlPagina,
+          xpath:path,
+          category:this.state.selectedCategory,
+          state:"new",
+          idContent:this.state.identifier
+        }
+        array.push(obj)
+      })
+    }
+    this.setState({
+      confirmedContent:Object.assign(this.state.confirmedContent, content),
+      contentSiblings: array   
     }, console.log(JSON.stringify(this.state.confirmedContent)))
   }
 
   confirm(){
     this.setState({loading:true})
     console.log(this.state)
-    axios.put('https://alexa-apirest.herokuapp.com/users/addContent/user/gonza',{
+    /*axios.put('https://alexa-apirest.herokuapp.com/users/addContent/user/gonza',{
       url:this.state.confirmedContent.link.url,
       xpath:this.state.confirmedContent.title.xpath,
       category:this.state.selectedCategory,
       state:"new",
       idContent:this.state.identifier
-    }).then(() => this.setState({
+    })*/
+
+    axios.put('https://alexa-apirest.herokuapp.com/users/addListContent/user/gonza',
+      this.state.contentSiblings)
+    .then(() => this.setState({
       loading:false,
       done: true
     }))
@@ -83,14 +109,16 @@ export default class NewsStepper extends React.Component{
           nextTwoSteps={() => this.nextTwoSteps()}
           previousStep={() => this.previousStep()}
           selectCategory={(value) => this.selectCategory(value)}
-          confirmContent={(content) => this.confirmContent(content)}
+          confirmContent={(content,siblings) => this.confirmContent(content,siblings)}
           selectedCategory={this.state.selectedCategory}
           changeIdentifier={(e) => this.changeIdentifier(e)}
+          selectedIdentifier={this.state.identifier}
+          clearCategory = {() => this.clearCategory() }
         />
         <Button style={{display:"inline-block", margin: "5px"}} onClick={() => this.props.changeSection("entry")}>
           Volver
         </Button>
-        {this.state.selectedCategory != "" &&
+        {this.state.selectedCategory != "" && this.state.identifier != "" &&
           <div>
             {!this.state.done && 
               <Button onClick={() => this.confirm()}type="danger" style={{display:"inline-block", margin: "5px"}}>
