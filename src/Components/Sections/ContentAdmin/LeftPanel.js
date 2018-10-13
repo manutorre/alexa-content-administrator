@@ -18,7 +18,7 @@ export default class LeftPanel extends React.Component {
 
     console.log(content)
 
-    event.dataTransfer.setData(JSON.stringify({idContent:content.idContent}), 'idContent');
+    event.dataTransfer.setData(JSON.stringify({order:content.order}), 'order');
     event.dataTransfer.setData(JSON.stringify({category:content.category}), 'category');
     event.dataTransfer.setData(JSON.stringify({state:content.state}), 'state');
     event.dataTransfer.setData(JSON.stringify({url:content.url}), 'url');

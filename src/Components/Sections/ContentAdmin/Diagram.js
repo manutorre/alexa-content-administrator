@@ -50,7 +50,7 @@ export default class GoJs extends Component {
       goObj(
         go.TextBlock,
         { margin: 6, font: "18px sans-serif" },
-        new go.Binding("text", "idContent")
+        new go.Binding("text", "order")
       )
     )
     return nodeTemplate;    
@@ -85,7 +85,7 @@ export default class GoJs extends Component {
     diagram.addDiagramListener("LinkDrawn", (ev) => {
       // console.log(diagram.model.toJson());
       let {links} = this.state
-      links.push({from:ev.subject.fromNode.data.idContent, to: ev.subject.toNode.data.idContent})
+      links.push({from:ev.subject.fromNode.data.order, to: ev.subject.toNode.data.order})
       this.setState({links})
       // this.reorderNodes()
     })
@@ -96,7 +96,7 @@ export default class GoJs extends Component {
   primero(){
     
     let primero = this.state.contents.filter((content) => {
-      if (this.state.links.filter((link) => link.to == content.idcontent).length == 0)
+      if (this.state.links.filter((link) => link.to == content.order).length == 0)
         return true
     })
     return primero[0]
@@ -105,11 +105,11 @@ export default class GoJs extends Component {
   processContents(contents){
     let contenidos = []
     // let contenidos = contents
-    contents.map((content)=> {
+    contents.map((content,index)=> {
       let contentCopy = Object.assign({},content)
-      let idContent = contentCopy.idcontent
-      delete contentCopy.idcontent
-      contentCopy.idContent = idContent
+      let order = contentCopy.order
+      delete contentCopy.order
+      contentCopy.order = index
       contentCopy.state = "edited"
       contenidos.push(contentCopy)
       console.log(contentCopy)
@@ -126,7 +126,7 @@ export default class GoJs extends Component {
       loading:true
     })
     let contentsToSend = this.reorderNodes()
-    axios.put('https://alexa-apirest.herokuapp.com/users/addListContent/user/gonza', contentsToSend).then(() => {
+    axios.put('https://alexa-apirest.herokuapp.com/users/updateListContents/user/gonza', contentsToSend).then(() => {
       this.setState({loading:false})
       this.state.myDiagram.div = null
       this.renderCanvas()
@@ -136,12 +136,12 @@ export default class GoJs extends Component {
   reorderNodes(){
     
     let primerNodo = this.primero()
-    let primerLink = this.state.links.filter( link => link.from == primerNodo.idcontent)
+    let primerLink = this.state.links.filter( link => link.from == primerNodo.order)
     let orderedNodes = [primerNodo]
     let lastNodo = primerNodo
     for (let index = 0; index < this.state.links.length; index++) {
-      let properLink = this.state.links.filter( link => link.from == lastNodo.idcontent)[0]
-      lastNodo = this.state.contents.filter( content => content.idcontent == properLink.to)[0]
+      let properLink = this.state.links.filter( link => link.from == lastNodo.order)[0]
+      lastNodo = this.state.contents.filter( content => content.order == properLink.to)[0]
       orderedNodes.push(lastNodo)
     }
     console.log(orderedNodes)
@@ -211,7 +211,7 @@ export default class GoJs extends Component {
     let contents = this.state.contents
     contents.push(content)
     this.setState({contents})
-    return content.idcontent
+    return content.order
     }
 
 
@@ -234,7 +234,7 @@ export default class GoJs extends Component {
     diagram.startTransaction('new node');
     diagram.model.addNodeData({
       location: point,
-      idContent: this.getContentStructure(
+      order: this.getContentStructure(
         event.dataTransfer.items[0].type, 
         event.dataTransfer.items[1].type, 
         event.dataTransfer.items[2].type, 

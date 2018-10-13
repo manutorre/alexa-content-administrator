@@ -54,13 +54,14 @@ export default class NewsStepper extends React.Component{
     const array=[]
     console.log("identifier ",this.state.identifier)
     if(contentSiblings.length > 0){
-      contentSiblings.map((path)=>{
+      contentSiblings.map((path,index)=>{
         const obj = {
           url:content.link.urlPagina,
           xpath:path,
           category:this.state.selectedCategory,
           state:"new",
-          idContent:this.state.identifier
+          idContent:this.state.identifier,
+          order:index
         }
         array.push(obj)
       })
