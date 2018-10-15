@@ -50,7 +50,7 @@ export default class GoJs extends Component {
       goObj(
         go.TextBlock,
         { margin: 6, font: "18px sans-serif" },
-        new go.Binding("text", "order")
+        new go.Binding("text", "idContent")
       )
     )
     return nodeTemplate;    
@@ -201,17 +201,18 @@ export default class GoJs extends Component {
       // Requirement in some browsers, such as Internet Explorer
   }
 
-  getContentStructure(content1,content2,content3,content4, content5){ //crea el content object
+  getContentStructure(content1,content2,content3,content4, content5, content6){ //crea el content object
     let parsedContent1 = JSON.parse(content1)
     let parsedContent2 = JSON.parse(content2)
     let parsedContent3 = JSON.parse(content3)
     let parsedContent4 = JSON.parse(content4)
     let parsedContent5 = JSON.parse(content5)
-    let content = ({...parsedContent1,...parsedContent2,...parsedContent3,...parsedContent4,...parsedContent5})
+    let parsedContent6 = JSON.parse(content6)
+    let content = ({...parsedContent1,...parsedContent2,...parsedContent3,...parsedContent4,...parsedContent5,...parsedContent6})
     let contents = this.state.contents
     contents.push(content)
     this.setState({contents})
-    return content.order
+    return [content.order,content.idcontent]
     }
 
 
@@ -232,15 +233,18 @@ export default class GoJs extends Component {
     var my = event.clientY - bbox.top * ((can.height/pixelratio) / bbh);
     var point = diagram.transformViewToDoc(new go.Point(mx, my));
     diagram.startTransaction('new node');
-    diagram.model.addNodeData({
-      location: point,
-      order: this.getContentStructure(
+    let values = this.getContentStructure(
         event.dataTransfer.items[0].type, 
         event.dataTransfer.items[1].type, 
         event.dataTransfer.items[2].type, 
         event.dataTransfer.items[3].type,
-        event.dataTransfer.items[4].type),
-        color:go.Brush.randomColor()
+        event.dataTransfer.items[4].type,
+        event.dataTransfer.items[5].type)
+    diagram.model.addNodeData({
+      location: point,
+      order: values[0],
+      idContent: values[1],
+      color:go.Brush.randomColor()
     });
     diagram.commitTransaction('new node');
     this.setState({

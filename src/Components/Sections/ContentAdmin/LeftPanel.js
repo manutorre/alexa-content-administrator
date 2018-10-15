@@ -23,7 +23,7 @@ export default class LeftPanel extends React.Component {
     event.dataTransfer.setData(JSON.stringify({state:content.state}), 'state');
     event.dataTransfer.setData(JSON.stringify({url:content.url}), 'url');
     event.dataTransfer.setData(JSON.stringify({xpath:content.xpath}), 'xpath');    
-
+    event.dataTransfer.setData(JSON.stringify({idContent:content.idContent}), 'idContent');
     // store a reference to the dragged element
     let dragged = event.target;
     // Objects during drag will have a red border
