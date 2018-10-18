@@ -8,10 +8,10 @@ render(){
     <div>
       <Popconfirm
         arrow={false}
-        title={"El título es: '" + this.props.title + "'?"}
-        visible={this.props.titleAndLinkStatus == "Esperando confirmación"}
-        onConfirm={() => this.props.confirmTitleAndLink()}
-        onCancel={() => this.props.cancelTitleAndLink()}>
+        title={this.props.title}
+        visible={this.props.statusVisible == "Esperando confirmación"}
+        onConfirm={() => this.props.confirm()}
+        onCancel={() => this.props.cancel()}>
       </Popconfirm>
     </div>
   )

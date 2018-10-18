@@ -47,7 +47,7 @@ export default class LeftPanel extends React.Component {
                   <Meta
 
                     title={content.idContent}
-                    description={content.category}
+                    description={content.url}
 
                     // title={content.title.text}
                     // description={content.link.text}

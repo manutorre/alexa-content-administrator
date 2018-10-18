@@ -2,6 +2,7 @@ import React from 'react'
 import { Steps, Button, Icon, Popconfirm, Select, Modal } from 'antd';
 import ConfirmPopover from './ConfirmPopover'
 import SiblingsModal from './SiblingsModal'
+import Formulario from './Formulario'
 import axios from 'axios'
 
 
@@ -22,7 +23,9 @@ export default class Stepper extends React.Component{
         className:"",
         tagName:""
       },
-      siblings:[]
+      siblings:[],
+      siblingStatus:false,
+      categories:[]
     }
   }
 
@@ -39,7 +42,8 @@ export default class Stepper extends React.Component{
 
   confirmTitleAndLink(){
     this.setState({
-      titleAndLinkStatus: "Confirmado"
+      titleAndLinkStatus: "Confirmado",
+      siblingStatus: "Esperando confirmación"
     })
     this.props.nextTwoSteps();
   }
@@ -83,6 +87,15 @@ export default class Stepper extends React.Component{
   }
 
   componentDidMount(){
+    axios.get("https://alexa-apirest.herokuapp.com/users/categories/gonza")
+    .then((response) =>{
+      console.log(response.data);
+      this.setState({
+        categories: response.data
+      });
+
+    });
+
     window.parent.postMessage({"mge":"maskForNewContent"}, "*");
     window.parent.postMessage({"mge":"titleAndLinkRecognizing"}, "*");
     window.addEventListener('message', (e) => this.onMessageReceive(e));
@@ -111,6 +124,12 @@ export default class Stepper extends React.Component{
       title: this.state.title,
       link: this.state.link
     },this.state.siblings)
+  }
+
+  handleSiblings(status){
+    this.setState({
+      siblingStatus:status
+    })    
   }
 
   returnSiblings(e){
@@ -150,29 +169,52 @@ export default class Stepper extends React.Component{
             description={this.state.titleAndLinkStatus == "Confirmado" ? "Link: " + this.state.link.url : "Por favor, arrastre el título del contenido hacia la caja de contenido."}
             icon={this.iconKind(this.state.titleAndLinkStatus)}
           />
-          <Step title={"Reconocer contenidos hermanos"}
+          <Step 
+            title={this.state.siblingStatus != "Esperando" ? "Reconocer contenidos hermanos" : "Asignar identificador y categoria"}
             size="small"
-            description={this.props.selectedIdentifier ? "Identificador de contenidos: "+this.props.selectedIdentifier : "Selecciona un criterio para reconocer contenidos hermanos."}
-            icon={this.props.selectedCategory ? this.iconKind("Confirmado") : this.props.currentStep == 3 ? this.iconKind("Esperando confirmación") : ""}
+            description={this.props.selectedIdentifier ? "Identificador de contenidos: "+this.props.selectedIdentifier : this.state.siblingStatus != "Esperando" ? "Selecciona un criterio para reconocer contenidos hermanos." : ""}
+            icon={this.props.selectedCategory && this.props.selectedIdentifier ? this.iconKind("Confirmado") : this.props.currentStep == 3 ? this.iconKind("Esperando confirmación") : ""}
           />
         </Steps>
         <ConfirmPopover
-          titleAndLinkStatus = {this.state.titleAndLinkStatus}
-          confirmTitleAndLink = {() => this.confirmTitleAndLink()}
-          cancelTitleAndLink = {() => this.cancelTitleAndLink()}
-          title={this.state.title.text}
+          status = {this.state.titleAndLinkStatus}
+          confirm = {() => this.confirmTitleAndLink()}
+          cancel = {() => this.cancelTitleAndLink()}
+          statusVisible = {this.state.titleAndLinkStatus}
+          title={"El titulo es: "+this.state.title.text+"?"}
+        />
+        <ConfirmPopover
+          status = {this.state.siblingStatus}
+          confirm = {() => this.handleSiblings("Confirmado")}
+          cancel = {() => this.handleSiblings("Esperando")}
+          statusVisible = {this.state.siblingStatus}
+          title={"Desea reconocer los contenidos hermanos?"}
         />
 
-        <SiblingsModal
-          currentStep = {this.props.currentStep}
-          titleAndLinkStatus = {this.state.titleAndLinkStatus}
-          selectCategory = {(value) => this.selectCategory(value)}
-          selectedCategory = {this.props.selectedCategory}
-          changeIdentifier = {(e) => this.props.changeIdentifier(e)}
-          returnSiblings = {(e) => this.returnSiblings(e) }
-          confirmContent = {() => this.confirmContent() }
-          clearCategory = {() => this.props.clearCategory() }
-        />
+        {this.props.currentStep == 3 && this.state.titleAndLinkStatus == "Confirmado" 
+          && this.state.siblingStatus == "Confirmado" && 
+            <SiblingsModal
+              categories = {this.state.categories}
+              titleAndLinkStatus = {this.state.titleAndLinkStatus}
+              selectCategory = {(value) => this.selectCategory(value)}
+              selectedCategory = {this.props.selectedCategory}
+              changeIdentifier = {(e) => this.props.changeIdentifier(e)}
+              returnSiblings = {(e) => this.returnSiblings(e) }
+              confirmContent = {() => this.confirmContent() }
+              clearCategory = {() => this.props.clearCategory() }
+            />
+        }
+          
+        {this.props.currentStep == 3 && this.state.titleAndLinkStatus == "Confirmado" 
+          && this.state.siblingStatus == "Esperando" && 
+            <Formulario
+              selectCategory={(value) => this.props.selectCategory(value)}
+              categories={this.state.categories}
+              selectedCategory = {this.props.selectedCategory}
+              changeIdentifier = {(e) => this.props.changeIdentifier(e)}
+            /> 
+        }
+        
 
         <br/>
         {/* {canBack && <Button type="primary" onClick={() => this.props.previousStep()}>Anterior</Button>}
