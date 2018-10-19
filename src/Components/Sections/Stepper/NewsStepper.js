@@ -37,11 +37,12 @@ export default class NewsStepper extends React.Component{
     this.setState({currentStep: this.state.currentStep -1})
   }
 
-  selectCategory(categoria){
+  selectCategory(content,categoria){
     console.log(categoria)
     this.setState({
       selectedCategory: categoria
     })
+    this.confirmSingleContent(content)
   }
 
   clearCategory(){
@@ -50,7 +51,7 @@ export default class NewsStepper extends React.Component{
     })
   }
 
-  confirmContent(content,contentSiblings){
+  confirmContentSiblings(content,contentSiblings){
     const array=[]
     console.log("identifier ",this.state.identifier)
     if(contentSiblings.length > 0){
@@ -60,35 +61,47 @@ export default class NewsStepper extends React.Component{
           xpath:path,
           category:this.state.selectedCategory,
           state:"new",
-          idContent:this.state.identifier,
-          order:index
+          idContent:this.state.identifier
         }
         array.push(obj)
       })
     }
     this.setState({
-      confirmedContent:Object.assign(this.state.confirmedContent, content),
       contentSiblings: array   
     }, console.log(JSON.stringify(this.state.confirmedContent)))
   }
 
-  confirm(){
+  confirmSingleContent(content){
+      const obj = {
+          url:content.link.urlPagina,
+          xpath:content.link.xpath,
+          category:this.state.selectedCategory,
+          state:"new",
+          idContent:this.state.identifier
+      }
+    this.setState({
+      confirmedContent:Object.assign(this.state.confirmedContent, obj)  
+    }, console.log(JSON.stringify(this.state.confirmedContent)))
+  }
+
+  confirm(){  
     this.setState({loading:true})
     console.log(this.state)
-    /*axios.put('https://alexa-apirest.herokuapp.com/users/addContent/user/gonza',{
-      url:this.state.confirmedContent.link.url,
-      xpath:this.state.confirmedContent.title.xpath,
-      category:this.state.selectedCategory,
-      state:"new",
-      idContent:this.state.identifier
-    })*/
-
-    axios.put('https://alexa-apirest.herokuapp.com/users/addListContent/user/gonza',
-      this.state.contentSiblings)
-    .then(() => this.setState({
-      loading:false,
-      done: true
-    }))
+    if(this.state.contentSiblings.length > 0){
+      axios.put('https://alexa-apirest.herokuapp.com/users/addListContent/user/gonza',
+        this.state.contentSiblings)
+      .then(() => this.setState({
+          loading:false,
+          done: true
+      })) 
+    }else{
+      axios.put('https://alexa-apirest.herokuapp.com/users/addContent/user/gonza',
+        this.state.confirmedContent)
+      .then(() => this.setState({
+          loading:false,
+          done: true
+      }))       
+    }   
   }
 
   showAdmin(){
@@ -109,8 +122,8 @@ export default class NewsStepper extends React.Component{
           nextStep={() => this.nextStep()}
           nextTwoSteps={() => this.nextTwoSteps()}
           previousStep={() => this.previousStep()}
-          selectCategory={(value) => this.selectCategory(value)}
-          confirmContent={(content,siblings) => this.confirmContent(content,siblings)}
+          selectCategory={(content,value) => this.selectCategory(content,value)}
+          confirmContentSiblings={(content,siblings) => this.confirmContentSiblings(content,siblings)}
           selectedCategory={this.state.selectedCategory}
           changeIdentifier={(e) => this.changeIdentifier(e)}
           selectedIdentifier={this.state.identifier}

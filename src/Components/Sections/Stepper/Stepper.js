@@ -114,13 +114,17 @@ export default class Stepper extends React.Component{
     }
   }
 
-  selectCategory(e){
-    console.log(e)
-    this.props.selectCategory(e)
+  selectCategory(category){
+    console.log(category)
+
+    this.props.selectCategory({
+      title: this.state.title,
+      link: this.state.link
+    },category)
   }
 
   confirmContent(){
-    this.props.confirmContent({
+    this.props.confirmContentSiblings({
       title: this.state.title,
       link: this.state.link
     },this.state.siblings)
@@ -208,7 +212,7 @@ export default class Stepper extends React.Component{
         {this.props.currentStep == 3 && this.state.titleAndLinkStatus == "Confirmado" 
           && this.state.siblingStatus == "Esperando" && 
             <Formulario
-              selectCategory={(value) => this.props.selectCategory(value)}
+              selectCategory={(value) => this.selectCategory(value)}
               categories={this.state.categories}
               selectedCategory = {this.props.selectedCategory}
               changeIdentifier = {(e) => this.props.changeIdentifier(e)}
