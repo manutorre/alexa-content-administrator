@@ -15,7 +15,8 @@ export default class NewsStepper extends React.Component{
       identifier:"",
       loading:false,
       done: false,
-      contentSiblings:[]    
+      contentSiblings:[],
+      errorMessage:null
     }
   }
 
@@ -38,7 +39,6 @@ export default class NewsStepper extends React.Component{
   }
 
   selectCategory(content,categoria){
-    console.log(categoria)
     this.setState({
       selectedCategory: categoria
     })
@@ -71,6 +71,13 @@ export default class NewsStepper extends React.Component{
     }, console.log(JSON.stringify(this.state.confirmedContent)))
   }
 
+  confirmBeforeSend(){
+    let previousConfirmedState = this.state.confirmedContent
+    previousConfirmedState.idContent = this.state.identifier
+    previousConfirmedState.category = this.state.selectedCategory
+    this.setState({confirmedContent:previousConfirmedState})
+  }
+
   confirmSingleContent(content){
       const obj = {
           url:content.link.urlPagina,
@@ -79,13 +86,16 @@ export default class NewsStepper extends React.Component{
           state:"new",
           idContent:this.state.identifier
       }
+    console.log(this.state.identifier)
+    console.log(obj)
     this.setState({
-      confirmedContent:Object.assign(this.state.confirmedContent, obj)  
+      confirmedContent: obj  
     }, console.log(JSON.stringify(this.state.confirmedContent)))
   }
 
   confirm(){  
     this.setState({loading:true})
+    this.confirmBeforeSend()
     console.log(this.state)
     if(this.state.contentSiblings.length > 0){
       axios.put('https://alexa-apirest.herokuapp.com/users/addListContent/user/gonza',
@@ -100,7 +110,10 @@ export default class NewsStepper extends React.Component{
       .then(() => this.setState({
           loading:false,
           done: true
-      }))       
+      }))
+      .catch((e) => {
+        this.setState({errorMessage:e.response.data})
+      })       
     }   
   }
 
@@ -110,42 +123,57 @@ export default class NewsStepper extends React.Component{
   }
 
   render(){
-    return(
-      <div style={{width:"210px",margin:"20px auto"}}>
-        {this.state.loading && 
-          <div className="example-stepper">
-            <Spin className="diagram-spin" size="large"/>
-          </div>        
-        }
-        <Stepper
-          currentStep={this.state.currentStep}
-          nextStep={() => this.nextStep()}
-          nextTwoSteps={() => this.nextTwoSteps()}
-          previousStep={() => this.previousStep()}
-          selectCategory={(content,value) => this.selectCategory(content,value)}
-          confirmContentSiblings={(content,siblings) => this.confirmContentSiblings(content,siblings)}
-          selectedCategory={this.state.selectedCategory}
-          changeIdentifier={(e) => this.changeIdentifier(e)}
-          selectedIdentifier={this.state.identifier}
-          clearCategory = {() => this.clearCategory() }
-        />
-        <Button style={{display:"inline-block", margin: "5px"}} onClick={() => this.props.changeSection("entry")}>
-          Volver
-        </Button>
-        {this.state.selectedCategory != "" && this.state.identifier != "" &&
-          <div>
-            {!this.state.done && 
-              <Button onClick={() => this.confirm()}type="danger" style={{display:"inline-block", margin: "5px"}}>
-                Confirmar
+    if (this.state.errorMessage || this.state.done) {
+      return(
+        <div>
+          <div>{this.state.errorMessage ? this.state.errorMessage : "El contenido fue añadido correctamente"}</div>
+          <Button style={{display:"inline-block", margin: "5px"}} onClick={() => this.showAdmin()}>
+            Administrar contenidos
+          </Button>
+          <Button style={{display:"inline-block", margin: "5px"}} onClick={() => this.props.changeSection("entry")}>
+            Volver
+          </Button>          
+        </div>
+      )
+    }
+    else{
+      return(
+        <div style={{width:"210px",margin:"20px auto"}}>
+          {this.state.loading && 
+            <div className="example-stepper">
+              <Spin className="diagram-spin" size="large"/>
+            </div>        
+          }
+          <Stepper
+            currentStep={this.state.currentStep}
+            nextStep={() => this.nextStep()}
+            nextTwoSteps={() => this.nextTwoSteps()}
+            previousStep={() => this.previousStep()}
+            selectCategory={(content,value) => this.selectCategory(content,value)}
+            confirmContentSiblings={(content,siblings) => this.confirmContentSiblings(content,siblings)}
+            selectedCategory={this.state.selectedCategory}
+            changeIdentifier={(e) => this.changeIdentifier(e)}
+            selectedIdentifier={this.state.identifier}
+            clearCategory = {() => this.clearCategory() }
+          />
+          <Button style={{display:"inline-block", margin: "5px"}} onClick={() => this.props.changeSection("entry")}>
+            Volver
+          </Button>
+          {this.state.selectedCategory != "" && this.state.identifier != "" &&
+            <div>
+              {!this.state.done && 
+                <Button onClick={() => this.confirm()}type="danger" style={{display:"inline-block", margin: "5px"}}>
+                  Confirmar
+                </Button>
+              }
+              <Button style={{display:"inline-block", margin: "5px"}} onClick={() => this.showAdmin()}>
+                Administrar contenidos
               </Button>
-            }
-            <Button style={{display:"inline-block", margin: "5px"}} onClick={() => this.showAdmin()}>
-              Administrar contenidos
-            </Button>
-          </div>
-        }
-      </div>
-    )
+            </div>
+          }
+        </div>
+      )
+    }
   }
 
 }
