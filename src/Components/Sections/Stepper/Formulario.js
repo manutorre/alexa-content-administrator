@@ -18,6 +18,7 @@ export default class Formulario extends React.Component {
       })
     }else{
       this.setState({
+        selectedItem:"",
         hideSelect:false
       })
     }

@@ -42,7 +42,7 @@ export default class NewsStepper extends React.Component{
     this.setState({
       selectedCategory: categoria
     })
-    this.confirmSingleContent(content)
+    this.confirmSingleContent(content,categoria)
   }
 
   clearCategory(){
@@ -78,11 +78,11 @@ export default class NewsStepper extends React.Component{
     this.setState({confirmedContent:previousConfirmedState})
   }
 
-  confirmSingleContent(content){
+  confirmSingleContent(content,categoria){
       const obj = {
           url:content.link.urlPagina,
           xpath:content.link.xpath,
-          category:this.state.selectedCategory,
+          category:categoria,
           state:"new",
           idContent:this.state.identifier
       }
