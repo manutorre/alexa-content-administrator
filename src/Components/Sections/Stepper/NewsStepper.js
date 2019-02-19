@@ -52,22 +52,24 @@ export default class NewsStepper extends React.Component{
   }
 
   confirmContentSiblings(content,contentSiblings){
-    const array=[]
+    const array = [];
+    const contents = {
+          categoria:this.state.selectedCategory,
+          identificador:this.state.identifier
+        }
     console.log("identifier ",this.state.identifier)
     if(contentSiblings.length > 0){
       contentSiblings.map((path,index)=>{
         const obj = {
-          url:content.link.urlPagina,
-          xpath:path,
-          category:this.state.selectedCategory,
-          state:"new",
-          idContent:this.state.identifier
+            url:content.link.urlPagina,
+            xpath:path
         }
         array.push(obj)
       })
     }
+    contents.siblings = array;
     this.setState({
-      contentSiblings: array   
+      contentSiblings: contents   
     }, console.log(JSON.stringify(this.state.confirmedContent)))
   }
 
@@ -97,15 +99,15 @@ export default class NewsStepper extends React.Component{
     this.setState({loading:true})
     this.confirmBeforeSend()
     console.log(this.state)
-    if(this.state.contentSiblings.length > 0){
-      axios.put('https://alexa-apirest.herokuapp.com/users/addListContent/user/gonza',
+    if(this.state.contentSiblings.siblings.length > 0){
+      axios.post('https://alexa-apirest.herokuapp.com/users/addSiblingContents/user/gonza',
         this.state.contentSiblings)
       .then(() => this.setState({
           loading:false,
           done: true
       })) 
     }else{
-      axios.put('https://alexa-apirest.herokuapp.com/users/addContent/user/gonza',
+      axios.post('https://alexa-apirest.herokuapp.com/users/addContent/user/gonza',
         this.state.confirmedContent)
       .then(() => this.setState({
           loading:false,
