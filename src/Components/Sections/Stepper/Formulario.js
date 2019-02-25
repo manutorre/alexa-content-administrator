@@ -37,9 +37,9 @@ export default class Formulario extends React.Component {
     const {Option} = Select
     return(
       <div>
-        <p>Categoria:</p>
+        <p>Category:</p>
         {this.props.categories.length > 0 && !this.state.hideSelect &&
-          <Select value={this.state.selectedItem? this.state.selectedItem : undefined}  placeholder="Categoría" 
+          <Select value={this.state.selectedItem? this.state.selectedItem : undefined}  placeholder="Category" 
               onChange={(e) =>this.selectCategory(e)} style={{ width: 120, display: "inline-block", margin: "0 auto" }}>
               
               {this.props.categories.map( (category, index) => {
@@ -56,12 +56,12 @@ export default class Formulario extends React.Component {
           </Select>
         }
         
-        <Input placeholder="Nueva categoria" 
+        <Input placeholder="New category" 
               onChange={(e) => this.hideSelect(e)} 
               style={{display:"inline-block", marginTop: "10px"}}/>              
                 
-        <p>Identificador:</p>
-        <Input placeholder="Identificador de contenido/s" 
+        <p>Identifier:</p>
+        <Input placeholder="Identifier of contents" 
               onChange={(e) => this.props.changeIdentifier(e)} 
               style={{display:"inline-block", margin: "0 auto"}}/>
       </div>

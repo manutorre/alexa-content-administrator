@@ -9,7 +9,7 @@ render(){
       <Popconfirm
         arrow={false}
         title={this.props.title}
-        visible={this.props.statusVisible == "Esperando confirmación"}
+        visible={this.props.statusVisible == "Waiting confirmation"}
         onConfirm={() => this.props.confirm()}
         onCancel={() => this.props.cancel()}>
       </Popconfirm>

@@ -1,5 +1,5 @@
 import React from 'react'
-import { Button, Spin } from 'antd';
+import { Button, Spin, Alert } from 'antd';
 import Stepper from './Stepper'
 import axios from 'axios'
 
@@ -75,18 +75,19 @@ export default class NewsStepper extends React.Component{
 
   confirmBeforeSend(){
     let previousConfirmedState = this.state.confirmedContent
-    previousConfirmedState.idContent = this.state.identifier
-    previousConfirmedState.category = this.state.selectedCategory
+    previousConfirmedState.identificador = this.state.identifier
+    previousConfirmedState.categoria = this.state.selectedCategory
     this.setState({confirmedContent:previousConfirmedState})
   }
 
   confirmSingleContent(content,categoria){
       const obj = {
-          url:content.link.urlPagina,
-          xpath:content.link.xpath,
-          category:categoria,
-          state:"new",
-          idContent:this.state.identifier
+          content:{
+            url:content.link.urlPagina,
+            xpath:content.link.xpath
+          },
+          categoria:categoria,
+          identificador:this.state.identifier
       }
     console.log(this.state.identifier)
     console.log(obj)
@@ -99,24 +100,27 @@ export default class NewsStepper extends React.Component{
     this.setState({loading:true})
     this.confirmBeforeSend()
     console.log(this.state)
-    if(this.state.contentSiblings.siblings.length > 0){
-      axios.post('https://alexa-apirest.herokuapp.com/users/addSiblingContents/user/gonza',
-        this.state.contentSiblings)
-      .then(() => this.setState({
-          loading:false,
-          done: true
-      })) 
-    }else{
-      axios.post('https://alexa-apirest.herokuapp.com/users/addContent/user/gonza',
-        this.state.confirmedContent)
-      .then(() => this.setState({
-          loading:false,
-          done: true
-      }))
-      .catch((e) => {
-        this.setState({errorMessage:e.response.data})
-      })       
-    }   
+    if(this.state.contentSibling){
+      if(this.state.contentSiblings.siblings.length > 0){
+        axios.post('https://alexa-apirest.herokuapp.com/users/addSiblingContents/user/gonza',
+          this.state.contentSiblings)
+        .then(() => this.setState({
+            loading:false,
+            done: true
+        }))
+      }
+    } 
+    else{
+        axios.post('https://alexa-apirest.herokuapp.com/users/addContent/user/gonza',
+          this.state.confirmedContent)
+        .then(() => this.setState({
+            loading:false,
+            done: true
+        }))
+        .catch((e) => {
+          this.setState({errorMessage:e.response.data})
+        })       
+      }   
   }
 
   showAdmin(){
@@ -128,12 +132,27 @@ export default class NewsStepper extends React.Component{
     if (this.state.errorMessage || this.state.done) {
       return(
         <div>
-          <div>{this.state.errorMessage ? this.state.errorMessage : "El contenido fue añadido correctamente"}</div>
+          <div>
+            {this.state.errorMessage ? 
+                <Alert
+                  message="Error"
+                  description= {this.state.errorMessage}
+                  type="error"
+                  showIcon
+                />
+            : <Alert
+                    message="Success Tips"
+                    description="The content was added correctly"
+                    type="success"
+                    showIcon
+                  /> 
+            }
+          </div>
           <Button style={{display:"inline-block", margin: "5px"}} onClick={() => this.showAdmin()}>
-            Administrar contenidos
+            Manage content
           </Button>
           <Button style={{display:"inline-block", margin: "5px"}} onClick={() => this.props.changeSection("entry")}>
-            Volver
+            Return
           </Button>          
         </div>
       )
@@ -159,17 +178,17 @@ export default class NewsStepper extends React.Component{
             clearCategory = {() => this.clearCategory() }
           />
           <Button style={{display:"inline-block", margin: "5px"}} onClick={() => this.props.changeSection("entry")}>
-            Volver
+            Return
           </Button>
           {this.state.selectedCategory != "" && this.state.identifier != "" &&
             <div>
               {!this.state.done && 
                 <Button onClick={() => this.confirm()}type="danger" style={{display:"inline-block", margin: "5px"}}>
-                  Confirmar
+                  Confirm
                 </Button>
               }
               <Button style={{display:"inline-block", margin: "5px"}} onClick={() => this.showAdmin()}>
-                Administrar contenidos
+                Manage content
               </Button>
             </div>
           }
