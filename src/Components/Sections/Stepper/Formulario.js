@@ -1,5 +1,5 @@
 import React from 'react'
-import {Button, Select, Input} from 'antd'
+import {Button, Select, Input, Checkbox} from 'antd'
 
 export default class Formulario extends React.Component {
 
@@ -9,6 +9,11 @@ export default class Formulario extends React.Component {
       hideSelect:false,
       selectedItem:""
     }
+  }
+  
+  onChange(e) {
+    //CONTROLAR QUE EL ELEMENTO TENGA UN LINK, SINO DESHABILITAR EL CHECK 
+    console.log(`checked = ${e.target.checked}`);
   }
 
   hideSelect(e){
@@ -64,6 +69,8 @@ export default class Formulario extends React.Component {
         <Input placeholder="Identifier of contents" 
               onChange={(e) => this.props.changeIdentifier(e)} 
               style={{display:"inline-block", margin: "0 auto"}}/>
+        <br/>
+        <Checkbox onChange={e => this.onChange(e)}>Can navegate?</Checkbox>
       </div>
     )
   }

@@ -140,11 +140,11 @@ export default class Stepper extends React.Component{
     const link = this.state.link
     console.log(e,link)
     switch (e) {
-      case "Ubicacion":
+      case "Location":
         //console.log(window.parent.document.getElementsByClassName(link.className))
         window.parent.postMessage({"mge":"className","elem":link.className}, "*");
         break;
-      case "Tipo de Contenido":
+      case "Type of content":
         //console.log(window.parent.document.getElementsByTagName(link.tagName))
         window.parent.postMessage({"mge":"tagName","elem":link.tagName}, "*");
         break;
@@ -185,7 +185,7 @@ export default class Stepper extends React.Component{
           confirm = {() => this.confirmTitleAndLink()}
           cancel = {() => this.cancelTitleAndLink()}
           statusVisible = {this.state.titleAndLinkStatus}
-          title={"EThe title is: "+this.state.title.text+"?"}
+          title={"The title is: "+this.state.title.text+"?"}
         />
         <ConfirmPopover
           status = {this.state.siblingStatus}

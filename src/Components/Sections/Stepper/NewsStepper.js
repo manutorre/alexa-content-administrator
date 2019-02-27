@@ -100,7 +100,7 @@ export default class NewsStepper extends React.Component{
     this.setState({loading:true})
     this.confirmBeforeSend()
     console.log(this.state)
-    if(this.state.contentSibling){
+    if(this.state.contentSiblings){
       if(this.state.contentSiblings.siblings.length > 0){
         axios.post('https://alexa-apirest.herokuapp.com/users/addSiblingContents/user/gonza',
           this.state.contentSiblings)
@@ -141,7 +141,7 @@ export default class NewsStepper extends React.Component{
                   showIcon
                 />
             : <Alert
-                    message="Success Tips"
+                    message="Success"
                     description="The content was added correctly"
                     type="success"
                     showIcon
