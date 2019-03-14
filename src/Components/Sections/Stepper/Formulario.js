@@ -70,7 +70,6 @@ export default class Formulario extends React.Component {
               onChange={(e) => this.props.changeIdentifier(e)} 
               style={{display:"inline-block", margin: "0 auto"}}/>
         <br/>
-        <Checkbox onChange={e => this.onChange(e)}>Can navegate?</Checkbox>
       </div>
     )
   }

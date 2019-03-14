@@ -62,7 +62,7 @@ export default class Entry extends Component {
         <p className="App-intro">
         </p>
 
-        <Button onClick={() => this.props.changeSection("stepper")}>Create notice</Button>
+        <Button onClick={() => this.props.changeSection("stepper")}>Create content</Button>
 
       </div>
     );

@@ -15,7 +15,7 @@ export default class NewsStepper extends React.Component{
       identifier:"",
       loading:false,
       done: false,
-      contentSiblings:[],
+      contentSiblings:null,
       errorMessage:null
     }
   }
