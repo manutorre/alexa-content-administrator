@@ -55,7 +55,7 @@ export default class NewsStepper extends React.Component{
     const array = [];
     const contents = {
           categoria:this.state.selectedCategory,
-          identificador:this.state.identifier
+          identificador: this.state.identifier.charAt(0).toUpperCase() + this.state.identifier.slice(1)
         }
     console.log("identifier ",this.state.identifier)
     if(contentSiblings.length > 0){
@@ -87,7 +87,7 @@ export default class NewsStepper extends React.Component{
             xpath:content.link.xpath
           },
           categoria:categoria,
-          identificador:this.state.identifier
+          identificador: this.state.identifier.charAt(0).toUpperCase() + this.state.identifier.slice(1)
       }
     console.log(this.state.identifier)
     console.log(obj)
