@@ -62,7 +62,8 @@ export default class NewsStepper extends React.Component{
       contentSiblings.map((path,index)=>{
         const obj = {
             url:content.link.urlPagina,
-            xpath:path
+            xpath:path,
+            available:true
         }
         array.push(obj)
       })
@@ -84,7 +85,8 @@ export default class NewsStepper extends React.Component{
       const obj = {
           content:{
             url:content.link.urlPagina,
-            xpath:content.link.xpath
+            xpath:content.link.xpath,
+            available:true
           },
           categoria:categoria,
           identificador: this.state.identifier.charAt(0).toUpperCase() + this.state.identifier.slice(1)
