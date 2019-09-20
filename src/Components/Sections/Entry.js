@@ -52,6 +52,11 @@ export default class Entry extends Component {
     window.addEventListener('message', (e) => this.onMessageReceive(e));//console.log(e.data)
   }
 
+  showAdmin(){
+    const win = window.open("http://localhost:3000/admin", '_blank'); //Cambiar la dire
+    win.focus();
+  }
+
   render() {
     return (
       <div className="App">
@@ -62,7 +67,13 @@ export default class Entry extends Component {
         <p className="App-intro">
         </p>
 
-        <Button onClick={() => this.props.changeSection("stepper")}>Create content</Button>
+        <Button style={{display:"inline-block", margin: "5px"}} onClick={() => this.props.changeSection("stepper")}>
+          Crear contenido
+        </Button>
+
+        <Button style={{display:"inline-block", margin: "5px"}} onClick={() => this.showAdmin()}>
+          Administrar contenidos
+        </Button>
 
       </div>
     );

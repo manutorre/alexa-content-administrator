@@ -9,7 +9,7 @@ export default class SiblingsModal extends React.Component {
     super(props)
     this.state = {
       visible: false,
-      criterios:["Location","Type of content"],
+      criterios:["Ubicacion","Tipo de contenido"],
       criterioItem:""
     }
   }
@@ -51,17 +51,17 @@ export default class SiblingsModal extends React.Component {
     return (
       <div> 
           <Button type="primary" onClick={() => this.showModal()} style={{ width: 120, display: "block", margin: "0 auto" }}>
-            Select
+            Seleccionar
           </Button>
         
           <Modal
-            title="Content"
+            title="Contenido"
             visible={this.state.visible}
             onOk={(e) => this.handleOk(e)}
             onCancel={(e) => this.handleCancel(e)}
           >
-          <p>Choose criteria for selection:</p>
-          <Select value={this.state.criterioItem? this.state.criterioItem : undefined} placeholder="Criteria" 
+          <p>Elegir criterio de seleccion:</p>
+          <Select value={this.state.criterioItem? this.state.criterioItem : undefined} placeholder="Criterio" 
             onChange={(e) => this.handleCriterio(e)} style={{ width: 140, display: "inline-block", margin: "0 auto" }}>
               {this.state.criterios.map( (criterio, index) => {
                 return(

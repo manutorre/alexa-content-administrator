@@ -144,17 +144,17 @@ export default class NewsStepper extends React.Component{
                 />
             : <Alert
                     message="Success"
-                    description="The content was added correctly"
+                    description="El contenido fue añadido correctamente"
                     type="success"
                     showIcon
                   /> 
             }
           </div>
           <Button style={{display:"inline-block", margin: "5px"}} onClick={() => this.showAdmin()}>
-            Manage content
+            Administrar contenidos
           </Button>
           <Button style={{display:"inline-block", margin: "5px"}} onClick={() => this.props.changeSection("entry")}>
-            Return
+            Atras
           </Button>          
         </div>
       )
@@ -180,17 +180,17 @@ export default class NewsStepper extends React.Component{
             clearCategory = {() => this.clearCategory() }
           />
           <Button style={{display:"inline-block", margin: "5px"}} onClick={() => this.props.changeSection("entry")}>
-            Return
+            Atras
           </Button>
           {this.state.selectedCategory != "" && this.state.identifier != "" &&
             <div>
               {!this.state.done && 
                 <Button onClick={() => this.confirm()}type="danger" style={{display:"inline-block", margin: "5px"}}>
-                  Confirm
+                  Confirmar
                 </Button>
               }
               <Button style={{display:"inline-block", margin: "5px"}} onClick={() => this.showAdmin()}>
-                Manage content
+                Administrar contenidos
               </Button>
             </div>
           }
