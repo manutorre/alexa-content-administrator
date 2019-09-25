@@ -216,6 +216,7 @@ export default class Stepper extends React.Component{
               categories={this.state.categories}
               selectedCategory = {this.props.selectedCategory}
               changeIdentifier = {(e) => this.props.changeIdentifier(e)}
+              setNavegable = {(e) => this.props.setNavegable(e)}
             /> 
         }
         

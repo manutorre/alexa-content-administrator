@@ -16,7 +16,8 @@ export default class NewsStepper extends React.Component{
       loading:false,
       done: false,
       contentSiblings:null,
-      errorMessage:null
+      errorMessage:null,
+      navegable:false
     }
   }
 
@@ -51,9 +52,18 @@ export default class NewsStepper extends React.Component{
     })
   }
 
+  setNavegable(e){
+    console.log(`checked = ${e.target.checked}`);
+    this.setState({
+      navegable: e.target.checked
+    })
+  }
+  
+
   confirmContentSiblings(content,contentSiblings){
     const array = [];
     const contents = {
+          navegable: this.state.navegable,
           categoria:this.state.selectedCategory,
           identificador: this.state.identifier.charAt(0).toUpperCase() + this.state.identifier.slice(1)
         }
@@ -78,6 +88,7 @@ export default class NewsStepper extends React.Component{
     let previousConfirmedState = this.state.confirmedContent
     previousConfirmedState.identificador = this.state.identifier
     previousConfirmedState.categoria = this.state.selectedCategory
+    previousConfirmedState.navegable = this.state.navegable
     this.setState({confirmedContent:previousConfirmedState})
   }
 
@@ -88,6 +99,7 @@ export default class NewsStepper extends React.Component{
             xpath:content.link.xpath,
             available:true
           },
+          navegable:this.state.navegable,
           categoria:categoria,
           identificador: this.state.identifier.charAt(0).toUpperCase() + this.state.identifier.slice(1)
       }
@@ -178,6 +190,7 @@ export default class NewsStepper extends React.Component{
             changeIdentifier={(e) => this.changeIdentifier(e)}
             selectedIdentifier={this.state.identifier}
             clearCategory = {() => this.clearCategory() }
+            setNavegable = {(e) => this.setNavegable(e)}
           />
           <Button style={{display:"inline-block", margin: "5px"}} onClick={() => this.props.changeSection("entry")}>
             Atras

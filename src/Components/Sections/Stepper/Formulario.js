@@ -10,11 +10,6 @@ export default class Formulario extends React.Component {
       selectedItem:""
     }
   }
-  
-  onChange(e) {
-    //CONTROLAR QUE EL ELEMENTO TENGA UN LINK, SINO DESHABILITAR EL CHECK 
-    console.log(`checked = ${e.target.checked}`);
-  }
 
   hideSelect(e){
     if(e.target.value != ""){
@@ -64,12 +59,16 @@ export default class Formulario extends React.Component {
         <Input placeholder="Nueva categoria" 
               onChange={(e) => this.hideSelect(e)} 
               style={{display:"inline-block", marginTop: "10px"}}/>              
-                
+        
+        <br/>      
         <p>Identificador:</p>
         <Input placeholder="Identificador de contenidos" 
               onChange={(e) => this.props.changeIdentifier(e)} 
               style={{display:"inline-block", margin: "0 auto"}}/>
         <br/>
+        <Checkbox onChange={(e)=>this.props.setNavegable(e)}>
+          Definir como contenido navegable?
+        </Checkbox>
       </div>
     )
   }
