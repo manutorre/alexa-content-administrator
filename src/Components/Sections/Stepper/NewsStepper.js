@@ -65,7 +65,7 @@ export default class NewsStepper extends React.Component{
     const contents = {
           navegable: this.state.navegable,
           categoria:this.state.selectedCategory,
-          identificador: this.state.identifier.charAt(0).toUpperCase() + this.state.identifier.slice(1)
+          identificador: this.state.identifier.charAt(0).toUpperCase() + this.state.identifier.slice(1).toLowerCase()
         }
     console.log("identifier ",this.state.identifier)
     if(contentSiblings.length > 0){
@@ -101,7 +101,7 @@ export default class NewsStepper extends React.Component{
           },
           navegable:this.state.navegable,
           categoria:categoria,
-          identificador: this.state.identifier.charAt(0).toUpperCase() + this.state.identifier.slice(1)
+          identificador: this.state.identifier.charAt(0).toUpperCase() + this.state.identifier.slice(1).toLowerCase()
       }
     console.log(this.state.identifier)
     console.log(obj)
