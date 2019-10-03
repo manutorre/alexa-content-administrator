@@ -1,7 +1,6 @@
 import React, { Component } from 'react';
 import Entry from './Sections/Entry'
 import NewsStepper from './Sections/Stepper/NewsStepper'
-import ContentAdmin from './Sections/ContentAdmin/ContentAdmin'
 import 'antd/dist/antd.css'
 import '../App.css';
 
@@ -19,10 +18,6 @@ class App extends Component {
   }
 
   render(){
-    console.log(window.location.href)
-    if (window.location.href.endsWith("/admin")) {
-      return <ContentAdmin/>
-    }
     switch (this.state.section) {
       case "entry":
         return <Entry changeSection={(section) => this.changeSection(section)}/>
