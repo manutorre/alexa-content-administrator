@@ -79,6 +79,7 @@ export default class SiblingsModal extends React.Component {
             categories={this.props.categories}
             selectedCategory = {this.props.selectedCategory}
             changeIdentifier = {(e) => this.props.changeIdentifier(e)}
+            setNavegable = {(e) => this.props.setNavegable(e)}
           />        
         </Modal>
       </div>

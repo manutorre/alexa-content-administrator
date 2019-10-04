@@ -206,6 +206,7 @@ export default class Stepper extends React.Component{
               returnSiblings = {(e) => this.returnSiblings(e) }
               confirmContent = {() => this.confirmContent() }
               clearCategory = {() => this.props.clearCategory() }
+              setNavegable = {(e) => this.props.setNavegable(e)}
             />
         }
           
