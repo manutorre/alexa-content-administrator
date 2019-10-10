@@ -86,7 +86,7 @@ export default class NewsStepper extends React.Component{
 
   confirmBeforeSend(){
     let previousConfirmedState = this.state.confirmedContent
-    previousConfirmedState.identificador = this.state.identifier
+    previousConfirmedState.identificador = this.state.identifier.charAt(0).toUpperCase() + this.state.identifier.slice(1).toLowerCase()
     previousConfirmedState.categoria = this.state.selectedCategory
     previousConfirmedState.navegable = this.state.navegable
     this.setState({confirmedContent:previousConfirmedState})
@@ -101,7 +101,7 @@ export default class NewsStepper extends React.Component{
           },
           navegable:this.state.navegable,
           categoria:categoria,
-          identificador: this.state.identifier.charAt(0).toUpperCase() + this.state.identifier.slice(1).toLowerCase()
+          identificador: this.state.identifier
       }
     console.log(this.state.identifier)
     console.log(obj)
