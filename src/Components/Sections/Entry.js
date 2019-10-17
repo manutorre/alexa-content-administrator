@@ -53,7 +53,7 @@ export default class Entry extends Component {
   }
 
   showAdmin(){
-    const win = window.open("../contentAdmin/index.html", '_blank'); //Cambiar la dire
+    const win = window.open("../contentAdmin/index.html", '_blank');
     win.focus();
   }
 

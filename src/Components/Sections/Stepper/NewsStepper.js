@@ -123,7 +123,7 @@ export default class NewsStepper extends React.Component{
             done: true
         }))
       }
-    } 
+    }
     else{
         axios.post('https://alexa-apirest.herokuapp.com/users/addContent/user/gonza',
           this.state.confirmedContent)
@@ -138,7 +138,7 @@ export default class NewsStepper extends React.Component{
   }
 
   showAdmin(){
-    const win = window.open("http://localhost:3000/admin", '_blank');
+    const win = window.open("../contentAdmin/index.html", '_blank');
     win.focus();
   }
 
