@@ -57,6 +57,17 @@ export default class Entry extends Component {
     win.focus();
   }
 
+  registro(e){
+    axios.post("https://alexa-apirest.herokuapp.com/users/newUser",e.target.value)
+    .then((response) =>{
+      console.log(response);
+      //Almacenar el nombre en la sesion
+      window.localStorage.setItem('Username',e.target.value)
+    }).catch((e) => {
+      //Manejar el error
+    })
+  }
+
   render() {
     return (
       <div className="App">
@@ -74,6 +85,14 @@ export default class Entry extends Component {
         <Button style={{display:"inline-block", margin: "5px"}} onClick={() => this.showAdmin()}>
           Administrar contenidos
         </Button>
+
+        <h4>
+        Registrarse
+        </h4>
+
+        <Input placeholder="Nombre de usuario" 
+              onChange={(e) => this.registro(e)} 
+              style={{display:"inline-block", marginTop: "10px"}}/>
 
       </div>
     );

@@ -110,13 +110,15 @@ export default class NewsStepper extends React.Component{
     }, console.log(JSON.stringify(this.state.confirmedContent)))
   }
 
-  confirm(){  
+  confirm(){
+    var username = window.localStorage.getItem('Username')
+  
     this.setState({loading:true})
     this.confirmBeforeSend()
     console.log(this.state)
     if(this.state.contentSiblings){
       if(this.state.contentSiblings.siblings.length > 0){
-        axios.post('https://alexa-apirest.herokuapp.com/users/addSiblingContents/user/gonza',
+        axios.post('https://alexa-apirest.herokuapp.com/users/addSiblingContents/user/'+username,
           this.state.contentSiblings)
         .then(() => this.setState({
             loading:false,
@@ -125,7 +127,7 @@ export default class NewsStepper extends React.Component{
       }
     }
     else{
-        axios.post('https://alexa-apirest.herokuapp.com/users/addContent/user/gonza',
+        axios.post('https://alexa-apirest.herokuapp.com/users/addContent/user/'+username,
           this.state.confirmedContent)
         .then(() => this.setState({
             loading:false,
