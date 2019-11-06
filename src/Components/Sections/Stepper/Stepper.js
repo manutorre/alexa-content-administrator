@@ -87,8 +87,9 @@ export default class Stepper extends React.Component{
   }
 
   componentDidMount(){
-    var username = window.localStorage.getItem('Username')
-    axios.get("https://alexa-apirest.herokuapp.com/users/categories/"+username)
+    
+    //var username = this.props.username
+    axios.get("https://alexa-apirest.herokuapp.com/users/categories")
     .then((response) =>{
       console.log(response.data);
       this.setState({

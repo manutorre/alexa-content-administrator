@@ -1,7 +1,6 @@
 import React, { Component } from 'react';
 import logo from '../../logo.svg';
 import {Button, Input} from 'antd'
-import axios from 'axios'
 
 
 
@@ -15,6 +14,7 @@ export default class Entry extends Component {
       str:"",
       action:"",
       selected:"",
+      username:""
     }
   }
 
@@ -49,53 +49,69 @@ export default class Entry extends Component {
     //document.getElementById("iframe").contentWindow.postMessage(data, "*");
   }
   componentDidMount(){
+    axios.get("https://alexa-apirest.herokuapp.com/users/getSessionName")
+    .then((response) =>{
+      console.log(response.data);
+      this.setState({
+        username: response.data
+      });
+
+    });
     //window.parent.postMessage("showMask","*");
     window.parent.postMessage({"mge":"hideMask"}, "*")
     window.addEventListener('message', (e) => this.onMessageReceive(e));//console.log(e.data)
   }
 
-  showAdmin(){
-    const win = window.open("../contentAdmin/index.html", '_blank');
-    win.focus();
+  cerrarSesion(){
+    axios.get("https://alexa-apirest.herokuapp.com/users/closeSession")
+    .then((response) =>{
+      console.log(response.data);
+      this.setState({
+        username: null
+      });
+    });
+
   }
 
-  registro(e){
-    axios.post("https://alexa-apirest.herokuapp.com/users/newUser",e.target.value)
-    .then((response) =>{
-      console.log(response);
-      //Almacenar el nombre en la sesion
-      window.localStorage.setItem('Username',e.target.value)
-    }).catch((e) => {
-      //Manejar el error
-    })
-  }
 
   render() {
     return (
       <div className="App">
         <header className="App-header">
           <img src={logo} className="App-logo" alt="logo" />
-          <h1 className="App-title">SkillMaker</h1>
+          <h1 className="App-title" style={{color:"white"}}>SkillMaker</h1>
         </header>
         <p className="App-intro">
         </p>
 
-        <Button style={{display:"inline-block", margin: "5px"}} onClick={() => this.props.changeSection("stepper")}>
-          Crear contenido
-        </Button>
+        { this.state.username != null) &&
+        <div>
+          <Button style={{display:"inline-block", margin: "5px"}} onClick={() => this.props.changeSection("stepper")}>
+            Crear contenido
+          </Button>
 
-        <Button style={{display:"inline-block", margin: "5px"}} onClick={() => this.showAdmin()}>
-          Administrar contenidos
-        </Button>
+          <Button style={{display:"inline-block", margin: "5px"}} onClick={() => this.props.showAdmin()}>
+            Administrar contenidos
+          </Button>
 
-        <h4>
-        Registrarse
-        </h4>
+          <Button style={{display:"inline-block", margin: "5px"}} 
+                  onClick={() => this.cerrarSesion()}>
+              Cerrar sesion
+          </Button>
+        </div>
+        }
 
-        <Input placeholder="Nombre de usuario" 
-              onChange={(e) => this.registro(e)} 
-              style={{display:"inline-block", marginTop: "10px"}}/>
+        { this.state.username == null) &&
+          <div>
+            <Input placeholder="Ingresar nombre de usuario" 
+                  onChange={(e) => this.props.changeUser(e)} 
+                  style={{display:"inline-block", width: "150px", margin: "10px"}}/>
 
+            <Button style={{display:"inline-block", margin: "5px"}} onClick={() => this.props.registro()}>
+              Ingresar
+            </Button>
+          </div>
+        }
       </div>
     );
   }

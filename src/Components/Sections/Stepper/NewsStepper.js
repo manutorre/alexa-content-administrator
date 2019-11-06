@@ -111,14 +111,14 @@ export default class NewsStepper extends React.Component{
   }
 
   confirm(){
-    var username = window.localStorage.getItem('Username')
+    //var username = this.props.username
   
     this.setState({loading:true})
     this.confirmBeforeSend()
     console.log(this.state)
     if(this.state.contentSiblings){
       if(this.state.contentSiblings.siblings.length > 0){
-        axios.post('https://alexa-apirest.herokuapp.com/users/addSiblingContents/user/'+username,
+        axios.post('https://alexa-apirest.herokuapp.com/users/addSiblingContents',
           this.state.contentSiblings)
         .then(() => this.setState({
             loading:false,
@@ -127,7 +127,7 @@ export default class NewsStepper extends React.Component{
       }
     }
     else{
-        axios.post('https://alexa-apirest.herokuapp.com/users/addContent/user/'+username,
+        axios.post('https://alexa-apirest.herokuapp.com/users/addContent',
           this.state.confirmedContent)
         .then(() => this.setState({
             loading:false,
@@ -139,10 +139,6 @@ export default class NewsStepper extends React.Component{
       }   
   }
 
-  showAdmin(){
-    const win = window.open("../contentAdmin/index.html", '_blank');
-    win.focus();
-  }
 
   render(){
     if (this.state.errorMessage || this.state.done) {
@@ -164,7 +160,7 @@ export default class NewsStepper extends React.Component{
                   /> 
             }
           </div>
-          <Button style={{display:"inline-block", margin: "5px"}} onClick={() => this.showAdmin()}>
+          <Button style={{display:"inline-block", margin: "5px"}} onClick={() => this.props.showAdmin()}>
             Administrar contenidos
           </Button>
           <Button style={{display:"inline-block", margin: "5px"}} onClick={() => this.props.changeSection("entry")}>
@@ -182,6 +178,7 @@ export default class NewsStepper extends React.Component{
             </div>        
           }
           <Stepper
+            
             currentStep={this.state.currentStep}
             nextStep={() => this.nextStep()}
             nextTwoSteps={() => this.nextTwoSteps()}
@@ -204,7 +201,7 @@ export default class NewsStepper extends React.Component{
                   Confirmar
                 </Button>
               }
-              <Button style={{display:"inline-block", margin: "5px"}} onClick={() => this.showAdmin()}>
+              <Button style={{display:"inline-block", margin: "5px"}} onClick={() => this.props.showAdmin()}>
                 Administrar contenidos
               </Button>
             </div>
