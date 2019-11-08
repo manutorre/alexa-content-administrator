@@ -145,12 +145,12 @@ export default class Entry extends Component {
         </div>
         }
 
-        { (this.state.username == "" || this.state.logueado == false) &&
+        { (this.state.logueado == false) &&
           <div>
-            { (this.state.errorLogin == true) &&
+            {(this.state.logueado == false && this.state.errorLogin == true) &&
             <Alert
-                message={"Bienvenido "+this.state.username}
-                type="success"
+                message={"No existe ningun usuario con ese nombre"}
+                type="error"
             />
             }
 
