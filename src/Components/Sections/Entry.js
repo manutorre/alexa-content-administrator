@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import logo from '../../logo.svg';
-import {Button, Input} from 'antd'
+import {Button, Input, Alert} from 'antd'
+import axios from 'axios'
 
 
 
@@ -14,7 +15,9 @@ export default class Entry extends Component {
       str:"",
       action:"",
       selected:"",
-      username:""
+      username:"",
+      logueado:false,
+      errorLogin:false
     }
   }
 
@@ -67,12 +70,47 @@ export default class Entry extends Component {
     .then((response) =>{
       console.log(response.data);
       this.setState({
-        username: null
+        username: "",
+        logueado:false
       });
     });
 
   }
 
+  changeUser = (e) => {
+    console.log("Username ",e.target.value)
+    this.setState({
+      username:e.target.value
+    })
+  }
+
+  registro(){
+    axios.post("https://alexa-apirest.herokuapp.com/users/newUser",{name:this.state.username})
+    .then((response) =>{
+      console.log(response);
+      this.setState({
+        logueado:true
+      })
+    }).catch((e) => {
+      //Manejar el error
+    })
+  }
+
+  login(){
+    axios.get("https://alexa-apirest.herokuapp.com/users/getUser/" + this.state.username)
+    .then((response) =>{
+      console.log(response);
+      this.setState({
+        logueado:true,
+        errorLogin:false
+      })
+    }).catch((e) => {
+      this.setState({
+        errorLogin:true
+      })
+      //Manejar el error
+    })
+  }
 
   render() {
     return (
@@ -84,8 +122,13 @@ export default class Entry extends Component {
         <p className="App-intro">
         </p>
 
-        { this.state.username != null) &&
+        { (this.state.username != "" && this.state.logueado == true ) &&
         <div>
+
+          <Alert
+                message={"Bienvenido "+this.state.username}
+                type="success"
+          />
           <Button style={{display:"inline-block", margin: "5px"}} onClick={() => this.props.changeSection("stepper")}>
             Crear contenido
           </Button>
@@ -98,18 +141,27 @@ export default class Entry extends Component {
                   onClick={() => this.cerrarSesion()}>
               Cerrar sesion
           </Button>
+
         </div>
         }
 
-        { this.state.username == null) &&
+        { (this.state.username == "" || this.state.logueado == false) &&
           <div>
+            { (this.state.errorLogin == true) &&
+            <Alert
+                message={"Bienvenido "+this.state.username}
+                type="success"
+            />
+            }
+
             <Input placeholder="Ingresar nombre de usuario" 
-                  onChange={(e) => this.props.changeUser(e)} 
+                  onChange={(e) => this.changeUser(e)} 
                   style={{display:"inline-block", width: "150px", margin: "10px"}}/>
 
-            <Button style={{display:"inline-block", margin: "5px"}} onClick={() => this.props.registro()}>
+            <Button style={{display:"inline-block", margin: "5px"}} onClick={() => this.login()}>
               Ingresar
             </Button>
+
           </div>
         }
       </div>

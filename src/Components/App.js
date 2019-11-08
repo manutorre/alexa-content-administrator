@@ -11,26 +11,9 @@ class App extends Component {
   constructor(props){
     super(props);
     this.state={
-      section:"entry"
+      section:"entry",
+      user:""
     }
-  }
-
-  changeUser = (e) => {
-    console.log("Username ",e.target.value)
-    this.setState({
-      user:e.target.value
-    })
-  }
-
-  registro(){
-    axios.post("https://alexa-apirest.herokuapp.com/users/newUser",{name:this.state.user})
-    .then((response) =>{
-      console.log(response);
-      //Almacenar el nombre en la sesion
-      //window.parent.postMessage({"mge":"username","payload":this.state.name}, "*")
-    }).catch((e) => {
-      //Manejar el error
-    })
   }
 
   changeSection(section){
@@ -38,9 +21,9 @@ class App extends Component {
   }
 
   showAdmin(){
-    const win = window.open("../contentAdmin/index.html?username="+this.state.user, '_blank');
+    const win = window.open("../contentAdmin/index.html", '_blank');
     //acceder con window.query("username")
-    win.username = this.state.user
+    //win.username = this.state.user
     win.focus();
   }
 
@@ -48,13 +31,13 @@ class App extends Component {
   render(){
     switch (this.state.section) {
       case "entry":
-        return <Entry showAdmin ={()=> this.showAdmin()} registro={()=> this.registro()} changeUser={(e)=> this.changeUser(e)} changeSection={(section) => this.changeSection(section)}/>
+        return <Entry showAdmin ={()=> this.showAdmin()}  changeSection={(section) => this.changeSection(section)}/>
         break;
       case "stepper":
         return <NewsStepper showAdmin ={()=> this.showAdmin()} changeSection={(section) => this.changeSection(section)}/>
         break;
       default:
-        return <Entry showAdmin ={()=> this.showAdmin()} registro={()=> this.registro()} changeUser={(e)=> this.changeUser(e)} changeSection={(section) => this.changeSection(section)}/>
+        return <Entry showAdmin ={()=> this.showAdmin()} changeSection={(section) => this.changeSection(section)}/>
         break;
     }
 
