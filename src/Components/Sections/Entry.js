@@ -117,7 +117,7 @@ export default class Entry extends Component {
       <div className="App">
         <header className="App-header">
           <img src={logo} className="App-logo" alt="logo" />
-          <h1 className="App-title" style={{color:"white"}}>SkillMaker</h1>
+          <h1 className="App-title" style={{color:"white"}}>ContentParser</h1>
         </header>
         <p className="App-intro">
         </p>
