@@ -137,7 +137,7 @@ export default class Entry extends Component {
             Open contents admin
           </Button>
 
-          <Button style={{marginTop:30}}
+          <Button style={{marginTop:70}}
             ghost
             type="danger"           
             className='buttons'

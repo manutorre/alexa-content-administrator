@@ -1,5 +1,10 @@
 import React from 'react'
-import {Button, Select, Input, Checkbox} from 'antd'
+import {Button, Select, Input, Checkbox, List} from 'antd'
+
+const data = [
+  'Title',
+  'Calification',
+];
 
 export default class SemanticForm extends React.Component {
 
@@ -39,8 +44,29 @@ export default class SemanticForm extends React.Component {
       <div style={{margin:"10px 0px 10px 0px"}}>
         
         <div style={{marginBottom:'10px'}}>
-          <p>Define a type of content:</p>
-          {this.props.types.length > 0 &&
+          <h3>Define a type of content:</h3>
+           <Input placeholder="New type" 
+                onChange={(e) => this.hideSelect(e)} 
+                style={{display:"inline-block"}}/>           
+           
+           <div style={{ 
+              display: "flex",
+              flexDirection: "column",
+              justifyContent: "center",
+              height: "220px"
+            }}>
+             <List
+                header={<h3 style={{marginBottom:0}}>Defined properties</h3>}
+                bordered
+                dataSource={data}
+                renderItem={item => (
+                  <List.Item>
+                    {item}
+                  </List.Item>
+                )}
+             />
+           </div>
+          {/*this.props.types.length > 0 &&
             <div>
               <p>Defined properties:</p>
               <Select value={this.state.selectedItem? this.state.selectedItem : undefined}  placeholder="Categoria" 
@@ -59,11 +85,7 @@ export default class SemanticForm extends React.Component {
                   }
               </Select>
             </div>
-          }
-          
-          <Input placeholder="New type" 
-                onChange={(e) => this.hideSelect(e)} 
-                style={{display:"inline-block"}}/>              
+          */}            
         </div>
       </div>
     )
