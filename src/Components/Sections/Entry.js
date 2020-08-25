@@ -3,8 +3,6 @@ import logo from '../../logo.svg';
 import {Button, Input, Alert} from 'antd'
 import axios from 'axios'
 
-
-
 export default class Entry extends Component {
 
   constructor(props){
@@ -49,20 +47,20 @@ export default class Entry extends Component {
   myFunction(event){
     var e = document.getElementById("select");
     this.setState({value:e.options[e.selectedIndex].value});
-    //document.getElementById("iframe").contentWindow.postMessage(data, "*");
   }
   componentDidMount(){
     axios.get("https://alexa-apirest.herokuapp.com/users/getSessionName")
     .then((response) =>{
-      console.log(response.data);
-      this.setState({
-        username: response.data
-      });
-
+      console.log("Didmount ",response.data);
+      if(response.data!= ""){
+        this.setState({
+          username: response.data,
+          logueado: (response.data != "")
+        })
+      }
     });
-    //window.parent.postMessage("showMask","*");
     window.parent.postMessage({"mge":"hideMask"}, "*")
-    window.addEventListener('message', (e) => this.onMessageReceive(e));//console.log(e.data)
+    window.addEventListener('message', (e) => this.onMessageReceive(e));
   }
 
   cerrarSesion(){
@@ -92,14 +90,14 @@ export default class Entry extends Component {
         logueado:true
       })
     }).catch((e) => {
-      //Manejar el error
+      console.log(e)
     })
   }
 
   login(){
     axios.get("https://alexa-apirest.herokuapp.com/users/getUser/" + this.state.username)
     .then((response) =>{
-      console.log(response);
+      console.log("Login response ",response);
       this.setState({
         logueado:true,
         errorLogin:false
@@ -108,7 +106,7 @@ export default class Entry extends Component {
       this.setState({
         errorLogin:true
       })
-      //Manejar el error
+      console.log(e)
     })
   }
 
@@ -119,27 +117,32 @@ export default class Entry extends Component {
           <img src={logo} className="App-logo" alt="logo" />
           <h1 className="App-title" style={{color:"white"}}>SkillMaker</h1>
         </header>
-        <p className="App-intro">
-        </p>
-
+        
         { (this.state.username != "" && this.state.logueado == true ) &&
-        <div>
+        <div className='ButtonsWrapper' >
 
           <Alert
                 message={"Bienvenido "+this.state.username}
                 type="success"
           />
-          <Button style={{display:"inline-block", margin: "5px"}} onClick={() => this.props.changeSection("stepper")}>
-            Crear contenido
+          <Button style={{marginTop:30}} className='buttons' onClick={() => this.props.changeSection("stepper")}>
+            Create default content
           </Button>
 
-          <Button style={{display:"inline-block", margin: "5px"}} onClick={() => this.props.showAdmin()}>
-            Administrar contenidos
+          <Button className='buttons' onClick={() => this.props.changeSection("semantic")}>
+            Create semantic content
           </Button>
 
-          <Button style={{display:"inline-block", margin: "5px"}} 
-                  onClick={() => this.cerrarSesion()}>
-              Cerrar sesion
+          <Button className='buttons' onClick={() => this.props.showAdmin()}>
+            Open contents admin
+          </Button>
+
+          <Button style={{marginTop:30}}
+            ghost
+            type="danger"           
+            className='buttons'
+            onClick={() => this.cerrarSesion()}>
+              Log out
           </Button>
 
         </div>
@@ -168,34 +171,3 @@ export default class Entry extends Component {
     );
   }
 }
-
-/*
-      <label >Accion a realizar</label>
-      <select defaultValue="-" id="selectAction" onChange={(event) => { this.onSelectAction(event) }}>
-          <option disabled value="-">-Seleccionar accion</option>
-          <option value="notice">Create notice</option>
-          <option value="section">Create section</option>
-      </select>
-
-
-        {(this.state.selected === "selectSection" && this.state.array.length > 0 )?
-        <div>
-        <label >Numero de noticia</label>
-          <select id="select" onChange={(event) => { this.myFunction(event) }}>
-          {
-            this.state.array.map((c) => <option key={this.state.array.indexOf(c)} value={this.state.array.indexOf(c)} >{this.state.array.indexOf(c)}</option>)
-          }
-          </select>
-          <br/>
-          <textarea rows="5" cols="25" value={this.state.array[this.state.value]}/>
-        </div>
-
-        :
-
-        <div>
-          <br/>
-          <textarea rows="5" cols="25" value={this.state.str}/>
-        </div>
-        }
-
-*/

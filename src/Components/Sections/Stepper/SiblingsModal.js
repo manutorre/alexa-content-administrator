@@ -49,9 +49,19 @@ export default class SiblingsModal extends React.Component {
   render() {
     const {Option} = Select
     return (
-      <div> 
-          <Button type="primary" onClick={() => this.showModal()} style={{ width: 120, display: "block", margin: "0 auto" }}>
-            Seleccionar
+      <div style={{
+        alignItems: 'center',
+        flexDirection: 'column',
+        display: 'flex'
+      }}> 
+          <Button 
+            type="primary" 
+            onClick={() => this.showModal()} 
+            style={{ width: 120, 
+              display: "block",     
+              marginBottom: "10px"
+            }}>
+              Seleccionar
           </Button>
         
           <Modal

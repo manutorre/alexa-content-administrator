@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import Entry from './Sections/Entry'
 import NewsStepper from './Sections/Stepper/NewsStepper'
+import SemanticScreen from './Sections/Stepper/SemanticScreen'
 import 'antd/dist/antd.css'
 import '../App.css';
 import axios from 'axios'
@@ -22,8 +23,6 @@ class App extends Component {
 
   showAdmin(){
     const win = window.open("../contentAdmin/index.html", '_blank');
-    //acceder con window.query("username")
-    //win.username = this.state.user
     win.focus();
   }
 
@@ -36,6 +35,9 @@ class App extends Component {
       case "stepper":
         return <NewsStepper showAdmin ={()=> this.showAdmin()} changeSection={(section) => this.changeSection(section)}/>
         break;
+      case "semantic":
+        return <SemanticScreen showAdmin ={()=> this.showAdmin()} changeSection={(section) => this.changeSection(section)}/>
+        break;
       default:
         return <Entry showAdmin ={()=> this.showAdmin()} changeSection={(section) => this.changeSection(section)}/>
         break;
@@ -46,5 +48,3 @@ class App extends Component {
 }
 
 export default App;
-
-//this.state.array[this.state.value]

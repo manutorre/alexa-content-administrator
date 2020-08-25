@@ -111,7 +111,6 @@ export default class NewsStepper extends React.Component{
   }
 
   confirm(){
-    //var username = this.props.username
   
     this.setState({loading:true})
     this.confirmBeforeSend()
@@ -171,7 +170,13 @@ export default class NewsStepper extends React.Component{
     }
     else{
       return(
-        <div style={{width:"210px",margin:"20px auto"}}>
+        <div style={{
+          width:"210px",
+          margin:"20px auto",  
+          alignItems: 'center',
+          display: 'flex',
+          flexDirection: 'column'
+        }}>
           {this.state.loading && 
             <div className="example-stepper">
               <Spin className="diagram-spin" size="large"/>

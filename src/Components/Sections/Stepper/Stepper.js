@@ -88,7 +88,6 @@ export default class Stepper extends React.Component{
 
   componentDidMount(){
     
-    //var username = this.props.username
     axios.get("https://alexa-apirest.herokuapp.com/users/categories")
     .then((response) =>{
       console.log(response.data);
@@ -143,11 +142,9 @@ export default class Stepper extends React.Component{
     console.log(e,link)
     switch (e) {
       case "Ubicacion":
-        //console.log(window.parent.document.getElementsByClassName(link.className))
         window.parent.postMessage({"mge":"className","elem":link.className}, "*");
         break;
       case "Tipo de contenido":
-        //console.log(window.parent.document.getElementsByTagName(link.tagName))
         window.parent.postMessage({"mge":"tagName","elem":link.tagName}, "*");
         break;
       default:
@@ -156,28 +153,28 @@ export default class Stepper extends React.Component{
   }
 
   render(){
-    const {Step} = Steps //destructing assignament: me guardo en Step el campo Step del objeto Steps
+    const {Step} = Steps 
     const canNext = this.props.currentStep < 2
     const canBack = this.props.currentStep > 0
 
     return(
       <div>
-        <Steps current={this.props.currentStep - 1}>
+        <Steps size="small" current={this.props.currentStep - 1}>
           <Step
-            size="small"
+            //size="small"
             title={this.state.titleAndLinkStatus}
             icon={this.iconKind(this.state.titleAndLinkStatus)}
             description={this.state.titleAndLinkStatus == "Confirmado" ? "Titulo: " + this.state.title.text : "Arrastrar el titulo del contenido hacia la caja de contenidos."}
           />
           <Step
-            size="small"
+            //size="small"
             title={ this.state.titleAndLinkStatus != "Esperando" ? this.state.titleAndLinkStatus : "Obtener link"}
             description={this.state.titleAndLinkStatus == "Confirmado" ? "Link: " + this.state.link.url : "Arrastrar el titulo del contenido hacia la caja de contenidos."}
             icon={this.iconKind(this.state.titleAndLinkStatus)}
           />
           <Step 
             title={this.state.siblingStatus != "Esperando" ? "Reconocer contenidos hermanos" : "Asignar identificador y categoria"}
-            size="small"
+            //size="small"
             description={this.props.selectedIdentifier ? "Identificador de contenidos: "+this.props.selectedIdentifier : this.state.siblingStatus != "Esperando" ? "Seleccionar un criterio para reconocer contenidos relacionados." : ""}
             icon={this.props.selectedCategory && this.props.selectedIdentifier ? this.iconKind("Confirmado") : this.props.currentStep == 3 ? this.iconKind("Esperando confirmacion") : ""}
           />
@@ -222,11 +219,6 @@ export default class Stepper extends React.Component{
               setNavegable = {(e) => this.props.setNavegable(e)}
             /> 
         }
-        
-
-        <br/>
-        {/* {canBack && <Button type="primary" onClick={() => this.props.previousStep()}>Anterior</Button>}
-        {canNext && <Button type="primary" onClick={() => this.props.nextStep()}>Siguiente</Button>} */}
       </div>
     )
   }
