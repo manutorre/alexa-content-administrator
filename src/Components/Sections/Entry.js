@@ -123,7 +123,7 @@ export default class Entry extends Component {
         </p>
 
         { (this.state.username != "" && this.state.logueado == true ) &&
-        <div>
+        <div className='ButtonsWrapper' >
 
           <Alert
                 message={"Welcome "+this.state.username}

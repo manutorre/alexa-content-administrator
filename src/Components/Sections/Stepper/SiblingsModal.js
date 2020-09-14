@@ -9,7 +9,7 @@ export default class SiblingsModal extends React.Component {
     super(props)
     this.state = {
       visible: false,
-      criterios:["Ubicacion","Tipo de contenido"],
+      criterios:["Location","Content type"],
       criterioItem:""
     }
   }
@@ -71,7 +71,7 @@ export default class SiblingsModal extends React.Component {
             onCancel={(e) => this.handleCancel(e)}
           >
           <p>Choose selection criteria:</p>
-          <Select value={this.state.criterioItem? this.state.criterioItem : undefined} placeholder="Criterio" 
+          <Select value={this.state.criterioItem? this.state.criterioItem : undefined} placeholder="Criteria" 
             onChange={(e) => this.handleCriterio(e)} style={{ width: 140, display: "inline-block", margin: "0 auto" }}>
               {this.state.criterios.map( (criterio, index) => {
                 return(
