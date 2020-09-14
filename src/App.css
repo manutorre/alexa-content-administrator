@@ -1,3 +1,18 @@
+p{
+  margin: 0px 0px 10px 0px;
+}
+
+.buttons{
+  margin:10px;
+  display:inline-block;
+}
+
+.ButtonsWrapper{
+  display: flex;
+  flex-direction: column;
+  margin:10px 30px 10px 30px; 
+}
+
 .administrator__global__container{
   height:800px;
 }

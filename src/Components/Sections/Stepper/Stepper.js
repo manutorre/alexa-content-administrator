@@ -42,8 +42,8 @@ export default class Stepper extends React.Component{
 
   confirmTitleAndLink(){
     this.setState({
-      titleAndLinkStatus: "Confirmado",
-      siblingStatus: "Esperando confirmacion"
+      titleAndLinkStatus: "Confirmed",
+      siblingStatus: "Waiting confirm"
     })
     this.props.nextTwoSteps();
   }
@@ -52,7 +52,7 @@ export default class Stepper extends React.Component{
     this.setState({
       title: {xpath:"", text: ""},
       link: {xpath:"", url: "",className:"",tagName:"",urlPagina:""},
-      titleAndLinkStatus: "Esperando"
+      titleAndLinkStatus: "Waiting"
     })
     window.parent.postMessage({"mge":"maskForNewContent"}, "*");
     window.parent.postMessage({"mge":"titleAndLinkRecognizing"}, "*");
@@ -60,7 +60,7 @@ export default class Stepper extends React.Component{
 
   askForConfirmTitleAndLink(){
     this.setState({
-      titleAndLinkStatus: "Esperando confirmacion"
+      titleAndLinkStatus: "Waiting confirm"
     })
   }
 
@@ -105,13 +105,13 @@ export default class Stepper extends React.Component{
 
 
   iconKind(state){
-    if (state == "Confirmado") {
+    if (state == "Confirmed") {
       return <Icon type="check" />
     }
-    if (state == "Esperando") {
+    if (state == "Waiting") {
       return <Icon type="loading" />
     }
-    if (state == "Esperando confirmacion") {
+    if (state == "Waiting confirmacion") {
       return <Icon type="question-circle-o" />
     }
   }
@@ -167,19 +167,19 @@ export default class Stepper extends React.Component{
             size="small"
             title={this.state.titleAndLinkStatus}
             icon={this.iconKind(this.state.titleAndLinkStatus)}
-            description={this.state.titleAndLinkStatus == "Confirmado" ? "Titulo: " + this.state.title.text : "Arrastrar el titulo del contenido hacia la caja de contenidos."}
+            description={this.state.titleAndLinkStatus == "Confirmed" ? "Titulo: " + this.state.title.text : "Drag and drop content title into the box."}
           />
           <Step
             size="small"
-            title={ this.state.titleAndLinkStatus != "Esperando" ? this.state.titleAndLinkStatus : "Obtener link"}
-            description={this.state.titleAndLinkStatus == "Confirmado" ? "Link: " + this.state.link.url : "Arrastrar el titulo del contenido hacia la caja de contenidos."}
+            title={ this.state.titleAndLinkStatus != "Waiting" ? this.state.titleAndLinkStatus : "Getting link"}
+            description={this.state.titleAndLinkStatus == "Confirmed" ? "Link: " + this.state.link.url : "Drag and drop content title into the box."}
             icon={this.iconKind(this.state.titleAndLinkStatus)}
           />
           <Step 
-            title={this.state.siblingStatus != "Esperando" ? "Reconocer contenidos hermanos" : "Asignar identificador y categoria"}
+            title={this.state.siblingStatus != "Waiting" ? "Identify sibling contents" : "Set identifier and category."}
             size="small"
-            description={this.props.selectedIdentifier ? "Identificador de contenidos: "+this.props.selectedIdentifier : this.state.siblingStatus != "Esperando" ? "Seleccionar un criterio para reconocer contenidos relacionados." : ""}
-            icon={this.props.selectedCategory && this.props.selectedIdentifier ? this.iconKind("Confirmado") : this.props.currentStep == 3 ? this.iconKind("Esperando confirmacion") : ""}
+            description={this.props.selectedIdentifier ? "Contents identifier: "+this.props.selectedIdentifier : this.state.siblingStatus != "Waiting" ? "Select a criteria to recognize sibling contents." : ""}
+            icon={this.props.selectedCategory && this.props.selectedIdentifier ? this.iconKind("Confirmed") : this.props.currentStep == 3 ? this.iconKind("Waiting confirm") : ""}
           />
         </Steps>
         <ConfirmPopover
@@ -187,18 +187,18 @@ export default class Stepper extends React.Component{
           confirm = {() => this.confirmTitleAndLink()}
           cancel = {() => this.cancelTitleAndLink()}
           statusVisible = {this.state.titleAndLinkStatus}
-          title={"El titulo es: "+this.state.title.text+"?"}
+          title={"Is "+this.state.title.text+" the correct title?"}
         />
         <ConfirmPopover
           status = {this.state.siblingStatus}
-          confirm = {() => this.handleSiblings("Confirmado")}
-          cancel = {() => this.handleSiblings("Esperando")}
+          confirm = {() => this.handleSiblings("Confirmed")}
+          cancel = {() => this.handleSiblings("Waiting")}
           statusVisible = {this.state.siblingStatus}
-          title={"Desea reconocer contenidos relacionados?"}
+          title={"Would you like to recognize sibling contents?"}
         />
 
-        {this.props.currentStep == 3 && this.state.titleAndLinkStatus == "Confirmado" 
-          && this.state.siblingStatus == "Confirmado" && 
+        {this.props.currentStep == 3 && this.state.titleAndLinkStatus == "Confirmed" 
+          && this.state.siblingStatus == "Confirmed" && 
             <SiblingsModal
               categories = {this.state.categories}
               titleAndLinkStatus = {this.state.titleAndLinkStatus}
@@ -212,8 +212,8 @@ export default class Stepper extends React.Component{
             />
         }
           
-        {this.props.currentStep == 3 && this.state.titleAndLinkStatus == "Confirmado" 
-          && this.state.siblingStatus == "Esperando" && 
+        {this.props.currentStep == 3 && this.state.titleAndLinkStatus == "Confirmed" 
+          && this.state.siblingStatus == "Waiting" && 
             <Formulario
               selectCategory={(value) => this.selectCategory(value)}
               categories={this.state.categories}
@@ -223,8 +223,6 @@ export default class Stepper extends React.Component{
             /> 
         }
         
-
-        <br/>
         {/* {canBack && <Button type="primary" onClick={() => this.props.previousStep()}>Anterior</Button>}
         {canNext && <Button type="primary" onClick={() => this.props.nextStep()}>Siguiente</Button>} */}
       </div>

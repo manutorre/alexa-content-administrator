@@ -49,18 +49,28 @@ export default class SiblingsModal extends React.Component {
   render() {
     const {Option} = Select
     return (
-      <div> 
-          <Button type="primary" onClick={() => this.showModal()} style={{ width: 120, display: "block", margin: "0 auto" }}>
-            Seleccionar
+      <div style={{
+        alignItems: 'center',
+        flexDirection: 'column',
+        display: 'flex'
+      }}>           
+          <Button 
+            type="primary" 
+            onClick={() => this.showModal()} 
+            style={{ width: 120, 
+              display: "block",     
+              marginBottom: "10px"
+            }}>
+              Select
           </Button>
         
           <Modal
-            title="Contenido"
+            title="Content"
             visible={this.state.visible}
             onOk={(e) => this.handleOk(e)}
             onCancel={(e) => this.handleCancel(e)}
           >
-          <p>Elegir criterio de seleccion:</p>
+          <p>Choose selection criteria:</p>
           <Select value={this.state.criterioItem? this.state.criterioItem : undefined} placeholder="Criterio" 
             onChange={(e) => this.handleCriterio(e)} style={{ width: 140, display: "inline-block", margin: "0 auto" }}>
               {this.state.criterios.map( (criterio, index) => {

@@ -154,25 +154,30 @@ export default class NewsStepper extends React.Component{
                 />
             : <Alert
                     message="Success"
-                    description="El contenido fue añadido correctamente"
+                    description="The content was successfully added"
                     type="success"
                     showIcon
                   /> 
             }
           </div>
           <Button style={{display:"inline-block", margin: "5px"}} onClick={() => this.props.showAdmin()}>
-            Administrar contenidos
+            Manage contents
           </Button>
           <Button style={{display:"inline-block", margin: "5px"}} onClick={() => this.props.changeSection("entry")}>
-            Atras
+            Back
           </Button>          
         </div>
       )
     }
     else{
       return(
-        <div style={{width:"210px",margin:"20px auto"}}>
-          {this.state.loading && 
+        <div style={{
+          width:"210px",
+          margin:"20px auto",  
+          alignItems: 'center',
+          display: 'flex',
+          flexDirection: 'column'
+        }}>          {this.state.loading && 
             <div className="example-stepper">
               <Spin className="diagram-spin" size="large"/>
             </div>        
@@ -192,17 +197,17 @@ export default class NewsStepper extends React.Component{
             setNavegable = {(e) => this.setNavegable(e)}
           />
           <Button style={{display:"inline-block", margin: "5px"}} onClick={() => this.props.changeSection("entry")}>
-            Atras
+            Back
           </Button>
           {this.state.selectedCategory != "" && this.state.identifier != "" &&
             <div>
               {!this.state.done && 
                 <Button onClick={() => this.confirm()}type="danger" style={{display:"inline-block", margin: "5px"}}>
-                  Confirmar
+                  Confirm
                 </Button>
               }
               <Button style={{display:"inline-block", margin: "5px"}} onClick={() => this.props.showAdmin()}>
-                Administrar contenidos
+                Manage contents
               </Button>
             </div>
           }

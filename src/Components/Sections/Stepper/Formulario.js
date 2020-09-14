@@ -36,38 +36,41 @@ export default class Formulario extends React.Component {
   render(){
     const {Option} = Select
     return(
-      <div>
-        <p>Categoria:</p>
-        {this.props.categories.length > 0 && !this.state.hideSelect &&
-          <Select value={this.state.selectedItem? this.state.selectedItem : undefined}  placeholder="Categoria" 
-              onChange={(e) =>this.selectCategory(e)} style={{ width: 120, display: "inline-block", margin: "0 auto" }}>
-              
-              {this.props.categories.map( (category, index) => {
-                return(
-                    <Option 
-                      key={index} 
-                      selected={(this.props.selectedCategory == category).toString()} 
-                      value={category.toString()}>
-                        {category.toString()}
-                    </Option>
-                    )
-                })
-              }
-          </Select>
-        }
+      <div style={{margin:"10px 0px 10px 0px"}}>
+        <div style={{marginBottom:'10px'}}>
+          <p>Category:</p>
+          {this.props.categories.length > 0 && !this.state.hideSelect &&
+            <Select value={this.state.selectedItem? this.state.selectedItem : undefined}  placeholder="Category" 
+                onChange={(e) =>this.selectCategory(e)} style={{ width: 120, display: "inline-block", margin: "0 auto" }}>
+                
+                {this.props.categories.map( (category, index) => {
+                  return(
+                      <Option 
+                        key={index} 
+                        selected={(this.props.selectedCategory == category).toString()} 
+                        value={category.toString()}>
+                          {category.toString()}
+                      </Option>
+                      )
+                  })
+                }
+            </Select>
+          }
+          
+          <Input placeholder="New category" 
+                onChange={(e) => this.hideSelect(e)} 
+                style={{display:"inline-block"}}/>              
+        </div>         
         
-        <Input placeholder="Nueva categoria" 
-              onChange={(e) => this.hideSelect(e)} 
-              style={{display:"inline-block", marginTop: "10px"}}/>              
-        
-        <br/>      
-        <p>Identificador:</p>
-        <Input placeholder="Identificador de contenidos" 
-              onChange={(e) => this.props.changeIdentifier(e)} 
-              style={{display:"inline-block", margin: "0 auto"}}/>
-        <br/>
+        <div style={{marginBottom:'10px'}}>
+          <p>Identifier:</p>
+          <Input placeholder="Content identifier" 
+                onChange={(e) => this.props.changeIdentifier(e)} 
+                style={{display:"inline-block", margin: "0 auto"}}/>
+        </div>
+          
         <Checkbox onChange={(e)=>this.props.setNavegable(e)}>
-          Definir como contenido navegable?
+          Define as navegable content?
         </Checkbox>
       </div>
     )

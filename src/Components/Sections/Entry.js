@@ -126,20 +126,28 @@ export default class Entry extends Component {
         <div>
 
           <Alert
-                message={"Bienvenido "+this.state.username}
+                message={"Welcome "+this.state.username}
                 type="success"
           />
-          <Button style={{display:"inline-block", margin: "5px"}} onClick={() => this.props.changeSection("stepper")}>
-            Crear contenido
+
+          <Button style={{marginTop:30}} className='buttons' onClick={() => this.props.changeSection("stepper")}>
+            Create default content
           </Button>
 
-          <Button style={{display:"inline-block", margin: "5px"}} onClick={() => this.props.showAdmin()}>
-            Administrar contenidos
+          <Button className='buttons' onClick={() => this.props.changeSection("semantic")}>
+            Create semantic content
           </Button>
 
-          <Button style={{display:"inline-block", margin: "5px"}} 
-                  onClick={() => this.cerrarSesion()}>
-              Cerrar sesion
+          <Button className='buttons' onClick={() => this.props.showAdmin()}>
+            Open contents admin
+          </Button>
+
+          <Button style={{marginTop:70}}
+            ghost
+            type="danger"           
+            className='buttons'
+            onClick={() => this.cerrarSesion()}>
+              Log out
           </Button>
 
         </div>
@@ -154,12 +162,12 @@ export default class Entry extends Component {
             />
             }
 
-            <Input placeholder="Ingresar nombre de usuario" 
+            <Input placeholder="Username" 
                   onChange={(e) => this.changeUser(e)} 
                   style={{display:"inline-block", width: "150px", margin: "10px"}}/>
 
             <Button style={{display:"inline-block", margin: "5px"}} onClick={() => this.login()}>
-              Ingresar
+              Login
             </Button>
 
           </div>
