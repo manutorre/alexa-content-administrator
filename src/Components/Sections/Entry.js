@@ -3,8 +3,6 @@ import logo from '../../logo.svg';
 import {Button, Input, Alert} from 'antd'
 import axios from 'axios'
 
-
-
 export default class Entry extends Component {
 
   constructor(props){
@@ -52,14 +50,14 @@ export default class Entry extends Component {
     //document.getElementById("iframe").contentWindow.postMessage(data, "*");
   }
   componentDidMount(){
-    axios.get("https://alexa-apirest.herokuapp.com/users/getSessionName")
-    .then((response) =>{
-      console.log(response.data);
-      this.setState({
-        username: response.data
-      });
+    // axios.get("https://alexa-apirest.herokuapp.com/users/getSessionName")
+    // .then((response) =>{
+    //   console.log(response.data);
+    //   this.setState({
+    //     username: response.data
+    //   });
 
-    });
+    // });
     //window.parent.postMessage("showMask","*");
     window.parent.postMessage({"mge":"hideMask"}, "*")
     window.addEventListener('message', (e) => this.onMessageReceive(e));//console.log(e.data)
@@ -122,38 +120,86 @@ export default class Entry extends Component {
         <p className="App-intro">
         </p>
 
-        { (this.state.username != "" && this.state.logueado == true ) &&
-        <div className='ButtonsWrapper' >
+        { //(this.state.username != "" && this.state.logueado == true ) &&
+        <div className='ButtonsWrapper' style={{alignItems:'center', marginLeft:300, marginRight:300}}>
 
           <Alert
-                message={"Welcome "+this.state.username}
-                type="success"
+            message={"Welcome "+this.state.username}
+            type="success"
           />
 
-          <Button style={{marginTop:30}} className='buttons' onClick={() => this.props.changeSection("stepper")}>
-            Create default content
+          <h2>
+            We will guide you through the chatbot generation process.
+          </h2>
+
+          <h3 className="App-intro">
+            1 - What information the chatbot should support on it responses?
+          </h3>
+
+          <Button className='buttons' onClick={() => this.props.changeSection("stepper")}>
+            Select a content from website
           </Button>
+
+          <h3 className="App-intro">
+            2 - Which properties of the defined content the chatbot should recognize?
+          </h3>
 
           <Button className='buttons' onClick={() => this.props.changeSection("semantic")}>
-            Create semantic content
+            Select desired properties for this content
           </Button>
 
-          <Button className='buttons' onClick={() => this.props.showAdmin()}>
-            Open contents admin
+          <h2>
+            Great! You already created a content that can be recognized by the chatbot!
+          </h2>
+
+          <h3 className="App-intro">
+            3 - Now is time to define which words will map with the content defined before.
+          </h3>
+
+            <label for="contentWords">Enter some text and press enter to add a new word</label>
+            <textarea style={{marginTop:20, marginBottom:20}} id="contentWords" name="contentWords" rows="4" cols="50" placeholder="Content Words">
+            </textarea>
+          {/*<Button className='buttons' onClick={() => this.props.changeSection("contentWords")}>
+            Define words
+          </Button>*/}
+
+          <p className="App-intro">
+            The contents from a Website could be organized into 'Categories', which let you find a product quickly
+            in the web, for example using the options of a Menu.
+          </p>
+
+          <h3 className="App-intro">
+            4 - Please, define 'Categories' associated to the content.
+          </h3>
+
+          <Button className='buttons' onClick={() => this.props.changeSection("category")}>
+            Define categories
           </Button>
 
-          <Button style={{marginTop:70}}
+          <h2>
+            Great! Your chatbot now recognize your contents and can filter them by categories. You almost got it! 
+          </h2>
+
+          <h3 className="App-intro">
+            6 - The next step is to define "Actions". An action represents a discrete outcome you want your assistant to be able to accomplish in response to a user's request.
+          </h3>
+
+          <Button className='buttons' onClick={() => this.props.changeSection("category")}>
+            Define actions
+          </Button>
+
+          {/*<Button style={{marginTop:70}}
             ghost
             type="danger"           
             className='buttons'
             onClick={() => this.cerrarSesion()}>
               Log out
           </Button>
-
+          */}
         </div>
         }
 
-        { (this.state.logueado == false) &&
+        {/*{ (this.state.logueado == false) &&
           <div>
             {(this.state.logueado == false && this.state.errorLogin == true) &&
             <Alert
@@ -171,7 +217,7 @@ export default class Entry extends Component {
             </Button>
 
           </div>
-        }
+        }*/}
       </div>
     );
   }

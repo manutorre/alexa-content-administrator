@@ -2,14 +2,14 @@
   "name": "alexa-content-parser",
   "version": "0.1.0",
   "private": true,
-  "homepage":"./",
+  "homepage": "./",
   "dependencies": {
     "antd": "^3.4.4",
-    "axios": "^0.18.0",
+    "axios": "^0.24.0",
     "gojs": "^1.8.28",
-    "react": "^16.2.0",
-    "react-dom": "^16.2.0",
-    "react-scripts": "1.1.1",
+    "react": "^17.0.2",
+    "react-dom": "^16.14.0",
+    "react-scripts": "^5.0.0",
     "storm-react-diagrams": "^5.2.1"
   },
   "scripts": {
@@ -17,5 +17,19 @@
     "build": "react-scripts build",
     "test": "react-scripts test --env=jsdom",
     "eject": "react-scripts eject"
+  },
+  "devDependencies": {
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
   }
 }

@@ -1,5 +1,8 @@
 import React, { Component } from 'react';
 import Entry from './Sections/Entry'
+import Category from './Sections/Category';
+import ContentdWords from './Sections/ContentWords';
+import CategoryWords from './Sections/CategoryWords';
 import NewsStepper from './Sections/Stepper/NewsStepper'
 import 'antd/dist/antd.css'
 import '../App.css';
@@ -35,6 +38,18 @@ class App extends Component {
         break;
       case "stepper":
         return <NewsStepper showAdmin ={()=> this.showAdmin()} changeSection={(section) => this.changeSection(section)}/>
+        break;
+      case "semantic":
+        return <Entry showAdmin ={()=> this.showAdmin()}  changeSection={(section) => this.changeSection(section)}/>
+        break;
+      case "contentWords":
+        return <ContentdWords showAdmin ={()=> this.showAdmin()}  changeSection={(section) => this.changeSection(section)}/>
+        break;
+      case "category":
+        return <Category showAdmin ={()=> this.showAdmin()}  changeSection={(section) => this.changeSection(section)}/>
+        break;
+      case "categoryWords":
+        return <CategoryWords showAdmin ={()=> this.showAdmin()}  changeSection={(section) => this.changeSection(section)}/>
         break;
       default:
         return <Entry showAdmin ={()=> this.showAdmin()} changeSection={(section) => this.changeSection(section)}/>
