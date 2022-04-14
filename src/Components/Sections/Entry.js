@@ -144,7 +144,7 @@ export default class Entry extends Component {
             2 - Which properties of the defined content the chatbot should recognize?
           </h3>
 
-          <Button className='buttons' onClick={() => this.props.changeSection("semantic")}>
+          <Button className='buttons' onClick={() => this.props.changeSection("checkout")}>
             Select desired properties for this content
           </Button>
 

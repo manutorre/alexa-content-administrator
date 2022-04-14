@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import Entry from './Sections/Entry'
 import Category from './Sections/Category';
+import Checkout from './Sections/checkout';
 import ContentdWords from './Sections/ContentWords';
 import CategoryWords from './Sections/CategoryWords';
 import NewsStepper from './Sections/Stepper/NewsStepper'
@@ -14,7 +15,7 @@ class App extends Component {
   constructor(props){
     super(props);
     this.state={
-      section:"entry",
+      section:"stepper",
       user:""
     }
   }
@@ -33,8 +34,8 @@ class App extends Component {
 
   render(){
     switch (this.state.section) {
-      case "entry":
-        return <Entry showAdmin ={()=> this.showAdmin()}  changeSection={(section) => this.changeSection(section)}/>
+      case "checkout":
+        return <Checkout/>
         break;
       case "stepper":
         return <NewsStepper showAdmin ={()=> this.showAdmin()} changeSection={(section) => this.changeSection(section)}/>
