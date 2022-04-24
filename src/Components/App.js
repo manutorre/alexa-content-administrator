@@ -15,7 +15,7 @@ class App extends Component {
   constructor(props){
     super(props);
     this.state={
-      section:"stepper",
+      section:"checkout",
       user:""
     }
   }

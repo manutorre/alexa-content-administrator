@@ -5,7 +5,20 @@ import TextField from '@mui/material/TextField';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import Checkbox from '@mui/material/Checkbox';
 
-export default function ContentDefinition() {
+export default function ContentDefinition({handleImagePosition}) {
+  
+  const [imgStyle, setStyle ] = React.useState({
+    position:'absolute',
+    left:'40%',
+    bottom:'25%',
+    height: '200px',
+    width: '300px',
+  });
+
+  React.useEffect(()=> {
+    handleImagePosition(imgStyle);
+  }, []);
+
   return (
     <React.Fragment>
       <Typography variant="h6" gutterBottom>
@@ -17,10 +30,11 @@ export default function ContentDefinition() {
       <Grid container>
         <Grid item xs={2} sm={2}/>
         <Grid item xs={8} sm={'auto'} >
+          <div style={{height: '200px',width: '300px',}}>
             <img 
-              src={require('../../../Drag-elements.jpg')}
-              height={200}
-            />
+            src={require('../../../Drag-elements.jpg')}
+            style={{...imgStyle}}/>
+          </div>         
         </Grid>
         <Grid item xs={2} sm={2}/>
       </Grid>

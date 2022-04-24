@@ -63,52 +63,7 @@ export default class Entry extends Component {
     window.addEventListener('message', (e) => this.onMessageReceive(e));//console.log(e.data)
   }
 
-  cerrarSesion(){
-    axios.get("https://alexa-apirest.herokuapp.com/users/closeSession")
-    .then((response) =>{
-      console.log(response.data);
-      this.setState({
-        username: "",
-        logueado:false
-      });
-    });
-
-  }
-
-  changeUser = (e) => {
-    console.log("Username ",e.target.value)
-    this.setState({
-      username:e.target.value
-    })
-  }
-
-  registro(){
-    axios.post("https://alexa-apirest.herokuapp.com/users/newUser",{name:this.state.username})
-    .then((response) =>{
-      console.log(response);
-      this.setState({
-        logueado:true
-      })
-    }).catch((e) => {
-      //Manejar el error
-    })
-  }
-
-  login(){
-    axios.get("https://alexa-apirest.herokuapp.com/users/getUser/" + this.state.username)
-    .then((response) =>{
-      console.log(response);
-      this.setState({
-        logueado:true,
-        errorLogin:false
-      })
-    }).catch((e) => {
-      this.setState({
-        errorLogin:true
-      })
-      //Manejar el error
-    })
-  }
+  // 
 
   render() {
     return (
@@ -251,5 +206,50 @@ export default class Entry extends Component {
           <textarea rows="5" cols="25" value={this.state.str}/>
         </div>
         }
-
 */
+// cerrarSesion(){
+  //   axios.get("https://alexa-apirest.herokuapp.com/users/closeSession")
+  //   .then((response) =>{
+  //     console.log(response.data);
+  //     this.setState({
+  //       username: "",
+  //       logueado:false
+  //     });
+  //   });
+
+  // }
+
+  // changeUser = (e) => {
+  //   console.log("Username ",e.target.value)
+  //   this.setState({
+  //     username:e.target.value
+  //   })
+  // }
+
+  // registro(){
+  //   axios.post("https://alexa-apirest.herokuapp.com/users/newUser",{name:this.state.username})
+  //   .then((response) =>{
+  //     console.log(response);
+  //     this.setState({
+  //       logueado:true
+  //     })
+  //   }).catch((e) => {
+  //     //Manejar el error
+  //   })
+  // }
+
+  // login(){
+  //   axios.get("https://alexa-apirest.herokuapp.com/users/getUser/" + this.state.username)
+  //   .then((response) =>{
+  //     console.log(response);
+  //     this.setState({
+  //       logueado:true,
+  //       errorLogin:false
+  //     })
+  //   }).catch((e) => {
+  //     this.setState({
+  //       errorLogin:true
+  //     })
+  //     //Manejar el error
+  //   })
+  // }

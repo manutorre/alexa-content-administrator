@@ -41,19 +41,17 @@ const contentSteps= ['Contents Selection', 'Properties Definition', 'Words Mappi
 var steps = contentSteps; 
 const skillSteps = ['Intents Creation', 'Dialog Skill Definition (Optional)', 'Operation Creation', 'Action Skill Definition (Optional)'];
 
-function getStepContent(step) {
+function getStepContent(step, handleImagePosition) {
   switch (step) {
+    case 0:
+      return <ContentDefinition handleImagePosition={handleImagePosition} />;
     case 1:
-      return <ContentDefinition />;
-    case 2:
       return <PropertiesDefinition />;
-    case 3:
+    case 2:
       return <UtterancesDefinition />;
-    case 4:
+    case 3:
       return <CategoriesDefinition />;
-    default:
-      throw new Error('Unknown step');
-  }
+    }
 }
 
 function getNewStepContent(step) {
@@ -66,8 +64,6 @@ function getNewStepContent(step) {
       return <OperationCreation />
     case 3:
       return <ActionDefinition />;
-    default:
-      throw new Error('Unknown step');
   }
 }
 
@@ -75,7 +71,39 @@ const theme = createTheme();
 
 export default function Checkout() {
   const [activeStep, setActiveStep] = React.useState(0);
-  const [activeForm, setActiveForm] = React.useState('skillsDefinition');
+  const [activeForm, setActiveForm] = React.useState('contentsDefinition');
+  const [imagePosition, setImagePosition] = React.useState(null);
+
+  React.useEffect(()=>{
+    window.parent.postMessage({mge: "maskForNewContent", "maskPosition": imagePosition}, "*");
+    window.parent.postMessage({mge: "titleAndLinkRecognizing"}, "*");
+    window.addEventListener('message', (e) => onMessageReceive(e));
+  }, [imagePosition]);
+
+
+  const handleImagePosition = (maskStyle) => {
+    setImagePosition(maskStyle);
+  }
+
+  const onMessageReceive = ({data}) => {
+    console.log(`On message receive in app: ${data}`);
+
+    if (typeof data === "string"){
+      window.parent.postMessage({"mge":"hideMask"}, "*")
+    }
+    
+    if (data.type === "titleAndLink") {
+      // this.assignTitleAndLink(e.data.title, e.data.link)
+      window.parent.postMessage({"mge":"hideMask"}, "*")
+      // this.askForConfirmTitleAndLink()
+    }
+    // if(e.data.type === "className" || e.data.type === "tagName"  ){
+    //   console.log("Mensaje desde el stepper ",e.data)
+    //   // this.setState({
+    //   //   siblings:e.data.pathsElem
+    //   // })
+    // }
+  }
 
   const handleNext = () => {
     setActiveStep(activeStep + 1);
@@ -100,7 +128,7 @@ export default function Checkout() {
   const renderContentsDefinition = () => {
     return (
       <React.Fragment>
-        {/*{activeStep === steps.length ? (
+        {activeStep === steps.length ? (
           <React.Fragment>
             <Typography variant="h5" gutterBottom>
               Well done! 
@@ -124,11 +152,10 @@ export default function Checkout() {
               </Button>
             </Box>
           </React.Fragment>
-        ) : (*/}
-        {activeStep === 0 && (
+        ) :  (
           <React.Fragment>
-            {getStepContent(activeStep)}
-            {/*<Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
+            {getStepContent(activeStep, handleImagePosition)}
+            <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
               {activeStep !== 0 && (
                 <Button onClick={handleBack} sx={{ mt: 3, ml: 1 }}>
                   Back
@@ -142,7 +169,7 @@ export default function Checkout() {
               >
                 {activeStep === steps.length - 1 ? 'Finish' : 'Next'}
               </Button>
-            </Box>*/}
+            </Box>
           </React.Fragment>
         )}
       </React.Fragment>
