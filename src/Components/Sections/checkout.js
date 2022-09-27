@@ -21,6 +21,8 @@ import DialogDefinition from './SkillsDefinition/dialogDefinition.js';
 import ActionDefinition from './SkillsDefinition/actionDefinition.js';
 import IntentsDefinition from './SkillsDefinition/intentsDefinition.js';
 import OperationCreation from './SkillsDefinition/operationCreation.js';
+import Dialog from './ContentsDefinition/dialog';
+
 // import UtterancesDefinition from './SkillsDefinition/utterancesDefinition.js';
 // import CategoriesDefinition from './SkillsDefinition/categoriesDefinition.js';
 
@@ -41,12 +43,12 @@ const contentSteps= ['Contents Selection', 'Properties Definition', 'Words Mappi
 var steps = contentSteps; 
 const skillSteps = ['Intents Creation', 'Dialog Skill Definition (Optional)', 'Operation Creation', 'Action Skill Definition (Optional)'];
 
-function getStepContent(step, handleImagePosition) {
+function getStepContent(step, handleImagePosition, handleBack, handleNext, saveInformation, messageData) {
   switch (step) {
     case 0:
-      return <ContentDefinition handleImagePosition={handleImagePosition} />;
+      return <ContentDefinition step={step} handleImagePosition={handleImagePosition} handleBack={handleBack} handleNext={handleNext} saveInformation={saveInformation} messageData={messageData}/>;
     case 1:
-      return <PropertiesDefinition />;
+      return <PropertiesDefinition step={step} handleImagePosition={handleImagePosition} handleBack={handleBack} handleNext={handleNext} saveInformation={saveInformation} messageData={messageData}/>;
     case 2:
       return <UtterancesDefinition />;
     case 3:
@@ -73,28 +75,77 @@ export default function Checkout() {
   const [activeStep, setActiveStep] = React.useState(0);
   const [activeForm, setActiveForm] = React.useState('contentsDefinition');
   const [imagePosition, setImagePosition] = React.useState(null);
+  const [contentLink, setContentLink] = React.useState({
+    xpath: '',
+    url: '',
+    urlPagina: '',
+    name: '',
+    text: ''
+  });
+
+  const [messageData, setMessageData] = React.useState({
+    xpath: '',
+    url: '',
+    urlPagina: '',
+    name: '',
+    text: ''
+  });
+  const [properties, setProperties] = React.useState([]);
+  const [showDialog, setShowDialog] = React.useState(false);
 
   React.useEffect(()=>{
-    window.parent.postMessage({mge: "maskForNewContent", "maskPosition": imagePosition}, "*");
-    window.parent.postMessage({mge: "titleAndLinkRecognizing"}, "*");
+    // window.parent.postMessage({mge: "maskForNewContent"}, "*");
+    // window.parent.postMessage({mge: "titleAndLinkRecognizing"}, "*");
     window.addEventListener('message', (e) => onMessageReceive(e));
-  }, [imagePosition]);
+  },[]);
 
 
   const handleImagePosition = (maskStyle) => {
     setImagePosition(maskStyle);
   }
 
+  const assignTitleAndLink = (linkObject, titleObject) => {
+    //const newTitle = Object.assign(this.state.title, {xpath: titleObject.data, text: titleObject.text});
+    const newLink = Object.assign(contentLink, {text: titleObject.text, xpath: linkObject.data, url: linkObject.url, urlPagina:linkObject.urlPagina});  //className:linkObject.className, tagName:linkObject.tagName});
+    setContentLink(newLink);
+    setMessageData(newLink);
+  }
+
+  const closeDialog = () => {
+    setShowDialog(false);
+  }
+
+  const handleDialog = () => {
+    setShowDialog(true);
+  }
+
+  const handleDisagree = () => {
+    // window.parent.postMessage({mge: "maskForNewContent"}, "*");
+    window.parent.postMessage({mge: "titleAndLinkRecognizing"}, "*");
+    setMessageData({
+      xpath: '',
+      url: '',
+      urlPagina: '',
+      name: '',
+      text: ''
+    });
+    closeDialog();
+  }
+
+  const handleAgree = () => {
+    closeDialog();
+  }
+
   const onMessageReceive = ({data}) => {
     console.log(`On message receive in app: ${data}`);
-
-    if (typeof data === "string"){
-      window.parent.postMessage({"mge":"hideMask"}, "*")
-    }
-    
+    // if (typeof data === "string"){
+    //   window.parent.postMessage({"mge":"hideMask"}, "*")
+    // }
     if (data.type === "titleAndLink") {
-      // this.assignTitleAndLink(e.data.title, e.data.link)
+      console.log("Link info ", data.link);
+      assignTitleAndLink(data.link, data.title);
       window.parent.postMessage({"mge":"hideMask"}, "*")
+      handleDialog();
       // this.askForConfirmTitleAndLink()
     }
     // if(e.data.type === "className" || e.data.type === "tagName"  ){
@@ -103,6 +154,24 @@ export default function Checkout() {
     //   //   siblings:e.data.pathsElem
     //   // })
     // }
+  }
+
+  const saveInformation = (newValue, operation) => {
+    console.log(`New value: "${newValue}"`);
+    
+    switch (operation) {
+      case 'setLink': {
+        setContentLink({...contentLink, name: newValue});
+        setMessageData({...messageData, name: newValue});
+        break;
+      }
+      case 'setProperties': {
+        const properties = properties;
+        properties.push(newValue);
+        setProperties(properties);
+        break;
+      }
+    }
   }
 
   const handleNext = () => {
@@ -154,22 +223,7 @@ export default function Checkout() {
           </React.Fragment>
         ) :  (
           <React.Fragment>
-            {getStepContent(activeStep, handleImagePosition)}
-            <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
-              {activeStep !== 0 && (
-                <Button onClick={handleBack} sx={{ mt: 3, ml: 1 }}>
-                  Back
-                </Button>
-              )}
-
-              <Button
-                variant="contained"
-                onClick={handleNext}
-                sx={{ mt: 3, ml: 1 }}
-              >
-                {activeStep === steps.length - 1 ? 'Finish' : 'Next'}
-              </Button>
-            </Box>
+            {getStepContent(activeStep, handleImagePosition, handleBack, handleNext, saveInformation, messageData)}
           </React.Fragment>
         )}
       </React.Fragment>
@@ -267,6 +321,7 @@ export default function Checkout() {
           }
           
         </Paper>
+        <Dialog open={showDialog} messageData={messageData} handleDisagree={handleDisagree} handleAgree={handleAgree} />
       </Container>
     </ThemeProvider>
   );
