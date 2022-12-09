@@ -1,9 +1,10 @@
-import { Fragment, React, useState } from "react";
+import { Fragment, React, useState, useRef } from "react";
 import {
   Grid,
   Typography,
   Button,
   TextField,
+  Box,
   FormControlLabel,
   Checkbox,
 } from "@mui/material";
@@ -13,11 +14,14 @@ import Footer from "./footer";
 export default function UtterancesDefinition({
   step,
   handleBack,
-  handleConfirm,
+  handleNext,
+  saveInformation,
+  contentData,
 }) {
   const [inputValue, setInputValue] = useState("");
   // const [utterance, setUtterance] = useState("");
-  const [utterances, setUtterances] = useState([]);
+  const [utterances, setUtterances] = useState(contentData?.utterances || []);
+  const contentValue = useRef(contentData);
 
   const handleButtonClick = () => {
     if (inputValue) {
@@ -32,13 +36,26 @@ export default function UtterancesDefinition({
     setInputValue(target.value);
   };
 
+  const handleConfirm = () => {
+    console.log("Next pressed ", utterances);
+    const operation = "setUtterances";
+    saveInformation(utterances, operation);
+    handleNext();
+  };
+
   return (
     <Fragment>
       <Typography variant="h6" gutterBottom>
         Words Mapping
       </Typography>
-      <Typography variant="subtitle1" gutterBottom>
-        Which words the chatbot should learn to recognize this content?
+      <Typography component="div" variant="subtitle1" gutterBottom>
+        Which words the chatbot should learn to recognize{" "}
+        <Box fontWeight="fontWeightBold" display="inline">
+          {`${
+            contentValue?.current?.name ? contentValue.current.name : "this"
+          }`}{" "}
+        </Box>{" "}
+        content
       </Typography>
       <Grid container marginTop={1} spacing={1}>
         {utterances &&
@@ -46,7 +63,7 @@ export default function UtterancesDefinition({
           utterances.map((word) => {
             return (
               <Grid item xs={"auto"} sm={"auto"}>
-                <Button size="small" color="secondary" variant="outlined">
+                <Button size="small" color="primary" variant="outlined">
                   {word || ""}
                 </Button>
               </Grid>
@@ -54,23 +71,16 @@ export default function UtterancesDefinition({
           })}
       </Grid>
       <Grid
-        marginTop={1}
-        marginBottom={1}
+        // marginTop={1}
+        // marginBottom={1}
         container
         direction="row"
         justifyContent="center"
         alignItems="flex-start"
-        spacing={3}
+        // spacing={3}
+        sx={{ my: 2 }}
       >
-        <Grid item xs={1.8} sm={1.8} />
-        <Grid item xs={1.2} sm={1.2} marginTop={2}>
-          <Button
-            startIcon={<AddIcon />}
-            onClick={handleButtonClick}
-            size="small"
-            color="secondary"
-          ></Button>
-        </Grid>
+        <Grid item xs={2.5} sm={2.5} />
         <Grid item xs={6} sm={6}>
           <TextField
             required
@@ -85,12 +95,20 @@ export default function UtterancesDefinition({
             onChange={handleChange}
           />
         </Grid>
-        <Grid item xs={3} sm={3} />
+        <Grid item xs={1} sm={1} marginTop={2}>
+          <Button
+            startIcon={<AddIcon />}
+            onClick={handleButtonClick}
+            size="small"
+            color="primary"
+          ></Button>
+        </Grid>
+        <Grid item xs={2.5} sm={2.5} />
       </Grid>
       <Grid marginTop={5}>
         <Typography variant="subtitle1" gutterBottom>
-          NOTE: the properties defined for this content will be recognized by
-          the names assigned in the previous step
+          NOTE: the features defined for this content will be recognized by the
+          names assigned in the previous step
         </Typography>
       </Grid>
       <Footer step={step} handleBack={handleBack} handleNext={handleConfirm} />

@@ -11,6 +11,7 @@ import {
 import AddIcon from "@mui/icons-material/Add";
 import Footer from "./footer";
 import Dialog from "./dialog";
+import HelperText from "./components/helperText";
 
 export default function PropertiesDefinition({
   step,
@@ -23,7 +24,7 @@ export default function PropertiesDefinition({
   const dialogText = useRef(null);
   const [showDialog, setShowDialog] = useState(false);
   const [property, setProperty] = useState({});
-  const [properties, setProperties] = useState([]);
+  const [properties, setProperties] = useState(contentData?.properties || []);
   const [imgStyle, setStyle] = useState({
     // position:'absolute',
     // left:'40%',
@@ -47,13 +48,26 @@ export default function PropertiesDefinition({
 
       const { text, url } = newData;
       dialogText.current = (
-        <Box sx={{ flexDirection: "row", flexWrap: "wrap", display: "flex" }}>
-          <Typography variant="body1">The text:</Typography>
-          <Typography variant="body2"> "{text}" </Typography>
+        <Box
+          sx={{
+            flexDirection: "row",
+            flexWrap: "wrap",
+            display: "flex",
+            alignItems: "center",
+            textAlign: "center",
+            justifyContent: "space-between",
+          }}
+        >
+          <Typography variant="body1">The text: </Typography>
+          <Typography variant="body2" sx={{ color: "black" }}>
+            {text}
+          </Typography>
           <Typography variant="body1">from: </Typography>
-          <Typography variant="body2"> "{url}" </Typography>
+          <Typography variant="body2" sx={{ color: "black" }}>
+            {url}
+          </Typography>
           <Typography variant="body1">
-            corresponds to the property you want to extract?
+            corresponds to the feature you want to extract?
           </Typography>
         </Box>
       );
@@ -109,71 +123,70 @@ export default function PropertiesDefinition({
   return (
     <Fragment>
       <Typography variant="h6" gutterBottom>
-        Properties Definition
+        Features Selection
       </Typography>
       <Typography component="div" variant="subtitle1" gutterBottom>
         Which{" "}
         <Box fontWeight="fontWeightBold" display="inline">
-          {`${contentValue.current ? contentValue.current.name : "content"}`}{" "}
+          {`${
+            contentValue?.current?.name ? contentValue.current.name : "content"
+          }`}{" "}
         </Box>{" "}
-        properties the chatbot should recognize?
+        features the chatbot should recognize?
       </Typography>
+      {properties.length === 0 && (
+        <HelperText additionalInstruction={"Enable inspect mode"} />
+      )}
       <Grid container marginTop={1} marginBottom={1} spacing={1}>
         {properties &&
           properties.length > 0 &&
           properties.map((property) => {
             return (
               <Grid item xs={"auto"} sm={"auto"}>
-                <Button size="small" color="secondary" variant="outlined">
+                <Button
+                  size="small"
+                  color="primary"
+                  variant="outlined"
+                  // disabled
+                >
                   {property.text || ""}
                 </Button>
               </Grid>
             );
           })}
       </Grid>
-      <Grid container>
-        <Grid item xs={2} sm={2} />
-        <Grid item xs={"auto"} sm={"auto"}>
-          <div style={{ height: "200px", width: "300px" }}>
-            <img
-              src={require("../../../Drag-elements.jpg")}
-              style={{ ...imgStyle }}
-            />
-          </div>
-        </Grid>
-        <Grid item xs={2} sm={2} />
-      </Grid>
       <Grid
         container
         direction="row"
         justifyContent="center"
         alignItems="flex-start"
-        spacing={3}
+        // spacing={3}
+        sx={{ my: 2 }}
       >
-        <Grid item xs={1.8} sm={1.8} />
-        <Grid item xs={1.2} sm={1.2} marginTop={2}>
-          <Button
-            startIcon={<AddIcon />}
-            onClick={handleButtonClick}
-            size="small"
-            color="secondary"
-          ></Button>
-        </Grid>
+        <Grid item xs={2.5} sm={2.5} />
         <Grid item xs={6} sm={6}>
           <TextField
             required
             id="propertyName"
             name="propertyName"
-            label="Property name"
+            label="Feature name"
             fullWidth
             autoComplete="given-name"
             variant="outlined"
             value={inputValue}
-            helperText="Properties can be product's price, name, rate, etc"
+            helperText="Features can be product's price, name, rate, etc"
             onChange={handleChange}
           />
         </Grid>
-        <Grid item xs={3} sm={3} />
+        <Grid item xs={1} sm={1} marginTop={2}>
+          <Button
+            startIcon={<AddIcon />}
+            onClick={handleButtonClick}
+            size="small"
+            color="primary"
+          ></Button>
+        </Grid>
+        <Grid item xs={2.5} sm={2.5} />
       </Grid>
 
       <Dialog

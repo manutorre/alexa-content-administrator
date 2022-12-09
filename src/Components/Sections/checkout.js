@@ -1,21 +1,26 @@
 import { useState, useEffect, useRef, Fragment, React } from "react";
-import CssBaseline from "@mui/material/CssBaseline";
-import AppBar from "@mui/material/AppBar";
-import Box from "@mui/material/Box";
-import Container from "@mui/material/Container";
-import Toolbar from "@mui/material/Toolbar";
-import Paper from "@mui/material/Paper";
-import Stepper from "@mui/material/Stepper";
-import Step from "@mui/material/Step";
-import StepLabel from "@mui/material/StepLabel";
-import Button from "@mui/material/Button";
-import Link from "@mui/material/Link";
-import Typography from "@mui/material/Typography";
+import {
+  CssBaseline,
+  AppBar,
+  Box,
+  Container,
+  Toolbar,
+  Paper,
+  Stepper,
+  Step,
+  StepLabel,
+  Button,
+  Link,
+  Typography,
+  IconButton,
+  Grid,
+} from "@mui/material";
+import ResetTvIcon from "@mui/icons-material/ResetTv";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
-import ContentDefinition from "./ContentsDefinition/contentDefinition.js";
+import ContentSelection from "./ContentsDefinition/contentSelection.js";
 import PropertiesDefinition from "./ContentsDefinition/propertiesDefinition.js";
 import UtterancesDefinition from "./ContentsDefinition/utterancesDefinition.js";
-import CategoriesDefinition from "./ContentsDefinition/categoriesDefinition.js";
+// import CategoriesDefinition from "./ContentsDefinition/categoriesDefinition.js";
 import Chatbot from "./chatbot.js";
 import DialogDefinition from "./SkillsDefinition/dialogDefinition.js";
 import ActionDefinition from "./SkillsDefinition/actionDefinition.js";
@@ -24,19 +29,42 @@ import OperationCreation from "./SkillsDefinition/operationCreation.js";
 import Dialog from "./ContentsDefinition/dialog";
 // import UtterancesDefinition from './SkillsDefinition/utterancesDefinition.js';
 // import CategoriesDefinition from './SkillsDefinition/categoriesDefinition.js';
+import { grey } from "@mui/material/colors";
+import { SettingsInputCompositeTwoTone } from "@mui/icons-material";
+import StepDefinition from "./SkillsDefinition/stepDefinition.js";
+
+const theme = createTheme({
+  palette: {
+    secondary: grey,
+  },
+});
 
 const contentSteps = [
   "Contents Selection",
-  "Properties Definition",
+  "Features Selection",
   "Words Mapping",
-  "Categories Definition (Optional)",
+  // "Categories Definition (Optional)",
 ];
 let steps = contentSteps;
+/* /////////////// Conversational Flow ///////////////////        
+{ 
+  Actions: {
+    phrases to trigger action (utterances),
+    steps: {
+      conditions (to trigger step),
+      responses: [text, images, ...],
+      what do next: [go to next step, go to another action, finish action, ...]
+    }
+  }
+}
+*/
 const skillSteps = [
-  "Intents Creation",
-  "Dialog Skill Definition (Optional)",
-  "Operation Creation",
-  "Action Skill Definition (Optional)",
+  "Actions Definition",
+  "Step Definition",
+  "Action Steps",
+  // "Information models selection",
+  // "Operation Creation",
+  // "Action Skill Definition (Optional)",
 ];
 
 function getStepContent(
@@ -44,16 +72,19 @@ function getStepContent(
   handleBack,
   handleNext,
   saveInformation,
-  contentData
+  contentData,
+  inspectMode
 ) {
   switch (step) {
     case 0:
       return (
-        <ContentDefinition
+        <ContentSelection
           step={step}
           handleBack={handleBack}
           handleNext={handleNext}
           saveInformation={saveInformation}
+          contentdata={contentData}
+          inspectMode={inspectMode}
         />
       );
     case 1:
@@ -76,8 +107,8 @@ function getStepContent(
           contentData={contentData}
         />
       );
-    case 3:
-      return <CategoriesDefinition />;
+    // case 3:
+    //   return <CategoriesDefinition />;
   }
 }
 
@@ -86,55 +117,120 @@ function getSkillContent(step) {
     case 0:
       return <IntentsDefinition />;
     case 1:
-      return <DialogDefinition />;
+      return <StepDefinition />;
     case 2:
-      return <OperationCreation />;
-    case 3:
-      return <ActionDefinition />;
+      return <DialogDefinition />;
+
+    // case 3:
+    //   return <ActionDefinition />;
   }
 }
 
-const theme = createTheme();
+const DEFAULT_CONTENT_DATA = {
+  xpath: "",
+  url: "",
+  urlPagina: "",
+  name: "",
+  text: "",
+  properties: [],
+  utterances: [],
+  siblings: [],
+  wayOfAccess: {
+    type: "",
+  },
+};
 
 export default function Checkout() {
-  const [activeStep, setActiveStep] = useState(2);
+  const [activeStep, setActiveStep] = useState(0);
   const [activeForm, setActiveForm] = useState("contentsDefinition");
-  const contentData = useRef({
-    xpath: "",
-    url: "",
-    urlPagina: "",
-    name: "",
-    text: "",
-    properties: [],
-  });
+  const [inspectMode, setInspectMode] = useState(false);
+  const [contentData, setContentData] = useState(DEFAULT_CONTENT_DATA);
 
-  // const assignTitleAndLink = (linkObject, titleObject) => {
-  //   //const newTitle = Object.assign(this.state.title, {xpath: titleObject.data, text: titleObject.text});
-  //   const newLink = Object.assign(contentLink, {text: titleObject.text, xpath: linkObject.data, url: linkObject.url, urlPagina:linkObject.urlPagina});  //className:linkObject.className, tagName:linkObject.tagName});
-  //   setContentLink(newLink);
-  //   setMessageData(newLink);
-  // }
+  const onMessageReceive = ({ data }) => {
+    const type = data?.type;
+    const contentdata = data?.contentData;
+    if (type === "contentData") {
+      console.log("Message received in checkout ", { data });
+      if (contentdata) {
+        const dataInLocalStorage = JSON.parse(contentdata);
+        setContentData({ ...contentData, ...dataInLocalStorage });
+      }
+    }
+  };
+
+  useEffect(() => {
+    // console.log({
+    //   json: JSON.parse(window.parent.localStorage.getItem("contentData")),
+    // });
+    // localStorage.clear();
+    window.parent.postMessage(
+      {
+        mge: "getContentData",
+      },
+      "*"
+    );
+    window.addEventListener("message", (e) => onMessageReceive(e));
+  }, []);
 
   const saveInformation = (newData, operation) => {
     console.log(`New data: "${{ newData }}"`);
 
     switch (operation) {
       case "setContent": {
-        contentData.current = { ...contentData.current, ...newData };
+        const newContentInfoFiltered = Object.entries(newData).filter(
+          (keyValue) => {
+            return !!keyValue[1];
+          }
+        );
+        const newContentInfo = newContentInfoFiltered.reduce(
+          (obj, keyValue) => {
+            const key = keyValue[0];
+            return Object.assign(obj, {
+              [key]: newData[key],
+            });
+          },
+          {}
+        );
+
+        setContentData({ ...contentData, ...newContentInfo });
         break;
       }
       case "setProperties": {
-        contentData.current.properties = [
-          ...contentData.current.properties,
-          ...newData,
-        ];
+        const propertyNames = contentData.properties.map(
+          (property) => property.text
+        );
+        const newProperties = newData.filter((property) => {
+          return !propertyNames.includes(property.text);
+        });
+        contentData.properties = [...contentData.properties, ...newProperties];
+        setContentData(contentData);
+        break;
+      }
+      case "setUtterances": {
+        const utteranceNames = contentData.utterances.map(
+          (utterance) => utterance.text
+        );
+        const newUtterances = newData.filter((utterance) => {
+          return !utteranceNames.includes(utterance.text);
+        });
+        contentData.utterances = [...contentData.utterances, ...newUtterances];
+        setContentData(contentData);
         break;
       }
     }
+    // console.log({ stringify: JSON.stringify(contentData.current) });
+    // window.parent.localStorage.setItem(
+    window.parent.postMessage(
+      {
+        mge: "setContentData",
+        contentData: JSON.stringify(contentData),
+      },
+      "*"
+    );
   };
 
   const handleNext = () => {
-    console.log(contentData.current);
+    console.log(contentData);
     setActiveStep(activeStep + 1);
   };
 
@@ -148,10 +244,10 @@ export default function Checkout() {
     setActiveStep(0);
   };
 
-  const goToContent = () => {
+  const goToContent = (step = 0) => {
     setActiveForm("contentsDefinition");
     steps = contentSteps;
-    setActiveStep(0);
+    setActiveStep(step);
   };
 
   const renderContentsDefinition = () => {
@@ -163,8 +259,7 @@ export default function Checkout() {
               Well done!
             </Typography>
             <Typography variant="subtitle1">
-              You already created a content that can be recognized by the
-              chatbot!
+              You created a content that can be recognized by the chatbot!
             </Typography>
             <Typography variant="subtitle1">
               Press on {`Skills Definition`.toUpperCase()} to follow on with the
@@ -190,7 +285,8 @@ export default function Checkout() {
               handleBack,
               handleNext,
               saveInformation,
-              contentData.current
+              contentData,
+              inspectMode
             )}
           </Fragment>
         )}
@@ -218,7 +314,7 @@ export default function Checkout() {
               </Button>
               <Button
                 variant="contained"
-                onClick={goToContent}
+                onClick={() => goToContent()}
                 sx={{ mt: 3, ml: 1 }}
               >
                 DEPLOY CHATBOT
@@ -229,11 +325,12 @@ export default function Checkout() {
           <Fragment>
             {getSkillContent(activeStep)}
             <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
-              {activeStep !== 0 && (
-                <Button onClick={handleBack} sx={{ mt: 3, ml: 1 }}>
-                  Back
-                </Button>
-              )}
+              <Button
+                onClick={activeStep !== 0 ? handleBack : () => goToContent(2)}
+                sx={{ mt: 3, ml: 1 }}
+              >
+                Back
+              </Button>
 
               <Button
                 variant="contained"
@@ -247,6 +344,15 @@ export default function Checkout() {
         )}
       </Fragment>
     );
+  };
+
+  const enableInspectModeOnOff = () => {
+    if (!inspectMode) {
+      window.parent.postMessage({ mge: "activateInspectMode" }, "*");
+    } else {
+      window.parent.postMessage({ mge: "desactivateInspectMode" }, "*");
+    }
+    setInspectMode(!inspectMode);
   };
 
   return (
@@ -263,22 +369,48 @@ export default function Checkout() {
       >
         <Toolbar>
           <Typography variant="h6" color="inherit" noWrap>
-            Chatbot creation
+            Chatbot Creation
           </Typography>
         </Toolbar>
       </AppBar>
-      <Container component="main" maxWidth="sm" sx={{ mb: 4 }}>
+      <Container
+        component="main"
+        sx={{
+          py: { xs: 3, md: 1 },
+          // pt: { xs: 0, md: 1 },
+        }}
+      >
         <Paper
-          style={{ marginBottom: 5 }}
           variant="outlined"
-          sx={{ my: { xs: 3, md: 6 }, p: { xs: 2, md: 3 } }}
+          sx={{
+            // my: { xs: 0, md: 5 },
+            p: { xs: 3, md: 5 },
+          }}
         >
-          <Typography component="h1" variant="h4" align="center">
-            {activeForm === "contentsDefinition"
-              ? "Info models definition"
-              : "Chatbot elements definition"}
-          </Typography>
-          <Stepper activeStep={activeStep} sx={{ pt: 3, pb: 5 }}>
+          <Grid container>
+            <Grid item xs={2} sm={2} />
+            <Grid item xs={8} sm={8}>
+              <Typography component="h1" variant="h5" align="center">
+                {activeForm === "contentsDefinition"
+                  ? "Information Models Definition"
+                  : "Chatbot Conversation Definition"}
+              </Typography>
+            </Grid>
+            {activeForm === "contentsDefinition" && (
+              <Grid item xs={2} sm={2} sx={{ pl: 3 }}>
+                <IconButton
+                  color={inspectMode ? "primary" : "secondary"}
+                  // aria-label="upload picture"
+                  component="label"
+                  onClick={enableInspectModeOnOff}
+                >
+                  <ResetTvIcon />
+                </IconButton>
+                <Typography component="h5">Inspect mode</Typography>
+              </Grid>
+            )}
+          </Grid>
+          <Stepper activeStep={activeStep} sx={{ py: 3, px: 2 }}>
             {steps.map((label) => (
               <Step key={label}>
                 <StepLabel>{label}</StepLabel>
