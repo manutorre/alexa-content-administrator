@@ -89,28 +89,29 @@ export default function StepDefinition({
 
   const handleSelect = (event) => {
     const value = event.target.value;
-    contentData.current = {
-      ...contentData.current,
-      wayOfAccess: {
-        type: value,
-      },
-    };
+    setStepType(value);
+    // contentData.current = {
+    //   ...contentData.current,
+    //   wayOfAccess: {
+    //     type: value,
+    //   },
+    // };
 
-    if (!!wayOfAccess && wayOfAccess !== value) {
-      dialogText.current = (
-        <DialogText
-          firstSentence="Are you sure to change the element access strategy from "
-          secondSentence={wayOfAccess}
-          thirdSentence=" to "
-          forthSentence={value}
-          fifthSentence=" ? This will require that you define a new content"
-        />
-      );
-      setShowDialog(true);
-      return;
-    }
+    // if (!!wayOfAccess && wayOfAccess !== value) {
+    //   dialogText.current = (
+    //     <DialogText
+    //       firstSentence="Are you sure to change the element access strategy from "
+    //       secondSentence={wayOfAccess}
+    //       thirdSentence=" to "
+    //       forthSentence={value}
+    //       fifthSentence=" ? This will require that you define a new content"
+    //     />
+    //   );
+    //   setShowDialog(true);
+    //   return;
+    // }
 
-    setWayOfAccess(value);
+    // setWayOfAccess(value);
 
     // shouldShowArrowIcon(event.target.value);
     // shouldShowCheckIcon(event.target.value);
@@ -197,25 +198,26 @@ export default function StepDefinition({
       </Typography>
       <Typography variant="subtitle1" gutterBottom>
         {
-          "The action defined previously will be integrated by a serie of steps necessary to collect data from users."
+          "The action defined previously will require to define a serie of steps necessary to collect data from users."
         }
       </Typography>
 
       <Typography variant="subtitle1" gutterBottom>
-        {"You can choose between:"}
+        {"You can choose between the next type of steps:"}
       </Typography>
 
       <Grid container sx={{ my: 2 }}>
         <SelectContainer
           inputLabel={"Step types"}
           options={["Ask for data", "Display information"]}
-          stepType={steptype}
+          wayOfAccess={steptype}
           handleSelect={handleSelect}
+          required
         />
       </Grid>
 
       <Typography variant="subtitle1" gutterBottom>
-        {"This step will require to define:"}
+        {"The step will require to define:"}
       </Typography>
 
       <Grid container>
