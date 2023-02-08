@@ -21,6 +21,7 @@ export default function PropertiesDefinition({
   contentData,
 }) {
   const [inputValue, setInputValue] = useState("");
+  const [inputImageValue, setInputImageValue] = useState("");
   const dialogText = useRef(null);
   const [showDialog, setShowDialog] = useState(false);
   const [property, setProperty] = useState({});
@@ -62,16 +63,25 @@ export default function PropertiesDefinition({
           <Typography variant="body2" sx={{ color: "black" }}>
             {text}
           </Typography>
-          <Typography variant="body1">from: </Typography>
+          {/* <Typography variant="body1">from: </Typography>
           <Typography variant="body2" sx={{ color: "black" }}>
             {url}
-          </Typography>
+          </Typography> */}
           <Typography variant="body1">
             corresponds to the feature you want to extract?
           </Typography>
         </Box>
       );
       setShowDialog(true);
+    } else if (data.type === "image") {
+      const { src, data, linkUrl, urlPagina } = data.image;
+      const newProperty = {
+        src,
+        data,
+        linkUrl,
+        urlPagina,
+      };
+      setProperty(newProperty);
     }
   };
 
@@ -101,9 +111,11 @@ export default function PropertiesDefinition({
   };
 
   const handleButtonClick = () => {
-    if (inputValue && property.text) {
-      setProperty({ ...property, name: inputValue });
-      setProperties([...properties, property]);
+    let prop;
+    if (inputValue && (property.text || property.src)) {
+      prop = { ...property, name: inputValue };
+      setProperty(prop);
+      setProperties([...properties, prop]);
       setInputValue("");
     }
   };
@@ -118,6 +130,11 @@ export default function PropertiesDefinition({
   const handleChange = ({ target }) => {
     console.log("Changing input ", target.value);
     setInputValue(target.value);
+  };
+
+  const handleImageChange = ({ target }) => {
+    console.log("Changing input ", target.value);
+    setInputImageValue(target.value);
   };
 
   return (
@@ -149,7 +166,7 @@ export default function PropertiesDefinition({
                   variant="outlined"
                   // disabled
                 >
-                  {property.text || ""}
+                  {property.name || property.text || ""}
                 </Button>
               </Grid>
             );
@@ -158,7 +175,7 @@ export default function PropertiesDefinition({
       <Grid
         container
         direction="row"
-        justifyContent="center"
+        justifyContent="space-around"
         alignItems="flex-start"
         // spacing={3}
         sx={{ my: 2 }}
@@ -176,6 +193,7 @@ export default function PropertiesDefinition({
             value={inputValue}
             helperText="Features can be product's price, name, rate, etc"
             onChange={handleChange}
+            disabled={!property.text}
           />
         </Grid>
         <Grid item xs={1} sm={1} marginTop={2}>
@@ -184,7 +202,51 @@ export default function PropertiesDefinition({
             onClick={handleButtonClick}
             size="small"
             color="primary"
-          ></Button>
+            disabled={!property.text}
+          >
+            Add Feature
+          </Button>
+        </Grid>
+        <Grid item xs={2.5} sm={2.5} />
+      </Grid>
+
+      <Typography variant="h6" gutterBottom>
+        Select multimedia (images)
+      </Typography>
+
+      <Grid
+        container
+        direction="row"
+        justifyContent="space-around"
+        alignItems="flex-end"
+        // spacing={3}
+        sx={{ my: 2 }}
+      >
+        <Grid item xs={2.5} sm={2.5} />
+        <Grid item xs={6} sm={6}>
+          <TextField
+            // required
+            id="imageName"
+            name="imageName"
+            label="Image name"
+            fullWidth
+            autoComplete="given-name"
+            variant="outlined"
+            value={inputImageValue}
+            onChange={handleImageChange}
+            disabled={!property.src || !!property.text}
+          />
+        </Grid>
+        <Grid item xs={1} sm={1} marginTop={2}>
+          <Button
+            startIcon={<AddIcon />}
+            onClick={handleButtonClick}
+            size="small"
+            color="primary"
+            disabled={!property.src || !!property.text}
+          >
+            Add image
+          </Button>
         </Grid>
         <Grid item xs={2.5} sm={2.5} />
       </Grid>

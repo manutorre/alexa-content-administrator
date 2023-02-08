@@ -220,12 +220,44 @@ export default function StepDefinition({
         {"The step will require to define:"}
       </Typography>
 
-      <Grid container>
+      <Grid container sx={{ m: 2 }}>
         <ContentSelectionStep
           showArrowIcon={!wayOfAccess}
           showCheckIcon={!!wayOfAccess}
-          message="Optional conditions (to trigger the step)"
+          message="The criteria applied to the search action" //"Optional conditions (to trigger the step)"
         />
+        <Typography variant="subtitle1" gutterBottom>
+          {
+            "You need to say to the chatbot what information you want to get. Is mandatory to define the 'First criteria parameter', which will be the 'Name' feature as default."
+          }
+        </Typography>
+        <SelectContainer
+          inputLabel={"First criteria parameter"}
+          options={["Name"]}
+          wayOfAccess={steptype}
+          handleSelect={handleSelect}
+          required
+        />
+        <Typography variant="subtitle1" gutterBottom>
+          {"Search action utterance: Search [name]"}
+        </Typography>
+      </Grid>
+      <Grid container sx={{ m: 2 }}>
+        <Typography variant="subtitle1" gutterBottom>
+          {
+            "If no others search criteria are defined, the chatbot will return all features of the content by default. You can select other criteria options from the next list of features to can filter results."
+          }
+        </Typography>
+        <SelectContainer
+          inputLabel={"Second criteria parameter"}
+          options={["Price", "Stars", "All"]}
+          wayOfAccess={steptype}
+          handleSelect={handleSelect}
+          required
+        />
+        <Typography variant="subtitle1" gutterBottom>
+          {"Search action utterance: Search [name] with [price|stars]"}
+        </Typography>
         {/* <SelectContainer
           wayOfAccess={wayOfAccess}
           handleSelect={handleSelect}

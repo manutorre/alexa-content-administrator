@@ -79,9 +79,9 @@ export default function ContentSelection({
         <DialogText
           firstSentence="The text: "
           secondSentence={text}
-          thirdSentence=" from "
-          forthSentence={url}
-          fifthSentence=" corresponds to the content you want to extract for the chatbot?"
+          thirdSentence=" corresponds to the content you want to extract for the chatbot?"
+          // forthSentence={url}
+          // fifthSentence=" corresponds to the content you want to extract for the chatbot?"
         />
       );
       setShowDialog(true);
@@ -97,27 +97,26 @@ export default function ContentSelection({
         ...contentData.current,
         siblings: [...siblings, ...data.pathsElem],
       };
-    }
-    // } else if (data.type === "searchUrl") {
-    //   console.log("######### Searching url ", { data });
-    //   contentData.current = {
-    //     ...contentData.current,
-    //     wayOfAccess: {
-    //       type: "searchUrl",
-    //       data: data.pathsElem,
-    //     },
-    //     // searchEngineUrl: data.pathsElem,
-    //   };
+    } else if (data.type === "searchUrl") {
+      console.log("######### Searching url ", { data });
+      contentData.current = {
+        ...contentData.current,
+        wayOfAccess: {
+          type: "searchUrl",
+          data: data.pathsElem,
+        },
+        // searchEngineUrl: data.pathsElem,
+      };
 
-    //   dialogText.current = (
-    //     <DialogText
-    //       firstSentence="The "
-    //       secondSentence={contentData.current.name}
-    //       thirdSentence=" content will be available through the search engine"
-    //     />
-    //   );
-    //   setShowDialog(true);
-    // } else if (data.type === "menuNavigation") {
+      dialogText.current = (
+        <DialogText
+          firstSentence="The "
+          secondSentence={contentData.current.name}
+          thirdSentence=" content will be available through the search engine"
+        />
+      );
+      setShowDialog(true);
+    } //else if (data.type === "menuNavigation") {
     //   assignMenuNavigation(data.link, data.title);
 
     //   dialogText.current = (
@@ -151,14 +150,24 @@ export default function ContentSelection({
   //   return;
   // };
   const assignTitleAndLink = (linkObject, titleObject) => {
-    const newContent = {
+    let newContent = {
       text: titleObject.text,
-      xpath: linkObject.data,
-      url: linkObject.url,
-      urlPagina: linkObject.urlPagina,
-      className: linkObject.className,
-      tagName: linkObject.tagName,
+      xpath: titleObject.data,
+      urlPagina: titleObject.urlPagina,
+      className: titleObject.className,
+      tagName: titleObject.tagName,
     };
+
+    if (linkObject) {
+      newContent = {
+        ...newContent,
+        xpath: linkObject.data,
+        url: linkObject.url,
+        urlPagina: linkObject.urlPagina,
+        className: linkObject.className,
+        tagName: linkObject.tagName,
+      };
+    }
     contentData.current = { ...contentData.current, ...newContent };
     return newContent;
   };
@@ -207,19 +216,19 @@ export default function ContentSelection({
       },
     };
 
-    if (!!wayOfAccess && wayOfAccess !== value) {
-      dialogText.current = (
-        <DialogText
-          firstSentence="Are you sure to change the element access strategy from "
-          secondSentence={wayOfAccess}
-          thirdSentence=" to "
-          forthSentence={value}
-          fifthSentence=" ? This will require that you define a new content"
-        />
-      );
-      setShowDialog(true);
-      return;
-    }
+    // if (!!wayOfAccess && wayOfAccess !== value) {
+    //   dialogText.current = (
+    //     <DialogText
+    //       firstSentence="Are you sure to change the element access strategy from "
+    //       secondSentence={wayOfAccess}
+    //       thirdSentence=" to "
+    //       forthSentence={value}
+    //       fifthSentence=" ? This will require that you define a new content"
+    //     />
+    //   );
+    //   setShowDialog(true);
+    //   return;
+    // }
 
     setWayOfAccess(value);
 
@@ -343,6 +352,7 @@ export default function ContentSelection({
           <TextInputContainer
             inputValue={inputValue}
             handleChange={handleChange}
+            isDisabled={!contentData.current?.text}
           />
           {inputValue && contentData.current.text && siblings?.length > 0 && (
             <OneLineText inputValue={inputValue} siblings={siblings} />

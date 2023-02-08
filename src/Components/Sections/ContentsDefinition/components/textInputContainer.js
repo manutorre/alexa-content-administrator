@@ -1,7 +1,7 @@
 import { React } from "react";
 import { Grid, TextField } from "@mui/material";
 
-const TextInputContainer = ({ inputValue, handleChange }) => {
+const TextInputContainer = ({ inputValue, handleChange, isDisabled }) => {
   return (
     <Grid container spacing={5} style={{ marginBottom: 10 }}>
       <Grid item xs={3} sm={3} />
@@ -24,13 +24,14 @@ const TextInputContainer = ({ inputValue, handleChange }) => {
           required
           id="contentName"
           name="contentName"
-          label="Content name"
+          label="Content identifier name"
           fullWidth
           autoComplete="given-name"
           variant="outlined"
           value={inputValue}
           helperText="Content can be a product, a news, etc"
           onChange={handleChange}
+          disabled={isDisabled}
         />
       </Grid>
       <Grid item xs={4} sm={4}></Grid>

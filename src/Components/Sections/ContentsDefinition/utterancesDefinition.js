@@ -55,7 +55,7 @@ export default function UtterancesDefinition({
             contentValue?.current?.name ? contentValue.current.name : "this"
           }`}{" "}
         </Box>{" "}
-        content
+        content?
       </Typography>
       <Grid container marginTop={1} spacing={1}>
         {utterances &&
@@ -76,7 +76,7 @@ export default function UtterancesDefinition({
         container
         direction="row"
         justifyContent="center"
-        alignItems="flex-start"
+        alignItems="flex-end"
         // spacing={3}
         sx={{ my: 2 }}
       >
@@ -86,7 +86,7 @@ export default function UtterancesDefinition({
             required
             id="utterance"
             name="utterance"
-            label="Add new word"
+            label="Word"
             fullWidth
             autoComplete="given-name"
             variant="outlined"
@@ -101,14 +101,16 @@ export default function UtterancesDefinition({
             onClick={handleButtonClick}
             size="small"
             color="primary"
-          ></Button>
+          >
+            Add word
+          </Button>
         </Grid>
         <Grid item xs={2.5} sm={2.5} />
       </Grid>
       <Grid marginTop={5}>
         <Typography variant="subtitle1" gutterBottom>
-          NOTE: the features defined for this content will be recognized by the
-          names assigned in the previous step
+          NOTE: the features defined on previous step will be recognized by the
+          names assigned
         </Typography>
       </Grid>
       <Footer step={step} handleBack={handleBack} handleNext={handleConfirm} />

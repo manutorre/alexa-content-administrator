@@ -12,7 +12,7 @@ const SelectContainer = ({
   wayOfAccess,
   handleSelect,
   inputLabel = "Element way of access",
-  options = ["Main Screen", "Menu Navigation", "Search Url"],
+  options = ["Search Url"], //"Main Screen", "Menu Navigation",
   required = false,
 }) => {
   return (
