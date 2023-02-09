@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, Fragment, React } from "react";
-import { Grid, Typography, Divider, TextField } from "@mui/material";
+import { Grid, Typography, Divider, TextField, Box } from "@mui/material";
 import DialogText from "../ContentsDefinition/components/dialogText";
 // import FormControlLabel from '@mui/material/FormControlLabel';
 // import Checkbox from '@mui/material/Checkbox';
@@ -11,6 +11,7 @@ import TextInputContainer from "../ContentsDefinition/components/textInputContai
 import OneLineText from "../ContentsDefinition/components/oneLineText";
 import SelectContainer from "../ContentsDefinition/components/selectContainer";
 import HelperText from "../ContentsDefinition/components/helperText";
+import Footer from "../ContentsDefinition/footer";
 
 export default function StepDefinition({
   step,
@@ -46,46 +47,6 @@ export default function StepDefinition({
   useEffect(() => {
     window.scrollTo(0, document.body.scrollHeight);
   }, [wayOfAccess, inputValue]);
-
-  useEffect(() => {
-    shouldShowArrowIcon(wayOfAccess);
-    shouldShowCheckIcon(wayOfAccess);
-  }, [inspectMode, wayOfAccess]);
-
-  const closeDialog = () => {
-    setShowDialog(false);
-  };
-
-  const handleDisagree = () => {
-    const dialogComesFromWayOfAccess = [
-      "mainScreen",
-      "menuNavigation",
-      "searchUrl",
-    ].includes(dialogText.current.props.forthSentence);
-    contentData.current = {};
-    if (!dialogComesFromWayOfAccess) {
-      setInputValue("");
-    }
-    closeDialog();
-  };
-
-  const handleAgree = () => {
-    const dialogComesFromWayOfAccess = [
-      "mainScreen",
-      "menuNavigation",
-      "searchUrl",
-    ].includes(dialogText.current.props.forthSentence);
-
-    if (!dialogComesFromWayOfAccess) {
-      const newInputValue = contentData.current.text?.split(" ")[0] || "";
-      setInputValue(newInputValue);
-      const newContentData = { ...contentData.current, name: newInputValue };
-      contentData.current = newContentData;
-    } else {
-      setWayOfAccess(contentData.current.wayOfAccess?.type);
-    }
-    closeDialog();
-  };
 
   const handleSelect = (event) => {
     const value = event.target.value;
@@ -134,184 +95,224 @@ export default function StepDefinition({
     contentData.current = newContentData;
   };
 
-  const shouldShowArrowIcon = (wayOfAccess) => {
-    const conditionFulfill = !contentData.current.text;
-    switch (wayOfAccess) {
-      case "searchUrl":
-        setShowArrowIcon(
-          conditionFulfill &&
-            contentData.current.wayOfAccess?.type === "searchUrl" &&
-            !inspectMode
-        );
-        break;
-      case "menuNavigation":
-        setShowArrowIcon(
-          conditionFulfill &&
-            contentData.current.wayOfAccess?.type === "menuNavigation" &&
-            !inspectMode
-        );
-        break;
-
-      case "mainScreen":
-        setShowArrowIcon(
-          conditionFulfill &&
-            contentData.current.wayOfAccess?.type === "mainScreen" &&
-            !inspectMode
-        );
-        break;
-    }
-  };
-
-  const shouldShowCheckIcon = (wayOfAccess) => {
-    const conditionFulfill = contentData.current.text;
-    switch (wayOfAccess) {
-      case "searchUrl":
-        setShowCheckIcon(
-          conditionFulfill ||
-            (contentData.current.wayOfAccess?.type === "searchUrl" &&
-              !!inspectMode)
-        );
-        break;
-
-      case "menuNavigation":
-        setShowCheckIcon(
-          conditionFulfill ||
-            (contentData.current.wayOfAccess?.type === "menuNavigation" &&
-              !!inspectMode)
-        );
-        break;
-
-      case "mainScreen":
-        setShowCheckIcon(
-          conditionFulfill ||
-            (contentData.current.wayOfAccess?.type === "mainScreen" &&
-              !!inspectMode)
-        );
-        break;
-    }
-  };
-
   return (
     <Fragment>
       <Typography variant="h6" gutterBottom>
-        Conversation Step Definition
-      </Typography>
-      <Typography variant="subtitle1" gutterBottom>
-        {
-          "The action defined previously will require to define a serie of steps necessary to collect data from users."
-        }
-      </Typography>
-
-      <Typography variant="subtitle1" gutterBottom>
-        {"You can choose between the next type of steps:"}
-      </Typography>
-
-      <Grid container sx={{ my: 2 }}>
-        <SelectContainer
-          inputLabel={"Step types"}
-          options={["Ask for data", "Display information"]}
-          wayOfAccess={steptype}
-          handleSelect={handleSelect}
-          required
-        />
-      </Grid>
-
-      <Typography variant="subtitle1" gutterBottom>
-        {"The step will require to define:"}
+        Conversation Steps
       </Typography>
 
       <Grid container sx={{ m: 2 }}>
         <ContentSelectionStep
           showArrowIcon={!wayOfAccess}
           showCheckIcon={!!wayOfAccess}
-          message="The criteria applied to the search action" //"Optional conditions (to trigger the step)"
+          message="Criteria applied to the search action" //"Optional conditions (to trigger the step)"
         />
-        <Typography variant="subtitle1" gutterBottom>
+        <Typography variant="subtitle1">
           {
-            "You need to say to the chatbot what information you want to get. Is mandatory to define the 'First criteria parameter', which will be the 'Name' feature as default."
+            "When you make a search, you need to tell to the chatbot what are you looking for."
           }
         </Typography>
-        <SelectContainer
-          inputLabel={"First criteria parameter"}
-          options={["Name"]}
-          wayOfAccess={steptype}
-          handleSelect={handleSelect}
-          required
-        />
-        <Typography variant="subtitle1" gutterBottom>
-          {"Search action utterance: Search [name]"}
+        <Typography variant="subtitle1">
+          {"If you only make a search using the content identifier "}
+          <Box fontWeight="fontWeightBold" display="inline">
+            {"name"}
+          </Box>
+          {", the chatbot will return "}
+          <Box fontWeight="fontWeightBold" display="inline">
+            {"ALL"}
+          </Box>
+          {" content features. An example of a Search Action utterance is:"}
         </Typography>
       </Grid>
+
+      <Grid container sx={{ m: 2 }}>
+        <Typography variant="subtitle1">
+          <Box fontWeight="fontWeightBold" display="inline">
+            {"User request: "}
+          </Box>
+          {'"Search '}
+          <Box fontWeight="fontWeightBold" display="inline">
+            {"[name]"}
+          </Box>
+          {'"'}
+        </Typography>
+      </Grid>
+
+      <Grid container sx={{ m: 2 }}>
+        <Typography variant="subtitle1">
+          {
+            "It's also possible to add other criteria options from the list of features. An example of a Search Action utterance is: "
+          }
+        </Typography>
+      </Grid>
+
       <Grid container sx={{ m: 2 }}>
         <Typography variant="subtitle1" gutterBottom>
-          {
-            "If no others search criteria are defined, the chatbot will return all features of the content by default. You can select other criteria options from the next list of features to can filter results."
-          }
+          <Box fontWeight="fontWeightBold" display="inline">
+            {"User request: "}
+          </Box>
+          {'"Search '}
+          <Box fontWeight="fontWeightBold" display="inline">
+            {"[price | stars | image]"}
+          </Box>
+          {" from "}
+          <Box fontWeight="fontWeightBold" display="inline">
+            {"[name]"}
+          </Box>
+          {'"'}
         </Typography>
-        <SelectContainer
-          inputLabel={"Second criteria parameter"}
-          options={["Price", "Stars", "All"]}
-          wayOfAccess={steptype}
-          handleSelect={handleSelect}
-          required
-        />
-        <Typography variant="subtitle1" gutterBottom>
-          {"Search action utterance: Search [name] with [price|stars]"}
-        </Typography>
-        {/* <SelectContainer
-          wayOfAccess={wayOfAccess}
-          handleSelect={handleSelect}
-        /> */}
       </Grid>
-      {/* {wayOfAccess && ( */}
-      {/* <Grid container sx={{ my: 2 }}>
+
+      <Grid container sx={{ m: 2 }}>
         <Grid item xs={12} sm={12} sx={{ my: 2 }}>
           <Divider variant="middle" />
         </Grid>
         <ContentSelectionStep
-          showArrowIcon={showArrowIcon}
-          showCheckIcon={showCheckIcon}
-          message={tasks[wayOfAccess]}
+          showArrowIcon={!wayOfAccess}
+          showCheckIcon={!!wayOfAccess}
+          message="Selection from defined contents" //"Optional conditions (to trigger the step)"
         />
-      </Grid> */}
-      {/* )} */}
-      {/* {showCheckIcon && ( */}
-      <>
-        <Grid item xs={12} sm={12} sx={{ my: 2 }}>
-          <Divider variant="middle" />
+        <Grid item xs={12} sm={12}>
+          <Typography variant="subtitle1" gutterBottom>
+            {
+              "The chatbot will try to find the response from the contents you defined before. Eg. for the next request: "
+            }
+          </Typography>
         </Grid>
-        <ContentSelectionStep
-          showArrowIcon={!contentData.current.text}
-          showCheckIcon={inputValue && contentData.current.text}
-          message="The response of the step (image, text, ...)"
-        />
-        {/* {!contentData.current.text && <HelperText container={true} />} */}
-        {/* <TextInputContainer
-          inputValue={inputValue}
-          handleChange={handleChange}
-        /> */}
-        {/* {inputValue && contentData.current.text && siblings?.length > 0 && (
-          <OneLineText inputValue={inputValue} siblings={siblings} />
-        )} */}
-      </>
-      {/* )} */}
-      <>
-        <Grid item xs={12} sm={12} sx={{ my: 2 }}>
-          <Divider variant="middle" />
+        <Grid item xs={12} sm={12} sx={{ my: 1 }}>
+          <Typography variant="subtitle1" gutterBottom>
+            <Box fontWeight="fontWeightBold" display="inline">
+              {"User request: "}
+            </Box>
+            {'"Search headphones"'}
+          </Typography>
         </Grid>
-        <ContentSelectionStep
-          showArrowIcon={!contentData.current.text}
-          showCheckIcon={inputValue && contentData.current.text}
-          message="A directive of what to do next (go to next step, finish action, ...)."
-        />
-      </>
-      <Dialog
+        <Grid item xs={12} sm={12}>
+          <Typography variant="subtitle1">
+            {"Behind the scene, the technology will search the word "}
+            <Box fontWeight="fontWeightBold" display="inline">
+              {"headphones"}
+            </Box>{" "}
+            {" between all "}
+            <Box fontWeight="fontWeightBold" display="inline">
+              {"[name]"}
+            </Box>
+            {" features from the contents defined."}
+          </Typography>
+        </Grid>
+        <Grid item xs={12} sm={12}>
+          <Typography variant="subtitle1">
+            {"Eg.: Between Contents identified as "}
+            <Box fontWeight="fontWeightBold" display="inline">
+              {"[Products | News]"}
+            </Box>
+          </Typography>
+        </Grid>
+      </Grid>
+      {/* <Dialog
         open={showDialog}
         dialogText={dialogText.current}
         handleDisagree={handleDisagree}
         handleAgree={handleAgree}
-      />
-      {/* <Footer step={step} handleBack={handleBack} handleNext={handleConfirm} /> */}
+      /> */}
+      <Footer step={step} handleBack={handleBack} handleNext={handleConfirm} />
     </Fragment>
   );
 }
+
+// useEffect(() => {
+//   shouldShowArrowIcon(wayOfAccess);
+//   shouldShowCheckIcon(wayOfAccess);
+// }, [inspectMode, wayOfAccess]);
+
+// const closeDialog = () => {
+//   setShowDialog(false);
+// };
+
+// const handleDisagree = () => {
+//   const dialogComesFromWayOfAccess = [
+//     "mainScreen",
+//     "menuNavigation",
+//     "searchUrl",
+//   ].includes(dialogText.current.props.forthSentence);
+//   contentData.current = {};
+//   if (!dialogComesFromWayOfAccess) {
+//     setInputValue("");
+//   }
+//   closeDialog();
+// };
+
+// const handleAgree = () => {
+//   const dialogComesFromWayOfAccess = [
+//     "mainScreen",
+//     "menuNavigation",
+//     "searchUrl",
+//   ].includes(dialogText.current.props.forthSentence);
+
+//   if (!dialogComesFromWayOfAccess) {
+//     const newInputValue = contentData.current.text?.split(" ")[0] || "";
+//     setInputValue(newInputValue);
+//     const newContentData = { ...contentData.current, name: newInputValue };
+//     contentData.current = newContentData;
+//   } else {
+//     setWayOfAccess(contentData.current.wayOfAccess?.type);
+//   }
+//   closeDialog();
+// };
+
+// const shouldShowArrowIcon = (wayOfAccess) => {
+//   const conditionFulfill = !contentData.current.text;
+//   switch (wayOfAccess) {
+//     case "searchUrl":
+//       setShowArrowIcon(
+//         conditionFulfill &&
+//           contentData.current.wayOfAccess?.type === "searchUrl" &&
+//           !inspectMode
+//       );
+//       break;
+//     case "menuNavigation":
+//       setShowArrowIcon(
+//         conditionFulfill &&
+//           contentData.current.wayOfAccess?.type === "menuNavigation" &&
+//           !inspectMode
+//       );
+//       break;
+
+//     case "mainScreen":
+//       setShowArrowIcon(
+//         conditionFulfill &&
+//           contentData.current.wayOfAccess?.type === "mainScreen" &&
+//           !inspectMode
+//       );
+//       break;
+//   }
+// };
+
+// const shouldShowCheckIcon = (wayOfAccess) => {
+//   const conditionFulfill = contentData.current.text;
+//   switch (wayOfAccess) {
+//     case "searchUrl":
+//       setShowCheckIcon(
+//         conditionFulfill ||
+//           (contentData.current.wayOfAccess?.type === "searchUrl" &&
+//             !!inspectMode)
+//       );
+//       break;
+
+//     case "menuNavigation":
+//       setShowCheckIcon(
+//         conditionFulfill ||
+//           (contentData.current.wayOfAccess?.type === "menuNavigation" &&
+//             !!inspectMode)
+//       );
+//       break;
+
+//     case "mainScreen":
+//       setShowCheckIcon(
+//         conditionFulfill ||
+//           (contentData.current.wayOfAccess?.type === "mainScreen" &&
+//             !!inspectMode)
+//       );
+//       break;
+//   }
+// };

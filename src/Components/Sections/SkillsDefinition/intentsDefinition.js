@@ -6,6 +6,7 @@ import FormControl from "@mui/material/FormControl";
 import AddIcon from "@mui/icons-material/Add";
 import SelectContainer from "../ContentsDefinition/components/selectContainer";
 import ArrowRightIcon from "@mui/icons-material/ArrowRight";
+import Footer from "../ContentsDefinition/footer";
 
 const INTENTS = [
   "Search", // by identifier name of product",
@@ -13,7 +14,12 @@ const INTENTS = [
 ];
 const UTTERANCES = ["Search headphones", "Search headphones by price"];
 
-export default function IntentsDefinition() {
+export default function IntentsDefinition({
+  step,
+  saveInformation,
+  handleNext,
+  handleBack,
+}) {
   // const [actionName, setActionName] = useState("");
   // const [criteria, setCriteria] = useState("");
   // const [features, setFeatures] = useState([]);
@@ -36,6 +42,13 @@ export default function IntentsDefinition() {
 
   const onChangeNewPhrase = ({ target }) => {
     setNewPhrase(target.value);
+  };
+
+  const handleConfirm = () => {
+    console.log("Next pressed ", phrases);
+    const operation = "setPhrases";
+    saveInformation(phrases, operation);
+    handleNext();
   };
 
   // const onChangeActionName = ({ target }) => {
@@ -118,7 +131,7 @@ export default function IntentsDefinition() {
                 helperText="Phrases are words users can say when interacts with the chatbot"
               />
             </Grid>
-            <Grid item xs={1} sm={1} marginTop={2}>
+            <Grid item xs={1} sm={1}>
               <Button
                 startIcon={<AddIcon />}
                 onClick={onAddNewPhrase}
@@ -136,10 +149,12 @@ export default function IntentsDefinition() {
               {actionSelected.search(/feature/) === -1
                 ? UTTERANCES[0] + '"'
                 : UTTERANCES[1] + '"'}
+              {" for the case of a product content."}
             </Typography>
           </Grid>
         </>
       )}
+      <Footer step={step} handleBack={handleBack} handleNext={handleConfirm} />
     </React.Fragment>
   );
 }

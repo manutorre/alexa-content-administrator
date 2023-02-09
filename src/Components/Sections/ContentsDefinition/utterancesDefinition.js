@@ -95,7 +95,7 @@ export default function UtterancesDefinition({
             onChange={handleChange}
           />
         </Grid>
-        <Grid item xs={1} sm={1} marginTop={2}>
+        <Grid item xs={1} sm={1}>
           <Button
             startIcon={<AddIcon />}
             onClick={handleButtonClick}

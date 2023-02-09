@@ -1,17 +1,17 @@
-import * as React from 'react';
-import Grid from '@mui/material/Grid';
-import Typography from '@mui/material/Typography';
-import TextField from '@mui/material/TextField';
-import FormControlLabel from '@mui/material/FormControlLabel';
-import Checkbox from '@mui/material/Checkbox';
-import InputLabel from '@mui/material/InputLabel';
-import FormControl from '@mui/material/FormControl';
-import { useTheme } from '@mui/material/styles';
-import Box from '@mui/material/Box';
-import OutlinedInput from '@mui/material/OutlinedInput';
-import MenuItem from '@mui/material/MenuItem';
-import Select from '@mui/material/Select';
-import Chip from '@mui/material/Chip';
+import * as React from "react";
+import Grid from "@mui/material/Grid";
+import Typography from "@mui/material/Typography";
+import TextField from "@mui/material/TextField";
+import FormControlLabel from "@mui/material/FormControlLabel";
+import Checkbox from "@mui/material/Checkbox";
+import InputLabel from "@mui/material/InputLabel";
+import FormControl from "@mui/material/FormControl";
+import { useTheme } from "@mui/material/styles";
+import Box from "@mui/material/Box";
+import OutlinedInput from "@mui/material/OutlinedInput";
+import MenuItem from "@mui/material/MenuItem";
+import Select from "@mui/material/Select";
+import Chip from "@mui/material/Chip";
 
 const ITEM_HEIGHT = 48;
 const ITEM_PADDING_TOP = 8;
@@ -25,7 +25,6 @@ const MenuProps = {
 };
 
 const INTENTS = ["Complete form", "Send message"];
-
 
 function getStyles(name, personName, theme) {
   return {
@@ -46,7 +45,7 @@ function MultipleSelectChip() {
     } = event;
     setPersonName(
       // On autofill we get a stringified value.
-      typeof value === 'string' ? value.split(',') : value,
+      typeof value === "string" ? value.split(",") : value
     );
   };
 
@@ -60,9 +59,11 @@ function MultipleSelectChip() {
           multiple
           value={personName}
           onChange={handleChange}
-          input={<OutlinedInput id="select-multiple-chip" label="Intents order" />}
+          input={
+            <OutlinedInput id="select-multiple-chip" label="Intents order" />
+          }
           renderValue={(selected) => (
-            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+            <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
               {selected.map((value) => (
                 <Chip key={value} label={value} />
               ))}
@@ -85,6 +86,34 @@ function MultipleSelectChip() {
   );
 }
 
+export default function ActionDefinition() {
+  return (
+    <React.Fragment>
+      <Typography variant="h6" gutterBottom>
+        Action Creation
+      </Typography>
+      <Typography variant="subtitle1" gutterBottom>
+        An Action is the other kind of skill you can choose. This kind of
+        interaction will let you perform some operation using the chatbot.
+      </Typography>
+      <Typography variant="subtitle1" gutterBottom>
+        You can build an action selecting some of the available operations.
+      </Typography>
+
+      <Grid container spacing={3} marginTop={1}>
+        <Grid item xs={2} sm={2} />
+        <Grid item xs={9} sm={9}>
+          {
+            //<SelectAutoWidth label={"Intents order"}/>
+          }
+          <MultipleSelectChip />
+        </Grid>
+
+        <Grid item xs={1} sm={1} />
+      </Grid>
+    </React.Fragment>
+  );
+}
 
 // function SelectAutoWidth(props) {
 //   const [age, setAge] = React.useState(1);
@@ -116,32 +145,3 @@ function MultipleSelectChip() {
 //     </div>
 //   );
 // }
-
-export default function ActionDefinition() {
-  return (
-    <React.Fragment>
-      <Typography variant="h6" gutterBottom>
-        Action Creation
-      </Typography>
-      <Typography variant="subtitle1" gutterBottom>
-        An Action is the other kind of skill you can choose. 
-        This kind of interaction will let you perform some operation using the chatbot. 
-      </Typography>
-      <Typography variant="subtitle1" gutterBottom>
-        You can build an action selecting some of the available operations. 
-      </Typography>
-      
-      <Grid container spacing={3} marginTop={1}>
-        <Grid item xs={2} sm={2}/>
-        <Grid item xs={9} sm={9} >
-          {
-            //<SelectAutoWidth label={"Intents order"}/>
-          }
-          <MultipleSelectChip />
-        </Grid>
-
-        <Grid item xs={1} sm={1}/>
-      </Grid>
-    </React.Fragment>
-  );
-}

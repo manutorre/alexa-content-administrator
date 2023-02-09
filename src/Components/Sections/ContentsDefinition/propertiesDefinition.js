@@ -196,7 +196,7 @@ export default function PropertiesDefinition({
             disabled={!property.text}
           />
         </Grid>
-        <Grid item xs={1} sm={1} marginTop={2}>
+        <Grid item xs={1} sm={1}>
           <Button
             startIcon={<AddIcon />}
             onClick={handleButtonClick}
@@ -237,7 +237,7 @@ export default function PropertiesDefinition({
             disabled={!property.src || !!property.text}
           />
         </Grid>
-        <Grid item xs={1} sm={1} marginTop={2}>
+        <Grid item xs={1} sm={1}>
           <Button
             startIcon={<AddIcon />}
             onClick={handleButtonClick}

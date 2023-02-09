@@ -61,7 +61,7 @@ let steps = contentSteps;
 const skillSteps = [
   "Actions Definition",
   "Step Definition",
-  "Action Steps",
+  // "Action Steps",
   // "Information models selection",
   // "Operation Creation",
   // "Action Skill Definition (Optional)",
@@ -112,14 +112,28 @@ function getStepContent(
   }
 }
 
-function getSkillContent(step) {
+function getSkillContent(step, saveInformation, handleNext, handleBack) {
   switch (step) {
     case 0:
-      return <IntentsDefinition />;
+      return (
+        <IntentsDefinition
+          step={step}
+          saveInformation={saveInformation}
+          handleNext={handleNext}
+          handleBack={handleBack}
+        />
+      );
     case 1:
-      return <StepDefinition />;
-    case 2:
-      return <DialogDefinition />;
+      return (
+        <StepDefinition
+          step={step}
+          saveInformation={saveInformation}
+          handleNext={handleNext}
+          handleBack={handleBack}
+        />
+      );
+    // case 2:
+    //   return <DialogDefinition />;
 
     // case 3:
     //   return <ActionDefinition />;
@@ -145,6 +159,7 @@ export default function Checkout() {
   const [activeForm, setActiveForm] = useState("contentsDefinition");
   const [inspectMode, setInspectMode] = useState(false);
   const [contentData, setContentData] = useState(DEFAULT_CONTENT_DATA);
+  const [showDialog, setShowDialog] = useState(false);
 
   const onMessageReceive = ({ data }) => {
     const type = data?.type;
@@ -239,9 +254,7 @@ export default function Checkout() {
   };
 
   const goToMenu = () => {
-    setActiveForm("skillsDefinition");
-    steps = skillSteps;
-    setActiveStep(0);
+    setShowDialog(!showDialog);
   };
 
   const goToContent = (step = 0) => {
@@ -259,11 +272,11 @@ export default function Checkout() {
               Well done!
             </Typography>
             <Typography variant="subtitle1">
-              You created a content that can be recognized by the chatbot!
+              You created a type of content that can be recognized by the
+              chatbot!
             </Typography>
             <Typography variant="subtitle1">
-              Press on {`Skills Definition`.toUpperCase()} to follow on with the
-              process
+              Press on {`Next step`.toUpperCase()} to follow on with the process
             </Typography>
             <Box sx={{ display: "flex", justifyContent: "space-between" }}>
               <Button onClick={handleBack} sx={{ mt: 3, ml: 1 }}>
@@ -274,9 +287,28 @@ export default function Checkout() {
                 onClick={goToMenu}
                 sx={{ mt: 3, ml: 1 }}
               >
-                Skills Definition
+                Next step
               </Button>
             </Box>
+            <Dialog
+              open={showDialog}
+              dialogText={
+                "Press on CONTENT DEFINITION if you want to continue selecting new contents or press on SKILL DEFINITION to continue with chatbot creation process."
+              }
+              dialogTitle={"What you want to do next?"}
+              agreeText="SKILL DEFINITION"
+              disagreeText="CONTENT DEFINITION"
+              handleDisagree={() => {
+                setShowDialog(!showDialog);
+                setActiveStep(0);
+              }}
+              handleAgree={() => {
+                setShowDialog(!showDialog);
+                setActiveForm("skillsDefinition");
+                steps = skillSteps;
+                setActiveStep(0);
+              }}
+            />
           </Fragment>
         ) : (
           <Fragment>
@@ -323,8 +355,13 @@ export default function Checkout() {
           </Fragment>
         ) : (
           <Fragment>
-            {getSkillContent(activeStep)}
-            <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
+            {getSkillContent(
+              activeStep,
+              saveInformation,
+              handleNext,
+              handleBack
+            )}
+            {/* <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
               <Button
                 onClick={activeStep !== 0 ? handleBack : () => goToContent(2)}
                 sx={{ mt: 3, ml: 1 }}
@@ -339,7 +376,7 @@ export default function Checkout() {
               >
                 {activeStep === steps.length - 1 ? "Finish" : "Next"}
               </Button>
-            </Box>
+            </Box> */}
           </Fragment>
         )}
       </Fragment>
@@ -410,10 +447,16 @@ export default function Checkout() {
               </Grid>
             )}
           </Grid>
-          <Stepper activeStep={activeStep} sx={{ py: 3, px: 2 }}>
+          <Stepper
+            activeStep={activeStep}
+            sx={{ py: 3, px: 2 }}
+            alternativeLabel
+          >
             {steps.map((label) => (
               <Step key={label}>
-                <StepLabel>{label}</StepLabel>
+                <StepLabel>
+                  <Typography variant="subtitle1">{label}</Typography>
+                </StepLabel>
               </Step>
             ))}
           </Stepper>

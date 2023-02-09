@@ -14,6 +14,9 @@ export default function AlertDialog({
   dialogText,
   handleDisagree,
   handleAgree,
+  dialogTitle = "Element data recognizing",
+  agreeText = "Agree",
+  disagreeText = "Disagree",
 }) {
   return (
     <Dialog
@@ -22,18 +25,18 @@ export default function AlertDialog({
       aria-labelledby="alert-dialog-title"
       aria-describedby="alert-dialog-description"
     >
-      <DialogTitle id="alert-dialog-title">
-        {"Element data recognizing"}
-      </DialogTitle>
+      <DialogTitle id="alert-dialog-title">{dialogTitle}</DialogTitle>
       <DialogContent>
         {/* <DialogContentText id="alert-dialog-description"> */}
         {dialogText}
         {/* </DialogContentText> */}
       </DialogContent>
       <DialogActions>
-        {handleDisagree && <Button onClick={handleDisagree}>Disagree</Button>}
+        {handleDisagree && (
+          <Button onClick={handleDisagree}>{disagreeText}</Button>
+        )}
         <Button onClick={handleAgree} autoFocus>
-          Agree
+          {agreeText}
         </Button>
       </DialogActions>
     </Dialog>

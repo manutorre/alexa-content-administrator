@@ -49,8 +49,10 @@ export default function ContentSelection({
   );
   const tasks = {
     mainScreen: "Enable inspect mode",
-    searchUrl:
-      "Make a search using the search bar from the website to catch the search url and enable inspect mode",
+    searchUrlIntro:
+      "Make a search using the search bar from the website to catch the search url and enable inspect mode.",
+    searchUrlBody:
+      "Then go to the website and you will see how the web elements will highlight with a RED color box while you hover them.",
     menuNavigation:
       "Access to some section from the website menu and enable inspect mode",
   };
@@ -312,7 +314,7 @@ export default function ContentSelection({
 
   return (
     <Fragment>
-      <Typography component="h6" gutterBottom>
+      <Typography variant="h6" gutterBottom>
         Contents Selection
       </Typography>
       <Grid container>
@@ -334,8 +336,15 @@ export default function ContentSelection({
           <ContentSelectionStep
             showArrowIcon={showArrowIcon}
             showCheckIcon={showCheckIcon}
-            message={tasks[wayOfAccess]}
+            message={tasks[wayOfAccess + "Intro"]}
           />
+          {showCheckIcon && (
+            <ContentSelectionStep
+              showArrowIcon={false}
+              showCheckIcon={false}
+              message={tasks[wayOfAccess + "Body"]}
+            />
+          )}
         </Grid>
       )}
       {showCheckIcon && (
