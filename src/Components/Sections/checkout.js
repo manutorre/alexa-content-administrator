@@ -21,9 +21,9 @@ import ContentSelection from "./ContentsDefinition/contentSelection.js";
 import PropertiesDefinition from "./ContentsDefinition/propertiesDefinition.js";
 import UtterancesDefinition from "./ContentsDefinition/utterancesDefinition.js";
 // import CategoriesDefinition from "./ContentsDefinition/categoriesDefinition.js";
-import Chatbot from "./chatbot.js";
+// import Chatbot from "./chatbot.js";
 import DialogDefinition from "./SkillsDefinition/dialogDefinition.js";
-import ActionDefinition from "./SkillsDefinition/actionDefinition.js";
+// import ActionDefinition from "./SkillsDefinition/actionDefinition.js";
 import IntentsDefinition from "./SkillsDefinition/intentsDefinition.js";
 import OperationCreation from "./SkillsDefinition/operationCreation.js";
 import Dialog from "./ContentsDefinition/dialog";
@@ -161,34 +161,36 @@ export default function Checkout() {
   const [contentData, setContentData] = useState(DEFAULT_CONTENT_DATA);
   const [showDialog, setShowDialog] = useState(false);
 
-  const onMessageReceive = ({ data }) => {
-    const type = data?.type;
-    const contentdata = data?.contentData;
-    if (type === "contentData") {
-      console.log("Message received in checkout ", { data });
-      if (contentdata) {
-        const dataInLocalStorage = JSON.parse(contentdata);
-        setContentData({ ...contentData, ...dataInLocalStorage });
-      }
-    }
-  };
+  // const onMessageReceive = ({ data }) => {
+  //   const type = data?.type;
+  //   const contentdata = data?.contentData;
+  //   if (type === "contentData") {
+  //     console.log("Message received in checkout ", { data });
+  //     if (contentdata) {
+  //       const dataInLocalStorage = JSON.parse(contentdata);
+  //       setContentData({ ...contentData, ...dataInLocalStorage });
+  //     }
+  //   }
+  // };
 
   useEffect(() => {
-    // console.log({
-    //   json: JSON.parse(window.parent.localStorage.getItem("contentData")),
-    // });
+    const localContentData = window.localStorage.getItem("contentData");
+
+    console.log({ localContentData });
+    setContentData(JSON.parse(localContentData));
     // localStorage.clear();
-    window.parent.postMessage(
-      {
-        mge: "getContentData",
-      },
-      "*"
-    );
-    window.addEventListener("message", (e) => onMessageReceive(e));
+    // window.parent.postMessage(
+    //   {
+    //     mge: "getContentData",
+    //   },
+    //   "*"
+    // );
+    // window.addEventListener("message", (e) => onMessageReceive(e));
   }, []);
 
   const saveInformation = (newData, operation) => {
     console.log(`New data: "${{ newData }}"`);
+    let newContentData = contentData;
 
     switch (operation) {
       case "setContent": {
@@ -207,41 +209,54 @@ export default function Checkout() {
           {}
         );
 
-        setContentData({ ...contentData, ...newContentInfo });
+        newContentData = { ...newContentData, ...newContentInfo };
         break;
       }
       case "setProperties": {
-        const propertyNames = contentData.properties.map(
-          (property) => property.text
+        const propertyNames = newContentData.properties.map(
+          (property) => property.name
         );
         const newProperties = newData.filter((property) => {
-          return !propertyNames.includes(property.text);
+          const nameIncluded = propertyNames.filter((name) =>
+            name?.toLowerCase().match(property.name?.toLowerCase())
+          );
+          return nameIncluded?.length === 0;
         });
-        contentData.properties = [...contentData.properties, ...newProperties];
-        setContentData(contentData);
+
+        newContentData.properties = [
+          ...newContentData.properties,
+          ...newProperties,
+        ];
         break;
       }
       case "setUtterances": {
-        const utteranceNames = contentData.utterances.map(
+        const utteranceNames = newContentData.utterances.map(
           (utterance) => utterance.text
         );
         const newUtterances = newData.filter((utterance) => {
           return !utteranceNames.includes(utterance.text);
         });
-        contentData.utterances = [...contentData.utterances, ...newUtterances];
-        setContentData(contentData);
+        newContentData.utterances = [
+          ...newContentData.utterances,
+          ...newUtterances,
+        ];
         break;
       }
     }
-    // console.log({ stringify: JSON.stringify(contentData.current) });
-    // window.parent.localStorage.setItem(
-    window.parent.postMessage(
-      {
-        mge: "setContentData",
-        contentData: JSON.stringify(contentData),
-      },
-      "*"
+    console.log({ stringify: JSON.stringify(newContentData) });
+    setContentData(newContentData);
+
+    window.localStorage.setItem(
+      "localContentData",
+      JSON.stringify(newContentData)
     );
+    // window.parent.postMessage(
+    //   {
+    //     mge: "setContentData",
+    //     contentData: JSON.stringify(contentData),
+    //   },
+    //   "*"
+    // );
   };
 
   const handleNext = () => {
@@ -469,15 +484,15 @@ export default function Checkout() {
   );
 }
 
-function Copyright() {
-  return (
-    <Typography variant="body2" color="text.secondary" align="center">
-      {"Copyright © "}
-      <Link color="inherit" href="https://mui.com/">
-        Your Website
-      </Link>{" "}
-      {new Date().getFullYear()}
-      {"."}
-    </Typography>
-  );
-}
+// function Copyright() {
+//   return (
+//     <Typography variant="body2" color="text.secondary" align="center">
+//       {"Copyright © "}
+//       <Link color="inherit" href="https://mui.com/">
+//         Your Website
+//       </Link>{" "}
+//       {new Date().getFullYear()}
+//       {"."}
+//     </Typography>
+//   );
+// }

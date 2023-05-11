@@ -23,17 +23,19 @@ export default function PropertiesDefinition({
   const [inputValue, setInputValue] = useState("");
   const [inputImageValue, setInputImageValue] = useState("");
   const dialogText = useRef(null);
-  const [showDialog, setShowDialog] = useState(false);
+  const [showDialog, setShowDialog] = useState("");
   const [property, setProperty] = useState({});
-  const [properties, setProperties] = useState(contentData?.properties || []);
-  const [imgStyle, setStyle] = useState({
-    // position:'absolute',
-    // left:'40%',
-    // bottom:'25%',
-    height: "200px",
-    width: "300px",
-  });
   const contentValue = useRef(contentData);
+  const [properties, setProperties] = useState(
+    contentData?.properties || contentValue?.properties || []
+  );
+  // const [imgStyle, setStyle] = useState({
+  //   // position:'absolute',
+  //   // left:'40%',
+  //   // bottom:'25%',
+  //   height: "200px",
+  //   width: "300px",
+  // });
 
   useEffect(() => {
     window.addEventListener("message", (e) => onMessageReceive(e));
@@ -45,7 +47,7 @@ export default function PropertiesDefinition({
     if (data.type === "titleAndLink") {
       console.log("Data info ", data.link);
       const newData = assignTitleAndLink(data.link, data.title);
-      window.parent.postMessage({ mge: "hideMask" }, "*");
+      // window.parent.postMessage({ mge: "hideMask" }, "*");
 
       const { text, url } = newData;
       dialogText.current = (
@@ -72,16 +74,33 @@ export default function PropertiesDefinition({
           </Typography>
         </Box>
       );
-      setShowDialog(true);
+      setShowDialog("feature");
     } else if (data.type === "image") {
-      const { src, data, linkUrl, urlPagina } = data.image;
+      const image = data.image;
+      const { src, linkUrl, urlPagina } = image;
       const newProperty = {
         src,
-        data,
+        data: image?.data,
         linkUrl,
         urlPagina,
       };
       setProperty(newProperty);
+
+      dialogText.current = (
+        <Box
+          sx={{
+            flexDirection: "row",
+            flexWrap: "wrap",
+            display: "flex",
+            alignItems: "center",
+            textAlign: "center",
+            justifyContent: "space-between",
+          }}
+        >
+          <Typography variant="body1">Image correctly detected</Typography>
+        </Box>
+      );
+      setShowDialog("image");
     }
   };
 
@@ -111,13 +130,23 @@ export default function PropertiesDefinition({
   };
 
   const handleButtonClick = () => {
-    let prop;
-    if (inputValue && (property.text || property.src)) {
-      prop = { ...property, name: inputValue };
+    const input = inputValue || inputImageValue;
+    const propertyNames = properties.map((property) => property.name);
+    const nameIncluded = propertyNames.filter((name) =>
+      name?.toLowerCase().match(input?.toLowerCase())
+    );
+
+    if (
+      nameIncluded?.length === 0 &&
+      input &&
+      (property.text || property.src)
+    ) {
+      const prop = { ...property, name: input };
       setProperty(prop);
       setProperties([...properties, prop]);
-      setInputValue("");
     }
+    setInputValue("");
+    setProperty({});
   };
 
   const handleConfirm = () => {
@@ -146,7 +175,11 @@ export default function PropertiesDefinition({
         Which{" "}
         <Box fontWeight="fontWeightBold" display="inline">
           {`${
-            contentValue?.current?.name ? contentValue.current.name : "content"
+            contentValue.current?.name
+              ? contentValue.current.name
+              : contentData?.name
+              ? contentData.name
+              : "content"
           }`}{" "}
         </Box>{" "}
         features the chatbot should recognize?
@@ -252,10 +285,17 @@ export default function PropertiesDefinition({
       </Grid>
 
       <Dialog
-        open={showDialog}
+        open={showDialog === "feature"}
         dialogText={dialogText.current}
         handleDisagree={handleDisagree}
         handleAgree={handleAgree}
+      />
+
+      <Dialog
+        open={showDialog === "image"}
+        dialogText={dialogText.current}
+        handleAgree={handleAgree}
+        agreeText={"OK"}
       />
       <Footer step={step} handleBack={handleBack} handleNext={handleConfirm} />
     </Fragment>

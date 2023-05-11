@@ -34,18 +34,25 @@ export default function ContentSelection({
   const [showArrowIcon, setShowArrowIcon] = useState(false);
   const [showCheckIcon, setShowCheckIcon] = useState(false);
   const [inputValue, setInputValue] = useState(
-    contentData.current.text?.split(" ")[0] || ""
+    contentdata?.name ||
+      contentData.current?.text?.split(" ")[0] ||
+      contentdata?.text ||
+      ""
   );
-  const [siblings, setSiblings] = useState(contentData.current?.siblings || []);
-  const [imgStyle, setStyle] = useState({
-    // position:'absolute',
-    // left:'40%',
-    // bottom:'25%',
-    height: "200px",
-    width: "300px",
-  });
+  const [siblings, setSiblings] = useState(
+    contentData.current?.siblings || contentdata?.siblings || []
+  );
+  // const [imgStyle, setStyle] = useState({
+  //   // position:'absolute',
+  //   // left:'40%',
+  //   // bottom:'25%',
+  //   height: "200px",
+  //   width: "300px",
+  // });
   const [wayOfAccess, setWayOfAccess] = useState(
-    contentData.current.wayOfAccess?.type || ""
+    contentData.current.wayOfAccess?.type ||
+      contentdata?.wayOfAccess?.type ||
+      ""
   );
   const tasks = {
     mainScreen: "Enable inspect mode",
@@ -217,6 +224,7 @@ export default function ContentSelection({
         type: value,
       },
     };
+    setWayOfAccess(value);
 
     // if (!!wayOfAccess && wayOfAccess !== value) {
     //   dialogText.current = (
@@ -231,8 +239,6 @@ export default function ContentSelection({
     //   setShowDialog(true);
     //   return;
     // }
-
-    setWayOfAccess(value);
 
     // shouldShowArrowIcon(event.target.value);
     // shouldShowCheckIcon(event.target.value);
