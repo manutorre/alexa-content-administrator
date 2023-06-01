@@ -34,10 +34,8 @@ class App extends Component {
     switch (this.state.section) {
       case "checkout":
         return <Checkout />;
-        break;
       case "chatbot": {
         return <Chatbot />;
-        break;
       }
       case "stepper":
         return (
@@ -46,7 +44,6 @@ class App extends Component {
             changeSection={(section) => this.changeSection(section)}
           />
         );
-        break;
       case "semantic":
         return (
           <Entry
@@ -54,7 +51,6 @@ class App extends Component {
             changeSection={(section) => this.changeSection(section)}
           />
         );
-        break;
       case "contentWords":
         return (
           <ContentdWords
@@ -62,7 +58,6 @@ class App extends Component {
             changeSection={(section) => this.changeSection(section)}
           />
         );
-        break;
       case "category":
         return (
           <Category
@@ -70,7 +65,6 @@ class App extends Component {
             changeSection={(section) => this.changeSection(section)}
           />
         );
-        break;
       case "categoryWords":
         return (
           <CategoryWords
@@ -78,7 +72,6 @@ class App extends Component {
             changeSection={(section) => this.changeSection(section)}
           />
         );
-        break;
       default:
         return (
           <Entry
@@ -86,7 +79,6 @@ class App extends Component {
             changeSection={(section) => this.changeSection(section)}
           />
         );
-        break;
     }
   }
 }

@@ -113,9 +113,9 @@ export default function StepDefinition({
           }
         </Typography>
         <Typography variant="subtitle1">
-          {"If you only make a search using the content identifier "}
+          {"If you only make a search using the content "}
           <Box fontWeight="fontWeightBold" display="inline">
-            {"name"}
+            {"identifier"}
           </Box>
           {", the chatbot will return "}
           <Box fontWeight="fontWeightBold" display="inline">
@@ -132,7 +132,7 @@ export default function StepDefinition({
           </Box>
           {'"Search '}
           <Box fontWeight="fontWeightBold" display="inline">
-            {"[name]"}
+            {"[identifier]"}
           </Box>
           {'"'}
         </Typography>
@@ -153,11 +153,11 @@ export default function StepDefinition({
           </Box>
           {'"Search '}
           <Box fontWeight="fontWeightBold" display="inline">
-            {"[price | stars | image]"}
+            {"[name | price | image]"}
           </Box>
           {" from "}
           <Box fontWeight="fontWeightBold" display="inline">
-            {"[name]"}
+            {"[identifier]"}
           </Box>
           {'"'}
         </Typography>
@@ -175,7 +175,7 @@ export default function StepDefinition({
         <Grid item xs={12} sm={12}>
           <Typography variant="subtitle1" gutterBottom>
             {
-              "The chatbot will try to find the response from the contents you defined before. Eg. for the next request: "
+              'The chatbot will try to find the response from the contents defined in the "Information Models Definition" stage. Eg. for the next request: '
             }
           </Typography>
         </Grid>
@@ -184,7 +184,14 @@ export default function StepDefinition({
             <Box fontWeight="fontWeightBold" display="inline">
               {"User request: "}
             </Box>
-            {'"Search headphones"'}
+            {'"Search '}
+            <Box fontWeight="fontWeightBold" display="inline">
+              {'headphones"'}
+            </Box>
+            {/* {" from "}
+            <Box fontWeight="fontWeightBold" display="inline">
+              {'products"'}
+            </Box> */}
           </Typography>
         </Grid>
         <Grid item xs={12} sm={12}>
@@ -195,19 +202,22 @@ export default function StepDefinition({
             </Box>{" "}
             {" between all "}
             <Box fontWeight="fontWeightBold" display="inline">
-              {"[name]"}
+              {"[identifier]"}
             </Box>
-            {" features from the contents defined."}
+            {" values from the contents defined."}
           </Typography>
         </Grid>
-        <Grid item xs={12} sm={12}>
+        {/* <Grid item xs={12} sm={12}>
           <Typography variant="subtitle1">
             {"Eg.: Between Contents identified as "}
             <Box fontWeight="fontWeightBold" display="inline">
               {"[Products | News]"}
             </Box>
           </Typography>
-        </Grid>
+        </Grid> */}
+        {
+          //TODO: Podria ser necesario que el chatbot necesite mas info para saber en que contenido buscar
+        }
       </Grid>
       {/* <Dialog
         open={showDialog}

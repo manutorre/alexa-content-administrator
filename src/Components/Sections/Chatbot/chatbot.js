@@ -315,12 +315,12 @@ export default function Chatbot() {
       <Grid container sx={{}}>
         <Grid xs={1} sm={3} />
         <Grid
-          container
           xs={12}
           sm={6}
           sx={{
             overflowY: "scroll",
-            maxHeight: (window.innerHeight * 2) / 3,
+            height: (window.innerHeight * 3) / 4,
+            maxHeight: (window.innerHeight * 3) / 4,
             bgcolor: "lightblue",
             py: 2,
             m: 2,
