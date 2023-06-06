@@ -1,0 +1,75 @@
+{
+    "welcome": {
+        "intro": {
+            "type": "Chatbot",
+            "text": "I will need some information from you to complete the form action"
+        },
+        "slot1": {
+            "type": "Chatbot",
+            "text": "What is your name and surname?"
+        },
+        "nextStep": "step2"
+    },
+    "step2": {
+        "steps": [
+            {
+                "type": "Chatbot",
+                "text": "Where do you live? Select one option from next countries"
+            },
+            {
+                "type": "User",
+                "options": [
+                    "Argentina",
+                    "Brasil",
+                    "Uruguay"
+                ],
+                "id": "req2"
+            }
+        ],
+        "nextStep": "step3"
+    },
+    "step3": {
+        "steps": [
+            {
+                "type": "Chatbot",
+                "text": "Select one option from next states"
+            },
+            {
+                "type": "User",
+                "options": {
+                    "Argentina": [
+                        "Buenos Aires",
+                        "Mendoza",
+                        "Cordoba"
+                    ],
+                    "Brasil": [
+                        "Sao Paulo",
+                        "Rio de Janeiro",
+                        "Santa Catarina"
+                    ],
+                    "Uruguay": [
+                        "Montevideo",
+                        "Maldonado",
+                        "Colonia"
+                    ]
+                },
+                "id": "req3"
+            }
+        ],
+        "nextStep": "slot4"
+    },
+    "slot4": {
+        "type": "Chatbot",
+        "text": "Do you have some email address?",
+        "nextStep": "slot5"
+    },
+    "slot5": {
+        "type": "Chatbot",
+        "text": "I need your email address again to confirm.",
+        "nextStep": "submit"
+    },
+    "submit": {
+        "type": "Chatbot",
+        "text": "Is all the information ok? If no, you can edit some or all the info. Just ask for some slot"
+    }
+}

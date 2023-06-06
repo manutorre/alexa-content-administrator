@@ -1,0 +1,50 @@
+{
+    "welcome": {
+        "type": "Chatbot",
+        "text": "I'm a Chatbot that can make easier you searchs in the Web. What are you looking for?",
+        "step": 1
+    },
+    "entity": {
+        "type": "Chatbot",
+        "step": 2,
+        "text": "Ok. What do you want to find?",
+        "options": [
+            "JBL Tune",
+            "Sony Zx",
+            "Jabra Evolve"
+        ]
+    },
+    "target": {
+        "type": "Chatbot",
+        "step": 3,
+        "text": "Ok. Where should I search?",
+        "options": [
+            "Product"
+        ]
+    },
+    "source": {
+        "type": "Chatbot",
+        "step": 4,
+        "text": "From where should I search?",
+        "options": [
+            "Amazon",
+            "MercadoLibre",
+            "E-commerce"
+        ]
+    },
+    "Amazon": {
+        "type": "Chatbot",
+        "step": 5,
+        "text": "I found SLOT_1 results from Amazon.com. I will show you the first 10 results."
+    },
+    "MercadoLibre": {
+        "type": "Chatbot",
+        "step": 5,
+        "text": "I found SLOT_1 results from MercadoLibre.com. I will show you the first 10 results."
+    },
+    "E-commerce": {
+        "type": "Chatbot",
+        "step": 5,
+        "text": "I found SLOT_1 results from all E-commerce. I will show you the first 10 results."
+    }
+}

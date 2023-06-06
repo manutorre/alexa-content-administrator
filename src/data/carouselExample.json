@@ -1,0 +1,31 @@
+{
+    "step1": {
+        "type": "Chatbot",
+        "text": "How can I help you?",
+        "step": 1
+    },
+    "step2": {
+        "type": "Chatbot",
+        "text": "Here are the main options available for \"On-ear\" headphones",
+        "step": 2
+    },
+    "step3": {
+        "type": "Chatbot",
+        "options": [
+            "JBL Tune",
+            "Sony Zx",
+            "Jabra Evolve"
+        ],
+        "step": 3
+    },
+    "step4": {
+        "type": "Chatbot",
+        "text": "Here are the main options available for \"On-ear\" headphones",
+        "step": 4
+    },
+    "step5": {
+        "type": "Chatbot",
+        "carousel": "itemData",
+        "step": 5
+    }
+}
