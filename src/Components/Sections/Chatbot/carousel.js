@@ -38,7 +38,7 @@ const images = [
 const Carousel = ({ carousel }) => {
   //   const theme = useTheme();
   const [activeStep, setActiveStep] = useState(0);
-  const maxSteps = 4;
+  const maxSteps = 1;
 
   const handleNext = () => {
     setActiveStep((prevActiveStep) => prevActiveStep + 1);
@@ -65,7 +65,9 @@ const Carousel = ({ carousel }) => {
           bgcolor: "background.default",
         }}
       >
-        <Typography>On-ear Headphones</Typography>
+        <Typography
+        //Aca va a ir la entidad de busqueda
+        ></Typography>
       </Paper>
       <SwipeableViews
         // axis={theme.direction === "rtl" ? "x-reverse" : "x"}
@@ -73,8 +75,8 @@ const Carousel = ({ carousel }) => {
         onChangeIndex={handleStepChange}
         enableMouseEvents
       >
-        {[1, 1, 1, 1].map(() => (
-          <TitlebarImageList carousel={carousel} />
+        {[1].map((item, index) => (
+          <TitlebarImageList carousel={carousel} key={index} />
         ))}
         {/* {images.map((step, index) => (
           <div key={step.label}>

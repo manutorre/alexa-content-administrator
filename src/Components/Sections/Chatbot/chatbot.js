@@ -4,9 +4,9 @@ import { Grid, TextField, Box } from "@mui/material";
 import ConversationalBox from "./conversationalBox";
 import Input from "./input";
 import FORM from "../../../data/formPrompts.json";
-import collection from "../../../data/objectsCollection";
+import { collection } from "../../../data/objectsCollection";
 import chatbotSteps from "../../../data/chatbotSteps.json";
-import { parseRequest, findNextStep } from "./utils";
+import { parseRequest, findNextStep, getNResults } from "./utils";
 
 export default function Chatbot() {
   const [requests, setRequests] = useState([]);
@@ -19,12 +19,18 @@ export default function Chatbot() {
 
   useEffect(() => {
     const lastRequest = requests[requests.length - 1];
-    const nextStep = findNextStep(lastRequest);
+    if (lastRequest) {
+      const nextStep = findNextStep(lastRequest);
+      console.log({ requestParams });
+      const nResults = getNResults(requestParams.current?.entity);
+      const text = nextStep.text.replace(/SLOT_1/g, nResults);
+      const nextStepModified = { ...nextStep, text };
 
-    setTimeout(() => {
-      newSteps = [...steps, lastRequest, nextStep];
-      setSteps(newSteps);
-    }, 1000);
+      setTimeout(() => {
+        const newSteps = [...steps, lastRequest, nextStepModified];
+        setSteps(newSteps);
+      }, 1000);
+    }
   }, [requests]);
 
   const getLastStepType = () => {
@@ -34,10 +40,11 @@ export default function Chatbot() {
 
   const onSubmit = (inputValue) => {
     // const id = "req" + requests.length;
-    // if (getLastStepType() === "User") {
-    //   return;
-    // }
+    if (getLastStepType() === "User") {
+      return;
+    }
     const params = parseRequest(inputValue, requestParams.current);
+    console.log({ params });
     const newRequest = { type: "User", text: inputValue, params }; //, id };
     const newRequests = [...requests, newRequest];
     requestParams.current = params;
@@ -142,7 +149,7 @@ export default function Chatbot() {
                       type={type}
                       text={text}
                       options={options}
-                      carousel={carousel}
+                      carousel={carousel && collection}
                       // editable={editable}
                       // onEdit={onEdit}
                       id={id}

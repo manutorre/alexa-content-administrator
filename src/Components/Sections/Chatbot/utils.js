@@ -3,6 +3,17 @@ import { collection } from "../../../data/objectsCollection";
 import steps from "../../../data/chatbotSteps.json";
 
 /**
+ * Returns the number of results in the collection that have a title
+ * matching the given entity.
+ *
+ * @param {string} entity - The entity to match against the titles in the collection
+ * @return {number} The number of results in the collection matching the entity
+ */
+export const getNResults = (entity) => {
+  return collection.filter((item) => item.title === entity).length;
+};
+
+/**
  * Parses the input string to extract the target, source, and entity values and constructs an object with the search action.
  * When some value is missing, returns the string "missing" for the property.
  *
@@ -25,13 +36,13 @@ export const parseRequest = (input, currentParams) => {
   return {
     action: "search",
     entity: entityFound
-      ? currentParams.entity || entityFound[0]
+      ? entityFound[0] || currentParams.entity
       : currentParams.entity || "missing",
     target: targetFound
-      ? currentParams.target || targetFound[0]
+      ? targetFound[0] || currentParams.target
       : currentParams.target || "missing",
     source: sourceFound
-      ? currentParams.source || sourceFound[0]
+      ? sourceFound[0] || currentParams.source
       : currentParams.source || "missing",
   };
 };

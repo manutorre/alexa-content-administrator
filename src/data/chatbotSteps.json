@@ -35,16 +35,19 @@
     "Amazon": {
         "type": "Chatbot",
         "step": 5,
-        "text": "I found SLOT_1 results from Amazon.com. I will show you the first 10 results."
+        "text": "I found SLOT_1 results from Amazon.com. I will show you the first 10 results.",
+        "carousel": true
     },
     "MercadoLibre": {
         "type": "Chatbot",
         "step": 5,
-        "text": "I found SLOT_1 results from MercadoLibre.com. I will show you the first 10 results."
+        "text": "I found SLOT_1 results from MercadoLibre.com. I will show you the first 10 results.",
+        "carousel": true
     },
     "E-commerce": {
         "type": "Chatbot",
         "step": 5,
-        "text": "I found SLOT_1 results from all E-commerce. I will show you the first 10 results."
+        "text": "I found SLOT_1 results from all E-commerce. I will show you the first 10 results.",
+        "carousel": true
     }
 }

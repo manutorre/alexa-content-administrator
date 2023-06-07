@@ -36,8 +36,13 @@ const ChatbotItem = ({ text, options, carousel }) => {
       {!!text && text}
       {!!options && (
         <Stack direction="row" spacing={2}>
-          {options.map((option) => (
-            <Button variant="outlined" onClick={onButtonClicked} value={option}>
+          {options.map((option, index) => (
+            <Button
+              variant="outlined"
+              onClick={onButtonClicked}
+              value={option}
+              key={index}
+            >
               {option}
             </Button>
           ))}
@@ -141,7 +146,13 @@ const ConversationalItem = ({
 }) => {
   switch (type) {
     case "Chatbot":
-      return <ChatbotItem text={text} options={options} carousel={carousel} />;
+      return (
+        <>
+          <ChatbotItem text={text} />
+          {options && <UsertItem options={options} />}
+          {carousel && <ChatbotItem carousel={carousel} />}
+        </>
+      );
     case "User":
       return (
         <UsertItem
