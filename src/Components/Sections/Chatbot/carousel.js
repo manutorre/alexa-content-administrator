@@ -53,16 +53,16 @@ const Carousel = ({ carousel }) => {
   };
 
   return (
-    <Box sx={{ flexGrow: 1 }}>
+    <Box sx={{ width: 305 }}>
       <Paper
         square
         elevation={0}
         sx={{
           display: "flex",
-          alignItems: "center",
-          height: 50,
+          // justifyContent: "center",
+          // height: 5,
           pl: 2,
-          bgcolor: "background.default",
+          // bgcolor: "background.default",
         }}
       >
         <Typography
@@ -75,9 +75,9 @@ const Carousel = ({ carousel }) => {
         onChangeIndex={handleStepChange}
         enableMouseEvents
       >
-        {[1].map((item, index) => (
-          <TitlebarImageList carousel={carousel} key={index} />
-        ))}
+        {/* {[1].map((item, index) => ( */}
+        <TitlebarImageList carousel={carousel} />
+        {/* ))} */}
         {/* {images.map((step, index) => (
           <div key={step.label}>
             {Math.abs(activeStep - index) <= 2 ? (

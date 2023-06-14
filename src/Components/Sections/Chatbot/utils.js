@@ -2,6 +2,30 @@ import { DEFAULT_TARGET, DEFAULT_SOURCES } from "../../../data/defaultSources";
 import { collection } from "../../../data/objectsCollection";
 import steps from "../../../data/chatbotSteps.json";
 
+export const getText = (nextStep, currentParams) => {
+  let text = nextStep.text;
+  console.log({ nextStep });
+  switch (nextStep.callbackForSlot) {
+    case "getNResults":
+      const nResults = getNResults(currentParams?.entity);
+      text = text.replace(/@slot/g, nResults);
+      break;
+    case "getSlot":
+      text = text.replace(/@slot/g, currentParams?.input);
+      break;
+  }
+  const { entity, target, source } = currentParams;
+  text = text.replace(/@entity/g, entity);
+  text = text.replace(/@target/g, target);
+  text = text.replace(/@source/g, source);
+
+  return text;
+};
+
+export const getStorageConversations = () => {
+  return JSON.parse(localStorage.getItem("conversations")) || [];
+};
+
 /**
  * Returns the number of results in the collection that have a title
  * matching the given entity.
@@ -34,6 +58,7 @@ export const parseRequest = (input, currentParams) => {
   const entityFound = input.match(reg3);
 
   return {
+    input,
     action: "search",
     entity: entityFound
       ? entityFound[0] || currentParams.entity

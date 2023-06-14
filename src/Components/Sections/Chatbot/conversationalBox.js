@@ -9,6 +9,7 @@ import {
   Button,
   IconButton,
   TextField,
+  Typography,
 } from "@mui/material";
 import Carousel from "./carousel";
 import BorderColorIcon from "@mui/icons-material/BorderColor";
@@ -33,7 +34,7 @@ const ChatbotItem = ({ text, options, carousel }) => {
   return (
     <Item sx={{ backgroundColor: "whitesmoke" }}>
       <SmartToyRoundedIcon sx={{ color: "lightblue", mr: 1 }} />
-      {!!text && text}
+      {!!text && <Typography variant="body1">{text}</Typography>}
       {!!options && (
         <Stack direction="row" spacing={2}>
           {options.map((option, index) => (
@@ -49,14 +50,27 @@ const ChatbotItem = ({ text, options, carousel }) => {
         </Stack>
       )}
       {!!carousel && (
-        <Stack direction="row" spacing={2}>
-          {/* <TitlebarImageList carousel={carousel} /> */}
+        <div
+          style={{
+            // flexDirection: "row",
+            // width: "100%",
+            // alignItems: "center",
+            marginLeft: "20%",
+          }}
+        >
           <Carousel carousel={carousel} />
-        </Stack>
+        </div>
       )}
     </Item>
   );
 };
+
+{
+  /* <Stack direction="row" spacing={2}>
+<TitlebarImageList carousel={carousel} />
+<Carousel carousel={carousel} />
+</Stack> */
+}
 
 const UsertItem = ({
   text,
@@ -80,14 +94,14 @@ const UsertItem = ({
 
   const onButtonClicked = ({ currentTarget }) => {
     setInputValue(currentTarget.value);
-    onOptionSelected(currentTarget.value, id);
+    onOptionSelected(currentTarget.value);
   };
 
   return (
     <Item sx={{ justifyContent: "space-between" }}>
       <Box sx={{ display: "flex", alignItems: "center" }}>
         <AccountCircle sx={{ mr: 1, color: "lightgreen" }} />
-        {!editable && text}
+        {!editable && <Typography variant="body2">{text}</Typography>}
         {editable && (
           <TextField
             label="Input"
@@ -115,18 +129,18 @@ const UsertItem = ({
         )}
       </Box>
       <Box>
-        {!editable && !options && (
+        {/* {!editable && !options && (
           <IconButton onClick={onEdit} value={id}>
             <BorderColorIcon />
           </IconButton>
-        )}
-        {editable && (
+        )} */}
+        {/* {editable && (
           <IconButton onClick={onPress} value={id}>
             <SendIcon
             // sx={{ marginLeft: "10px", color: "black", mr: 1, my: 0.5 }}
             />
           </IconButton>
-        )}
+        )} */}
       </Box>
     </Item>
   );
@@ -149,7 +163,9 @@ const ConversationalItem = ({
       return (
         <>
           <ChatbotItem text={text} />
-          {options && <UsertItem options={options} />}
+          {options && (
+            <UsertItem options={options} onOptionSelected={onOptionSelected} />
+          )}
           {carousel && <ChatbotItem carousel={carousel} />}
         </>
       );
@@ -166,6 +182,8 @@ const ConversationalItem = ({
           selectedOptions={selectedOptions}
         />
       );
+    case "Conversation":
+      return <ChatbotItem text={text} />;
   }
 };
 

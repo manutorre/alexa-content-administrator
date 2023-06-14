@@ -1,23 +1,24 @@
 {
     "welcome": {
         "type": "Chatbot",
-        "text": "I'm a Chatbot that can make easier you searchs in the Web. What are you looking for?",
+        "text": "I'm a Chatbot that can make easier your searches in the Web. What are you looking for?",
         "step": 1
     },
     "entity": {
         "type": "Chatbot",
         "step": 2,
-        "text": "Ok. What do you want to find?",
+        "text": "There is nothing matching \"@slot\". Here are some examples you can get",
         "options": [
             "JBL Tune",
             "Sony Zx",
             "Jabra Evolve"
-        ]
+        ],
+        "callbackForSlot": "getSlot"
     },
     "target": {
         "type": "Chatbot",
         "step": 3,
-        "text": "Ok. Where should I search?",
+        "text": "Looking for things matching \"@entity\". What type of things are you interested in?",
         "options": [
             "Product"
         ]
@@ -25,7 +26,7 @@
     "source": {
         "type": "Chatbot",
         "step": 4,
-        "text": "From where should I search?",
+        "text": "Looking for \"@target\" matching \"@entity\". Should I look into some place in particular?",
         "options": [
             "Amazon",
             "MercadoLibre",
@@ -35,19 +36,22 @@
     "Amazon": {
         "type": "Chatbot",
         "step": 5,
-        "text": "I found SLOT_1 results from Amazon.com. I will show you the first 10 results.",
-        "carousel": true
+        "text": "I found @slot results from \"@source\". I will show you the first results.",
+        "carousel": true,
+        "callbackForSlot": "getNResults"
     },
     "MercadoLibre": {
         "type": "Chatbot",
         "step": 5,
-        "text": "I found SLOT_1 results from MercadoLibre.com. I will show you the first 10 results.",
-        "carousel": true
+        "text": "I found @slot results from \"@source\". I will show you the first results.",
+        "carousel": true,
+        "callbackForSlot": "getNResults"
     },
     "E-commerce": {
         "type": "Chatbot",
         "step": 5,
-        "text": "I found SLOT_1 results from all E-commerce. I will show you the first 10 results.",
-        "carousel": true
+        "text": "I found @slot results from all \"@source\". I will show you the first results.",
+        "carousel": true,
+        "callbackForSlot": "getNResults"
     }
 }

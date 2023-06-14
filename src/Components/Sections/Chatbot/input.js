@@ -17,7 +17,7 @@ const Input = ({ onSubmit }) => {
   return (
     <Box
       sx={{
-        mx: 2,
+        ml: 2,
         display: "flex",
         alignItems: "center",
         my: 2,
@@ -30,9 +30,15 @@ const Input = ({ onSubmit }) => {
         variant="outlined"
         value={value}
         onChange={onChangeValue}
+        onKeyPress={(ev) => {
+          if (ev.key === "Enter") {
+            onPress();
+            ev.preventDefault();
+          }
+        }}
       />
       <IconButton onClick={onPress}>
-        <SendIcon sx={{ marginLeft: "10px", color: "black", mr: 1, my: 0.5 }} />
+        <SendIcon sx={{ marginLeft: "10px", color: "black", my: 0.5 }} />
       </IconButton>
     </Box>
   );
