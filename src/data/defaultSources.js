@@ -1,2 +1,14 @@
-export const DEFAULT_TARGET = ["Product"];
-export const DEFAULT_SOURCES = ["Amazon", "MercadoLibre", "E-commerce"];
+import { productsCollection, reviewsCollection } from "./objectsCollection";
+
+export const DEFAULT_TARGET = {
+  product: {
+    sources: ["Amazon", "MercadoLibre", "E-commerce"],
+    collection: productsCollection,
+  },
+  reviews: {
+    sources: ["Booking"],
+    collection: reviewsCollection,
+  },
+};
+
+export const DEFAULT_CRITERIA_OPERATIONS = ["order", "less than"];

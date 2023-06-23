@@ -49,18 +49,7 @@ const ChatbotItem = ({ text, options, carousel }) => {
           ))}
         </Stack>
       )}
-      {!!carousel && (
-        <div
-          style={{
-            // flexDirection: "row",
-            // width: "100%",
-            // alignItems: "center",
-            marginLeft: "20%",
-          }}
-        >
-          <Carousel carousel={carousel} />
-        </div>
-      )}
+      {!!carousel && <Carousel carousel={carousel} />}
     </Item>
   );
 };
@@ -166,7 +155,9 @@ const ConversationalItem = ({
           {options && (
             <UsertItem options={options} onOptionSelected={onOptionSelected} />
           )}
-          {carousel && <ChatbotItem carousel={carousel} />}
+          {!!carousel && carousel.length > 0 && (
+            <ChatbotItem carousel={carousel} />
+          )}
         </>
       );
     case "User":

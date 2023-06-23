@@ -7,16 +7,15 @@ import {
 } from "@mui/material";
 import InfoIcon from "@mui/icons-material/Info";
 
-const TitlebarImageList = ({ carousel }) => {
+const TitlebarImageList = ({ item }) => {
   const onButtonClicked = (e) => {
     alert(e.currentTarget.value);
   };
-  const item = carousel;
+
+  console.log({ item });
 
   return (
     <ImageList rowHeight={"auto"}>
-      {/* {carousel?.length > 0 &&
-        carousel.map((item) => ( */}
       <ImageListItem>
         <img
           src={item.img}
@@ -40,7 +39,6 @@ const TitlebarImageList = ({ carousel }) => {
           }
         />
       </ImageListItem>
-      {/* ))} */}
     </ImageList>
   );
 };

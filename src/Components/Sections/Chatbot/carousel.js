@@ -38,7 +38,7 @@ const images = [
 const Carousel = ({ carousel }) => {
   //   const theme = useTheme();
   const [activeStep, setActiveStep] = useState(0);
-  const maxSteps = 1;
+  const maxSteps = carousel.length;
 
   const handleNext = () => {
     setActiveStep((prevActiveStep) => prevActiveStep + 1);
@@ -52,22 +52,23 @@ const Carousel = ({ carousel }) => {
     setActiveStep(step);
   };
 
+  // console.log({ activeStep });
+
   return (
-    <Box sx={{ width: 305 }}>
+    <Box sx={{ bgcolor: "background.default" }}>
       <Paper
         square
         elevation={0}
         sx={{
           display: "flex",
-          // justifyContent: "center",
-          // height: 5,
-          pl: 2,
-          // bgcolor: "background.default",
+          justifyContent: "center",
+          // height: 50,
+          mt: 1,
         }}
       >
-        <Typography
-        //Aca va a ir la entidad de busqueda
-        ></Typography>
+        <Typography variant="h6" sx={{}}>
+          {carousel[activeStep].title + " - " + carousel[activeStep].subtitle}
+        </Typography>
       </Paper>
       <SwipeableViews
         // axis={theme.direction === "rtl" ? "x-reverse" : "x"}
@@ -75,27 +76,26 @@ const Carousel = ({ carousel }) => {
         onChangeIndex={handleStepChange}
         enableMouseEvents
       >
-        {/* {[1].map((item, index) => ( */}
-        <TitlebarImageList carousel={carousel} />
-        {/* ))} */}
-        {/* {images.map((step, index) => (
-          <div key={step.label}>
+        {/* <TitlebarImageList item={carousel[activeStep]} /> */}
+        {carousel.map((step, index) => (
+          <div key={index}>
             {Math.abs(activeStep - index) <= 2 ? (
-            <Box
-              component="img"
-              sx={{
-                //   height: 255,
-                display: "block",
-                //   maxWidth: 400,
-                overflow: "hidden",
-                width: "100%",
-              }}
-              src={step.imgPath}
-              alt={step.label}
-            />
+              <Box
+                component="img"
+                sx={{
+                  height: 400,
+                  display: "block",
+                  // maxWidth: 400,
+                  overflow: "hidden",
+                  width: "70%",
+                  margin: "auto",
+                }}
+                src={step.img}
+                alt={step.title}
+              />
             ) : null}
           </div>
-        ))} */}
+        ))}
       </SwipeableViews>
       <MobileStepper
         steps={maxSteps}

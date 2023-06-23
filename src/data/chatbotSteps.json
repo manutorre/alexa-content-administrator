@@ -7,7 +7,7 @@
     "entity": {
         "type": "Chatbot",
         "step": 2,
-        "text": "There is nothing matching \"@slot\". Here are some examples you can get",
+        "text": "There is nothing matching \"@slotForEntity\". Here are some examples you can get",
         "options": [
             "JBL Tune",
             "Sony Zx",
@@ -27,31 +27,32 @@
         "type": "Chatbot",
         "step": 4,
         "text": "Looking for \"@target\" matching \"@entity\". Should I look into some place in particular?",
-        "options": [
-            "Amazon",
-            "MercadoLibre",
-            "E-commerce"
-        ]
+        "options": true
     },
-    "Amazon": {
+    "results": {
         "type": "Chatbot",
         "step": 5,
-        "text": "I found @slot results from \"@source\". I will show you the first results.",
+        "text": "I found @slotForResults results from \"@source\". I will show you the first results.",
         "carousel": true,
         "callbackForSlot": "getNResults"
     },
-    "MercadoLibre": {
+    "explore": {
         "type": "Chatbot",
-        "step": 5,
-        "text": "I found @slot results from \"@source\". I will show you the first results.",
-        "carousel": true,
-        "callbackForSlot": "getNResults"
+        "text": "Do you want to explore more about them? You can filter results by some feature, get them ordered, or do operations like get the average, etc.",
+        "step": 6
     },
-    "E-commerce": {
+    "order": {
         "type": "Chatbot",
-        "step": 5,
-        "text": "I found @slot results from all \"@source\". I will show you the first results.",
+        "step": 7,
+        "text": "Here you have the results from \"@source\" ordered by @slotForOrdering. Do you want to explore more about them?",
         "carousel": true,
-        "callbackForSlot": "getNResults"
+        "callbackForSlot": "oderBySlot"
+    },
+    "less than": {
+        "type": "Chatbot",
+        "step": 7,
+        "text": "Here you have the results from \"@source\" with price less than @value. Do you want to explore more about them?",
+        "carousel": true,
+        "callbackForSlot": "filterWithLess"
     }
 }

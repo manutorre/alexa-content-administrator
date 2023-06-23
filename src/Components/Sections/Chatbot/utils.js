@@ -1,29 +1,11 @@
-import { DEFAULT_TARGET, DEFAULT_SOURCES } from "../../../data/defaultSources";
-import { collection } from "../../../data/objectsCollection";
+import {
+  DEFAULT_TARGET,
+  DEFAULT_CRITERIA_OPERATIONS,
+} from "../../../data/defaultSources";
 import steps from "../../../data/chatbotSteps.json";
 
-export const getText = (nextStep, currentParams) => {
-  let text = nextStep.text;
-  console.log({ nextStep });
-  switch (nextStep.callbackForSlot) {
-    case "getNResults":
-      const nResults = getNResults(currentParams?.entity);
-      text = text.replace(/@slot/g, nResults);
-      break;
-    case "getSlot":
-      text = text.replace(/@slot/g, currentParams?.input);
-      break;
-  }
-  const { entity, target, source } = currentParams;
-  text = text.replace(/@entity/g, entity);
-  text = text.replace(/@target/g, target);
-  text = text.replace(/@source/g, source);
-
-  return text;
-};
-
 export const getStorageConversations = () => {
-  return JSON.parse(localStorage.getItem("conversations")) || [];
+  return JSON.parse(localStorage.getItem("conversations")) || {};
 };
 
 /**
@@ -33,8 +15,14 @@ export const getStorageConversations = () => {
  * @param {string} entity - The entity to match against the titles in the collection
  * @return {number} The number of results in the collection matching the entity
  */
-export const getNResults = (entity) => {
-  return collection.filter((item) => item.title === entity).length;
+export const getNResults = (entity, target) => {
+  return DEFAULT_TARGET[target]?.collection?.filter((item) => {
+    const reg = new RegExp(entity, "g");
+    return (
+      item.title.toLowerCase().match(reg) ||
+      item.category.toLowerCase().match(reg)
+    );
+  }).length;
 };
 
 /**
@@ -45,30 +33,97 @@ export const getNResults = (entity) => {
  * @return {object} an object containing the search action, entity value, target value, and source value.
  */
 export const parseRequest = (input, currentParams) => {
-  const targets = DEFAULT_TARGET.join("|");
-  const reg1 = new RegExp(targets, "g");
-  const targetFound = input.match(reg1);
+  const formattedInput = input.toLowerCase();
+  let entityFound = currentParams.entity;
+  let targetFound = currentParams.target;
+  let sourceFound = currentParams.source;
 
-  const sources = DEFAULT_SOURCES.join("|");
-  const reg2 = new RegExp(sources, "g");
-  const sourceFound = input.match(reg2);
+  //Third, split words from collections objects, in order to find them also by individual words
+  if (!entityFound || entityFound === "missing") {
+    for (let target in DEFAULT_TARGET) {
+      const targetCollection = DEFAULT_TARGET[target].collection;
+      let entityWords =
+        targetCollection &&
+        targetCollection.flatMap((item) => {
+          return Object.entries(item).flatMap((value) => {
+            if (value[0] !== "img" && typeof value[1] === "string") {
+              return value[1].toLowerCase().split(" ").join("|");
+            }
+            return [];
+          });
+        });
 
-  const entities = collection.map((item) => item.title).join("|");
-  const reg3 = new RegExp(entities, "g");
-  const entityFound = input.match(reg3);
+      console.log(entityWords);
+
+      entityWords = entityWords && [...new Set(entityWords)].join("|");
+
+      console.log(entityWords);
+
+      const reg3 = entityWords && new RegExp(entityWords, "g");
+      entityFound = reg3 && formattedInput.match(reg3)?.join(" ");
+      if (entityFound) {
+        targetFound = target;
+        break;
+      }
+    }
+  }
+
+  entityFound = entityFound || "missing";
+
+  //First identify the target (class)
+  if (!targetFound || targetFound === "missing") {
+    const targets = Object.keys(DEFAULT_TARGET)
+      .map((item) => item.toLowerCase())
+      .join("|");
+    const reg1 = new RegExp(targets, "g");
+    targetFound = formattedInput.match(reg1)?.join(" ") || "missing";
+  }
+
+  //Second identify the source of the target (url | classification tag)
+  if (targetFound && (!sourceFound || sourceFound === "missing")) {
+    const sources =
+      DEFAULT_TARGET[targetFound] &&
+      DEFAULT_TARGET[targetFound].sources
+        ?.map((item) => item.toLowerCase())
+        .join("|");
+    const reg2 = sources && new RegExp(sources, "g");
+    sourceFound = reg2 && formattedInput.match(reg2)?.join(" ");
+  }
+
+  sourceFound = sourceFound || "missing";
+
+  const criteria = DEFAULT_CRITERIA_OPERATIONS.map((item) =>
+    item.toLowerCase()
+  ).join("|");
+
+  const reg4 = criteria && new RegExp(criteria, "g");
+  const criteriaFound =
+    (reg4 && formattedInput.match(reg4)?.join(" ")) ||
+    currentParams.criteria ||
+    "missing";
+  console.log({ criteria, criteriaFound });
+
+  let slot;
+  if (criteriaFound === "order") {
+    const words = formattedInput.split(" ");
+    const i = words.findIndex((w) => w.toLowerCase().match(/by/g));
+    slot = words[i + 1]; //Slot = next word after 'by'
+  } else if (criteriaFound === "less than") {
+    const words = formattedInput.split(" ");
+    const i = words.findIndex((w) => w.toLowerCase().match(/than/g));
+    slot = words[i + 1]; //Slot = next word after 'less than'
+  }
+
+  slot = slot || currentParams.slot || "missing";
 
   return {
     input,
     action: "search",
-    entity: entityFound
-      ? entityFound[0] || currentParams.entity
-      : currentParams.entity || "missing",
-    target: targetFound
-      ? targetFound[0] || currentParams.target
-      : currentParams.target || "missing",
-    source: sourceFound
-      ? sourceFound[0] || currentParams.source
-      : currentParams.source || "missing",
+    slot,
+    criteria: criteriaFound,
+    entity: entityFound,
+    target: targetFound,
+    source: sourceFound,
   };
 };
 
@@ -83,6 +138,14 @@ export const findNextStep = ({ params }) => {
     (prop) => params[prop] === "missing"
   );
 
+  // //Check if some step key is part of user input
+  // const inputWords = params.input?.split(" ").join("|");
+  // const reg1 = new RegExp(inputWords, "g");
+  // const stepFound = Object.keys(steps).join(" ").match(reg1);
+  // if (stepFound) {
+  //   return steps[stepFound[0]];
+  // }
+
   if (missingProps.includes("entity")) {
     return steps["entity"];
   }
@@ -93,16 +156,77 @@ export const findNextStep = ({ params }) => {
     return steps["source"];
   }
 
-  //If no missing properties are found, return the result according source requested.
-  const sourceRequested = params["source"];
+  //Check if some criteria operation is part of user input
+  if (params.criteria !== "missing") {
+    return steps[params.criteria];
+  }
 
-  if (sourceRequested === "Amazon") {
-    return steps["Amazon"];
+  //If no missing properties are found, return the result according source requested.
+  const productRequested = params.target === "product";
+
+  if (productRequested) {
+    return steps["results"];
   }
-  if (sourceRequested === "MercadoLibre") {
-    return steps["MercadoLibre"];
+
+  return steps["explore"];
+};
+
+/**
+ * Returns the text of the next step in a conversation, based on the supplied `nextStep` and `currentParams`.
+ *
+ * @param {Object} nextStep - An object representing the next step in the conversation.
+ * @param {Object} currentParams - An object representing the current parameters of the conversation.
+ * @return {string} The text of the next step in the conversation.
+ */
+export const getText = (nextStep, currentParams) => {
+  let text = nextStep.text;
+  console.log({ nextStep });
+  const { entity, target, source, input, criteria, slot } = currentParams;
+
+  switch (nextStep.callbackForSlot) {
+    case "getNResults":
+      const nResults = getNResults(entity, target);
+      text = text.replace(/@slotForResults/g, nResults);
+      break;
+    case "getSlot":
+      text = text.replace(/@slotForEntity/g, input);
+      break;
+    case "oderBySlot":
+      text = text.replace(/@slotForOrdering/g, slot);
+      break;
+    case "filterWithLess":
+      text = text.replace(/@value/g, slot);
+      break;
   }
-  if (sourceRequested === "E-commerce") {
-    return steps["E-commerce"];
+  text = text.replace(/@entity/g, entity);
+  text = text.replace(/@target/g, target);
+  text = text.replace(/@source/g, source);
+
+  return text;
+};
+
+export const getOptions = (currentParams) => {
+  const { target } = currentParams;
+  return DEFAULT_TARGET[target].sources;
+};
+
+/**
+ * Sorts an array of objects based on a specified slot using a provided criteria.
+ *
+ * @param {Array} filteredElements - Array of objects to be filtered
+ * @param {string} criteria - The criteria to be used for sorting
+ * @param {string} slot - The slot to sort the objects by
+ * @return {Array} - A sorted array of objects
+ */
+export const applyCriteria = (filteredElements, criteria, slot) => {
+  console.log("Before ", filteredElements);
+  if (criteria === "order") {
+    return filteredElements.sort(
+      (firstItem, secondItem) => firstItem["subtitle"] - secondItem["subtitle"]
+    );
+  }
+
+  if (criteria === "less than") {
+    return filteredElements.filter((item) => item["subtitle"] < slot);
   }
 };

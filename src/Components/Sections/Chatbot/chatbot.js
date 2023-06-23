@@ -4,14 +4,15 @@ import { Grid, TextField, Box, Typography } from "@mui/material";
 import ConversationalBox from "./conversationalBox";
 import Input from "./input";
 import FORM from "../../../data/formPrompts.json";
-import { collection } from "../../../data/objectsCollection";
+import { productsCollection } from "../../../data/objectsCollection";
 import chatbotSteps from "../../../data/chatbotSteps.json";
 import {
   parseRequest,
   findNextStep,
-  getNResults,
   getStorageConversations,
   getText,
+  applyCriteria,
+  getOptions,
 } from "./utils";
 import { HistoryBox } from "./historyBox";
 
@@ -27,18 +28,17 @@ export default function Chatbot() {
 
   useEffect(() => {
     const conversationName = new Date().toDateString();
-    conversations.push({ steps, text: conversationName });
-    setConversations(conversations);
-    // localStorage.setItem("conversations", JSON.stringify(conversations));
-  }, []);
+    const conversationFound = conversations[conversationName];
+    console.log({ conversationFound });
+    if (!conversationFound) {
+      conversations[conversationName] = { steps };
+    } else {
+      conversations[conversationName].steps = steps;
+    }
 
-  // useEffect(() => {
-  //   const conversationName = new Date().toDateString();
-  //   let lastConversation = conversations[conversations.length - 1];
-  //   lastConversation = { steps, text: conversationName };
-  //   setConversations(conversations);
-  //   localStorage.setItem("conversations", JSON.stringify(conversations));
-  // }, [steps]);
+    setConversations(conversations);
+    localStorage.setItem("conversations", JSON.stringify(conversations));
+  }, [steps]);
 
   useEffect(() => {
     const lastRequest = requests[requests.length - 1];
@@ -47,7 +47,15 @@ export default function Chatbot() {
       console.log({ requestParams });
 
       const text = getText(nextStep, requestParams.current);
-      const nextStepModified = { ...nextStep, text };
+      let nextStepModified = { ...nextStep, text };
+      if (nextStep.options) {
+        const options = getOptions(requestParams.current);
+        nextStepModified = { ...nextStepModified, options };
+      }
+      if (nextStepModified.carousel) {
+        const elements = getCarouselItems();
+        nextStepModified = { ...nextStepModified, elements };
+      }
 
       // setTimeout(() => {
       const newSteps = [...steps, lastRequest, nextStepModified];
@@ -56,7 +64,12 @@ export default function Chatbot() {
     }
   }, [requests]);
 
-  // useEffect(() => {}, [steps]);
+  useEffect(() => {
+    if (steps[steps.length - 1].callbackForSlot === "getNResults") {
+      const newSteps = [...steps, chatbotSteps.explore];
+      setSteps(newSteps);
+    }
+  }, [steps]);
 
   //TODO: create some comparative operations
 
@@ -101,9 +114,26 @@ export default function Chatbot() {
 
   console.log({ steps, requests, conversations });
 
-  const getCarouselItem = () => {
-    const selectedOption = requestParams.current?.entity;
-    return collection.filter((item) => item.title === selectedOption)[0];
+  const getCarouselItems = () => {
+    //Returns an array of items based on user input
+    const { criteria, entity, slot } = requestParams.current;
+    let carouselItems = steps[steps.length - 1].elements || productsCollection;
+
+    //Get items where their title or category matches the entity
+    carouselItems = carouselItems.filter((item) => {
+      const reg = new RegExp(entity, "g");
+      return (
+        item.title.toLowerCase().match(reg) ||
+        item.category.toLowerCase().match(reg)
+      );
+    });
+
+    //Applies an additional criteria if was requested by user (ex. order, price less than, etc.)
+    if (criteria !== "missing" && slot !== "missing") {
+      carouselItems = applyCriteria(carouselItems, criteria, slot);
+    }
+    console.log("After ", carouselItems);
+    return carouselItems;
   };
 
   return (
@@ -124,8 +154,8 @@ export default function Chatbot() {
             Historial
           </Typography>
 
-          {conversations.length > 0 &&
-            conversations.map(({ text }, index) => {
+          {Object.keys(conversations).length > 0 &&
+            Object.keys(conversations).map((text, index) => {
               return (
                 <Grid item xs={12} sm={12} key={index}>
                   <HistoryBox
@@ -163,14 +193,14 @@ export default function Chatbot() {
         </Grid> */}
           {steps.length > 0 &&
             steps.map(
-              ({ type, text, options, carousel, editable, id }, index) => {
+              ({ type, text, options, carousel, elements, id }, index) => {
                 return (
                   <Grid item xs={12} sm={12} key={index}>
                     <ConversationalBox
                       type={type}
                       text={text}
                       options={options}
-                      carousel={carousel && getCarouselItem()}
+                      carousel={carousel && elements}
                       // editable={editable}
                       // onEdit={onEdit}
                       id={id}
