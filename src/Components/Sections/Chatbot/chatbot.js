@@ -8,6 +8,7 @@ import { productsCollection } from "../../../data/objectsCollection";
 import chatbotSteps from "../../../data/chatbotSteps.json";
 import {
   parseRequest,
+  parseRequestWithGpt,
   findNextStep,
   getStorageConversations,
   getText,
@@ -78,12 +79,12 @@ export default function Chatbot() {
     return steps.length > 0 && steps[steps.length - 1].type;
   };
 
-  const onSubmit = (inputValue) => {
+  const onSubmit = async (inputValue) => {
     // const id = "req" + requests.length;
     if (getLastStepType() === "User") {
       return;
     }
-    const params = parseRequest(inputValue, requestParams.current);
+    const params = await parseRequestWithGpt(inputValue, requestParams.current);
     console.log({ params });
     const newRequest = { type: "User", text: inputValue, params }; //, id };
     const newRequests = [...requests, newRequest];

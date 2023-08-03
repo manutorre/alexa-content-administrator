@@ -3,6 +3,7 @@ import {
   DEFAULT_CRITERIA_OPERATIONS,
 } from "../../../data/defaultSources";
 import steps from "../../../data/chatbotSteps.json";
+import openai from "../../../apiGPT";
 
 export const getStorageConversations = () => {
   return JSON.parse(localStorage.getItem("conversations")) || {};
@@ -23,6 +24,49 @@ export const getNResults = (entity, target) => {
       item.category.toLowerCase().match(reg)
     );
   }).length;
+};
+
+/**
+ * Parses the input string to extract the target, source, and entity values and constructs an object with the search action.
+ * When some value is missing, returns the string "missing" for the property.
+ *
+ * @param {string} input - the input string to be parsed.
+ * @return {object} an object containing the search action, entity value, target value, and source value.
+ */
+export const parseRequestWithGpt = async (input, currentParams) => {
+  // const formattedInput = input.toLowerCase();
+  let entityFound = currentParams.entity;
+  let targetFound = currentParams.target;
+  let sourceFound = currentParams.source;
+  let criteriaFound = false;
+
+  //First, train GPT to find entity, target and source values from a sentence
+  const entityTrainingMessages = [
+    {
+      role: "system",
+      content:
+        'You are a helpful assistant. You need to recognize 3 kind of concepts (entity, target, source) in the following sentences and return them in the form {key:value}. In next example: "I want to buy a wireless headphone", the entity is "wireless headphone", the target is "product" and the source is "missing". In next example: "I want to buy a book from Amazon", the entity is "book", the target is "product" and the source is "Amazon".',
+    },
+    { role: "user", content: input },
+  ];
+
+  const completion = await openai.createChatCompletion({
+    model: "gpt-3.5-turbo",
+    messages: entityTrainingMessages,
+  });
+
+  const result = completion.data.choices[0].message;
+  console.log({ result });
+
+  return {
+    input,
+    action: "search",
+    slot,
+    criteria: criteriaFound,
+    entity: entityFound,
+    target: targetFound,
+    source: sourceFound,
+  };
 };
 
 /**
