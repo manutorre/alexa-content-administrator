@@ -22,7 +22,12 @@ export default function Chatbot() {
   const [steps, setSteps] = useState([chatbotSteps["welcome"]]);
   const [conversations, setConversations] = useState(getStorageConversations());
   const lastStep = useRef("welcome");
-  const requestParams = useRef({});
+  const requestParams = useRef({
+    entity: "missing",
+    target: "missing",
+    source: "missing",
+    criteria: "missing",
+  });
   // const [requestAdded, setRequestAdded] = useState(false);
   const [requestEdited, setRequestEdited] = useState(false);
   const [selectedOptions, setSelectedOptions] = useState(["", ""]);
@@ -45,7 +50,7 @@ export default function Chatbot() {
     const lastRequest = requests[requests.length - 1];
     if (lastRequest) {
       const nextStep = findNextStep(lastRequest);
-      console.log({ requestParams });
+      console.log({ requestParams, nextStep });
 
       const text = getText(nextStep, requestParams.current);
       let nextStepModified = { ...nextStep, text };
@@ -145,6 +150,9 @@ export default function Chatbot() {
           xs={1}
           sm={3}
           sx={{
+            overflowY: "scroll",
+            height: (window.innerHeight * 3) / 4,
+            maxHeight: (window.innerHeight * 3) / 4,
             bgcolor: "lightgrey",
             py: 2,
             my: 2,

@@ -7,15 +7,20 @@
     "entity": {
         "type": "Chatbot",
         "step": 2,
-        "text": "There is nothing matching \"@slotForEntity\". Try with something else"
+        "text": "There is nothing matching \"@slotForEntity\". Here are some examples you can get",
+        "options": [
+            "JBL Tune",
+            "Sony Zx",
+            "Jabra Evolve"
+        ],
+        "callbackForSlot": "getSlot"
     },
     "target": {
         "type": "Chatbot",
         "step": 3,
         "text": "Looking for things matching \"@entity\". What type of things are you interested in?",
         "options": [
-            "Product",
-            "Review"
+            "Product"
         ]
     },
     "source": {
@@ -36,10 +41,10 @@
         "text": "Do you want to explore more about them? You can filter results by some feature, get them ordered, or do operations like get the average, etc.",
         "step": 6
     },
-    "criteria": {
+    "order": {
         "type": "Chatbot",
         "step": 7,
-        "text": "Here you have the results from \"@source\" @criteria @slotForOrdering. Do you want to explore more about them?",
+        "text": "Here you have the results from \"@source\" ordered by @slotForOrdering. Do you want to explore more about them?",
         "carousel": true,
         "callbackForSlot": "oderBySlot"
     },

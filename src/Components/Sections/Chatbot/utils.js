@@ -26,6 +26,19 @@ export const getNResults = (entity, target) => {
   }).length;
 };
 
+const TRAINING_MESSAGES = {
+  allMissing:
+    'You are a helpful assistant. You need to recognize 5 kind of concepts (entity, target, source, criteria, slot) in the following sentences and return them in the form {key:value}. In next example: "I want to buy a wireless headphone", the entity is "wireless headphone", the target is "product" and the source is "missing". In next example: "I want to buy a book from Amazon", the entity is "book", the target is "product" and the source is "Amazon". In next example: "I want headphones from Amazon ordered by price", the entity is "headphones", the target is "product", the source is "Amazon" and the criteria is "order by" where "price" is the "slot".',
+  entityMissing:
+    'You are a helpful assistant. You need to recognize 1 concept (entity) in the following sentences and return it in the form {key:value}. In next example: "I want to buy a wireless headphone", the entity is "wireless headphone". In next example: "I want to buy a book from Amazon", the entity is "book".',
+  targetMissing:
+    'You are a helpful assistant. You need to recognize 1 concept (target) in the following sentences and return it in the form {key:value}. In next example: "I want to buy a wireless headphone", the target is "product". In next example: "I want to buy a book from Amazon", the target is "product".',
+  sourceMissing:
+    'You are a helpful assistant. You need to recognize 1 concept (source) in the following sentences and return it in the form {key:value}. In next example: "I want to buy a wireless headphone", the source is "missing". In next example: "I want to buy a book from Amazon", the source is "Amazon".',
+  criteriaMissing:
+    'You are a helpful assistant. You need to recognize 2 concepts (criteria, slot) in the following sentences and return it in the form {key:value}. "I want headphones from Amazon ordered by price", the entity is "headphones", the target is "product", the source is "Amazon" and the criteria is "order by" where "price" is the "slot".',
+};
+
 /**
  * Parses the input string to extract the target, source, and entity values and constructs an object with the search action.
  * When some value is missing, returns the string "missing" for the property.
@@ -35,33 +48,66 @@ export const getNResults = (entity, target) => {
  */
 export const parseRequestWithGpt = async (input, currentParams) => {
   // const formattedInput = input.toLowerCase();
-  let entityFound = currentParams.entity;
-  let targetFound = currentParams.target;
-  let sourceFound = currentParams.source;
-  let criteriaFound = false;
+  const criteriaMissing = currentParams.criteria === "missing";
+  const entityMissing = currentParams.entity === "missing";
+  const targetMissing = currentParams.target === "missing";
+  const sourceMissing = currentParams.source === "missing";
+  const allMissing =
+    entityMissing && targetMissing && sourceMissing && criteriaMissing;
+
+  const searchPropsForMissing = {
+    allMissing,
+    entityMissing,
+    targetMissing,
+    sourceMissing,
+    criteriaMissing,
+  };
+  const missingIndex = Object.entries(searchPropsForMissing).findIndex(
+    (searchProp) => !!searchProp[1]
+  );
+  const propMissing =
+    missingIndex !== -1 && Object.entries(searchPropsForMissing)[missingIndex];
+
+  const messagePosition = propMissing[0];
+  const content = TRAINING_MESSAGES[messagePosition];
+
+  console.log({ content, currentParams });
 
   //First, train GPT to find entity, target and source values from a sentence
-  const entityTrainingMessages = [
+  const trainingMessages = [
     {
       role: "system",
-      content:
-        'You are a helpful assistant. You need to recognize 3 kind of concepts (entity, target, source) in the following sentences and return them in the form {key:value}. In next example: "I want to buy a wireless headphone", the entity is "wireless headphone", the target is "product" and the source is "missing". In next example: "I want to buy a book from Amazon", the entity is "book", the target is "product" and the source is "Amazon".',
+      content,
     },
     { role: "user", content: input },
   ];
 
   const completion = await openai.createChatCompletion({
     model: "gpt-3.5-turbo",
-    messages: entityTrainingMessages,
+    messages: trainingMessages,
   });
 
-  const result = completion.data.choices[0].message;
-  console.log({ result });
+  const completionResult = completion.data.choices[0].message;
+  const { entity, target, source, criteria, slot } =
+    completionResult.content && JSON.parse(completionResult.content);
+
+  console.log({ completionResult });
+
+  const entityFound =
+    (!entityMissing && currentParams.entity) || entity || "missing";
+  const targetFound =
+    (!targetMissing && currentParams.target) || target || "missing";
+  const sourceFound =
+    (!sourceMissing && currentParams.source) || source || "missing";
+  const criteriaFound =
+    (!criteriaMissing && currentParams.criteria) || criteria || "missing";
+  const slotFound =
+    (!criteriaMissing && currentParams.slot) || slot || "missing";
 
   return {
     input,
     action: "search",
-    slot,
+    slot: slotFound,
     criteria: criteriaFound,
     entity: entityFound,
     target: targetFound,
@@ -202,7 +248,7 @@ export const findNextStep = ({ params }) => {
 
   //Check if some criteria operation is part of user input
   if (params.criteria !== "missing") {
-    return steps[params.criteria];
+    return steps["criteria"];
   }
 
   //If no missing properties are found, return the result according source requested.
@@ -245,6 +291,7 @@ export const getText = (nextStep, currentParams) => {
   text = text.replace(/@entity/g, entity);
   text = text.replace(/@target/g, target);
   text = text.replace(/@source/g, source);
+  text = text.replace(/@criteria/g, criteria);
 
   return text;
 };
