@@ -12,29 +12,6 @@ import { autoPlay } from "react-swipeable-views-utils";
 import TitlebarImageList from "./titleBarImageList";
 // const AutoPlaySwipeableViews = autoPlay(SwipeableViews);
 
-const images = [
-  {
-    label: "San Francisco – Oakland Bay Bridge, United States",
-    imgPath:
-      "https://images.unsplash.com/photo-1537944434965-cf4679d1a598?auto=format&fit=crop&w=400&h=250&q=60",
-  },
-  {
-    label: "Bird",
-    imgPath:
-      "https://images.unsplash.com/photo-1538032746644-0212e812a9e7?auto=format&fit=crop&w=400&h=250&q=60",
-  },
-  {
-    label: "Bali, Indonesia",
-    imgPath:
-      "https://images.unsplash.com/photo-1537996194471-e657df975ab4?auto=format&fit=crop&w=400&h=250",
-  },
-  {
-    label: "Goč, Serbia",
-    imgPath:
-      "https://images.unsplash.com/photo-1512341689857-198e7e2f3ca8?auto=format&fit=crop&w=400&h=250&q=60",
-  },
-];
-
 const Carousel = ({ carousel }) => {
   //   const theme = useTheme();
   const [activeStep, setActiveStep] = useState(0);
@@ -52,6 +29,11 @@ const Carousel = ({ carousel }) => {
     setActiveStep(step);
   };
 
+  const redirectToUrl = () => {
+    const url = Object.values(carousel[activeStep])[0].fullLink;
+    window.open(url);
+  }
+
   // console.log({ activeStep });
 
   return (
@@ -66,9 +48,12 @@ const Carousel = ({ carousel }) => {
           mt: 1,
         }}
       >
-        <Typography variant="h6" sx={{}}>
-          {carousel[activeStep].title + " - " + carousel[activeStep].subtitle}
+        <a>
+        <Typography onClick={redirectToUrl} variant="subtitle1" sx={{}}>
+          {Object.values(carousel[activeStep])[0].text} - <b>{Object.values(carousel[activeStep])[0].price}</b>
         </Typography>
+        </a>
+
       </Paper>
       <SwipeableViews
         // axis={theme.direction === "rtl" ? "x-reverse" : "x"}
@@ -83,15 +68,15 @@ const Carousel = ({ carousel }) => {
               <Box
                 component="img"
                 sx={{
-                  height: 400,
+                  height: 200,
                   display: "block",
                   // maxWidth: 400,
                   overflow: "hidden",
-                  width: "70%",
+                  width: "40%",
                   margin: "auto",
                 }}
-                src={step.img}
-                alt={step.title}
+                src={Object.values(step)[0].imageSrc}
+                alt={Object.values(step)[0].text}
               />
             ) : null}
           </div>

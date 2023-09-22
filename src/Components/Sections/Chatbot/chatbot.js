@@ -14,11 +14,13 @@ import {
   getText,
   applyCriteria,
   getOptions,
+  applyOperation,
 } from "./utils";
 import { HistoryBox } from "./historyBox";
 
 export default function Chatbot() {
   const [requests, setRequests] = useState([]);
+  const collection = useRef(null);
   const [steps, setSteps] = useState([chatbotSteps["welcome"]]);
   const [conversations, setConversations] = useState(getStorageConversations());
   const lastStep = useRef("welcome");
@@ -47,27 +49,44 @@ export default function Chatbot() {
   }, [steps]);
 
   useEffect(() => {
-    const lastRequest = requests[requests.length - 1];
-    if (lastRequest) {
-      const nextStep = findNextStep(lastRequest);
-      console.log({ requestParams, nextStep });
 
-      const text = getText(nextStep, requestParams.current);
-      let nextStepModified = { ...nextStep, text };
-      if (nextStep.options) {
-        const options = getOptions(requestParams.current);
-        nextStepModified = { ...nextStepModified, options };
-      }
-      if (nextStepModified.carousel) {
-        const elements = getCarouselItems();
-        nextStepModified = { ...nextStepModified, elements };
-      }
+    const getResultsFromRequest = async () => {
+      const lastRequest = requests[requests.length - 1];
+      if (lastRequest) {
+        let operationResult;
+        const nextStep = findNextStep(lastRequest);
+        console.log({ requestParams, nextStep });
 
-      // setTimeout(() => {
-      const newSteps = [...steps, lastRequest, nextStepModified];
-      setSteps(newSteps);
-      // }, 1000);
+        if (nextStep.callbackForSlot === "getAverage") {
+          const { criteria, entity, slot, value } = requestParams.current;
+          if (criteria) {
+            operationResult = await applyOperation(collection.current, criteria, slot);
+          }
+        }
+
+        const { text, results } = await getText(nextStep, requestParams.current, operationResult);
+        if (results) {
+          collection.current = results;
+        }
+        let nextStepModified = { ...nextStep, text };
+        if (nextStep.options) {
+          const options = getOptions(requestParams.current);
+          nextStepModified = { ...nextStepModified, options };
+        }
+        if (nextStepModified.carousel) {
+          const elements = await getCarouselItems(collection.current, lastRequest);
+          nextStepModified = { ...nextStepModified, elements };
+        }
+        requestParams.current.criteria = "missing";
+
+        // setTimeout(() => {
+        const newSteps = [...steps, lastRequest, nextStepModified];
+        setSteps(newSteps);
+        // }, 1000);
+      }
     }
+
+    getResultsFromRequest();
   }, [requests]);
 
   useEffect(() => {
@@ -93,7 +112,7 @@ export default function Chatbot() {
     console.log({ params });
     const newRequest = { type: "User", text: inputValue, params }; //, id };
     const newRequests = [...requests, newRequest];
-    requestParams.current = params;
+    requestParams.current = { ...requestParams.current, ...params };
 
     setRequests(newRequests);
   };
@@ -120,23 +139,27 @@ export default function Chatbot() {
 
   console.log({ steps, requests, conversations });
 
-  const getCarouselItems = () => {
+  const getCarouselItems = async (results, lastRequest) => {
     //Returns an array of items based on user input
-    const { criteria, entity, slot } = requestParams.current;
-    let carouselItems = steps[steps.length - 1].elements || productsCollection;
+    const { criteria, entity, slot, value } = requestParams.current;
+    let carouselItems = results || steps[steps.length - 1].elements || productsCollection;
 
     //Get items where their title or category matches the entity
-    carouselItems = carouselItems.filter((item) => {
-      const reg = new RegExp(entity, "g");
-      return (
-        item.title.toLowerCase().match(reg) ||
-        item.category.toLowerCase().match(reg)
-      );
-    });
+    carouselItems = Object.entries(carouselItems).map(item => { return { [item[0]]: item[1] } });
+
+    // .filter((item) => {
+    //   // const reg = new RegExp(entity, "g");
+    //   // const key = item[0];
+    //   const info = Object.values(item)[0];
+    //   return (
+    //     info
+    //     // info.text?.toLowerCase().match(reg) // ||item.category.toLowerCase().match(reg)
+    //   );
+    // });
 
     //Applies an additional criteria if was requested by user (ex. order, price less than, etc.)
     if (criteria !== "missing" && slot !== "missing") {
-      carouselItems = applyCriteria(carouselItems, criteria, slot);
+      carouselItems = await applyCriteria(results, criteria, slot, value);
     }
     console.log("After ", carouselItems);
     return carouselItems;
@@ -170,15 +193,15 @@ export default function Chatbot() {
                   <HistoryBox
                     text={text}
                     onPressHistoryItem={onPressHistoryItem}
-                    // options={options}
-                    // carousel={carousel && collection}
-                    // // editable={editable}
-                    // // onEdit={onEdit}
-                    // id={id}
-                    // // onSubmit={onSubmitEdit}
-                    // onOptionSelected={onOptionSelected}
-                    // // requestEdited={requestEdited}
-                    // selectedOptions={selectedOptions}
+                  // options={options}
+                  // carousel={carousel && collection}
+                  // // editable={editable}
+                  // // onEdit={onEdit}
+                  // id={id}
+                  // // onSubmit={onSubmitEdit}
+                  // onOptionSelected={onOptionSelected}
+                  // // requestEdited={requestEdited}
+                  // selectedOptions={selectedOptions}
                   />
                 </Grid>
               );

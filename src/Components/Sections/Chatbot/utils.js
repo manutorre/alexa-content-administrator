@@ -4,6 +4,8 @@ import {
 } from "../../../data/defaultSources";
 import steps from "../../../data/chatbotSteps.json";
 import openai from "../../../apiGPT";
+import axios from "axios";
+import * as cheerio from "cheerio";
 
 export const getStorageConversations = () => {
   return JSON.parse(localStorage.getItem("conversations")) || {};
@@ -16,14 +18,27 @@ export const getStorageConversations = () => {
  * @param {string} entity - The entity to match against the titles in the collection
  * @return {number} The number of results in the collection matching the entity
  */
-export const getNResults = (entity, target) => {
-  return DEFAULT_TARGET[target]?.collection?.filter((item) => {
-    const reg = new RegExp(entity, "g");
-    return (
-      item.title.toLowerCase().match(reg) ||
-      item.category.toLowerCase().match(reg)
-    );
-  }).length;
+export const getNResults = async (entity, target, input) => {
+  const param = entity.replaceAll(" ", "+");
+
+  const response = await axios({
+    method: "get",
+    url: `https://www.amazon.com/s?k=${param}`,
+    headers: { "Access-Control-Allow-Origin": "*" },
+  });
+
+  const $ = cheerio.load(response.data);
+  // const mainElements = $("div[class='sg-col-20-of-24 s-result-item s-asin sg-col-0-of-12 sg-col-16-of-20 AdHolder sg-col s-widget-spacing-small sg-col-12-of-16']");
+  const mainElements = {};
+  for (let i = 0; i < 5; i++) {
+    const text = $("span[class='a-size-medium a-color-base a-text-normal']")[i].firstChild.data;
+    const price = $("span[class='a-price']")[i].firstChild.children[0].data;
+    const imageSrc = $("div[class='a-section aok-relative s-image-fixed-height']")[i].firstChild.attribs.src;
+    const link = $("h2[class='a-size-mini a-spacing-none a-color-base s-line-clamp-2']")[i].firstChild.attribs.href;
+    const fullLink = `http://www.amazon.com${link}`;
+    mainElements[i] = { text, imageSrc, fullLink, price };
+  }
+  return mainElements;
 };
 
 const TRAINING_MESSAGES = {
@@ -36,7 +51,7 @@ const TRAINING_MESSAGES = {
   sourceMissing:
     'You are a helpful assistant. You need to recognize 1 concept (source) in the following sentences and return it in the form {key:value}. In next example: "I want to buy a wireless headphone", the source is "missing". In next example: "I want to buy a book from Amazon", the source is "Amazon".',
   criteriaMissing:
-    'You are a helpful assistant. You need to recognize 2 concepts (criteria, slot) in the following sentences and return it in the form {key:value}. "I want headphones from Amazon ordered by price", the entity is "headphones", the target is "product", the source is "Amazon" and the criteria is "order by" where "price" is the "slot".',
+    'You are a helpful assistant. You need to recognize 2 concepts (criteria, slot) in the following sentences and return it in the form {key:value}. "I want headphones from Amazon ordered by price", the entity is "headphones", the target is "product", the source is "Amazon" and the criteria is "order by" where "price" is the "slot". Or "I want the products with price less than 100", the criteria is "less than", the slot is "price" and the value is "100".',
 };
 
 /**
@@ -52,8 +67,8 @@ export const parseRequestWithGpt = async (input, currentParams) => {
   const entityMissing = currentParams.entity === "missing";
   const targetMissing = currentParams.target === "missing";
   const sourceMissing = currentParams.source === "missing";
-  const allMissing =
-    entityMissing && targetMissing && sourceMissing && criteriaMissing;
+  const allMissing = entityMissing && targetMissing && sourceMissing && criteriaMissing;
+  let entity, target, source, criteria, slot, value;
 
   const searchPropsForMissing = {
     allMissing,
@@ -69,29 +84,37 @@ export const parseRequestWithGpt = async (input, currentParams) => {
     missingIndex !== -1 && Object.entries(searchPropsForMissing)[missingIndex];
 
   const messagePosition = propMissing[0];
-  const content = TRAINING_MESSAGES[messagePosition];
 
-  console.log({ content, currentParams });
+  if (messagePosition) {
+    const content = TRAINING_MESSAGES[messagePosition];
+    console.log({ content, currentParams });
 
-  //First, train GPT to find entity, target and source values from a sentence
-  const trainingMessages = [
-    {
-      role: "system",
-      content,
-    },
-    { role: "user", content: input },
-  ];
+    //First, train GPT to find entity, target and source values from a sentence
+    const trainingMessages = [
+      {
+        role: "system",
+        content,
+      },
+      { role: "user", content: input },
+    ];
 
-  const completion = await openai.createChatCompletion({
-    model: "gpt-3.5-turbo",
-    messages: trainingMessages,
-  });
+    const completion = await openai.createChatCompletion({
+      model: "gpt-3.5-turbo",
+      messages: trainingMessages,
+    });
 
-  const completionResult = completion.data.choices[0].message;
-  const { entity, target, source, criteria, slot } =
-    completionResult.content && JSON.parse(completionResult.content);
+    const completionResult = completion.data.choices[0].message;
+    const data =
+      completionResult.content && JSON.parse(completionResult.content);
 
-  console.log({ completionResult });
+    entity = data.entity;
+    target = data.target;
+    source = data.source;
+    criteria = data.criteria;
+    slot = data.slot;
+    value = data.value;
+    console.log({ data });
+  }
 
   const entityFound =
     (!entityMissing && currentParams.entity) || entity || "missing";
@@ -100,116 +123,17 @@ export const parseRequestWithGpt = async (input, currentParams) => {
   const sourceFound =
     (!sourceMissing && currentParams.source) || source || "missing";
   const criteriaFound =
-    (!criteriaMissing && currentParams.criteria) || criteria || "missing";
+    criteria || (!criteriaMissing && currentParams.criteria) || "missing";
   const slotFound =
-    (!criteriaMissing && currentParams.slot) || slot || "missing";
+    slot || (!criteriaMissing && currentParams.slot) || "missing";
+  const valueFound =
+    value || (!criteriaMissing && currentParams.value) || "missing";
 
   return {
     input,
     action: "search",
     slot: slotFound,
-    criteria: criteriaFound,
-    entity: entityFound,
-    target: targetFound,
-    source: sourceFound,
-  };
-};
-
-/**
- * Parses the input string to extract the target, source, and entity values and constructs an object with the search action.
- * When some value is missing, returns the string "missing" for the property.
- *
- * @param {string} input - the input string to be parsed.
- * @return {object} an object containing the search action, entity value, target value, and source value.
- */
-export const parseRequest = (input, currentParams) => {
-  const formattedInput = input.toLowerCase();
-  let entityFound = currentParams.entity;
-  let targetFound = currentParams.target;
-  let sourceFound = currentParams.source;
-
-  //Third, split words from collections objects, in order to find them also by individual words
-  if (!entityFound || entityFound === "missing") {
-    for (let target in DEFAULT_TARGET) {
-      const targetCollection = DEFAULT_TARGET[target].collection;
-      let entityWords =
-        targetCollection &&
-        targetCollection.flatMap((item) => {
-          return Object.entries(item).flatMap((value) => {
-            if (value[0] !== "img" && typeof value[1] === "string") {
-              return value[1].toLowerCase().split(" ").join("|");
-            }
-            return [];
-          });
-        });
-
-      console.log(entityWords);
-
-      entityWords = entityWords && [...new Set(entityWords)].join("|");
-
-      console.log(entityWords);
-
-      const reg3 = entityWords && new RegExp(entityWords, "g");
-      entityFound = reg3 && formattedInput.match(reg3)?.join(" ");
-      if (entityFound) {
-        targetFound = target;
-        break;
-      }
-    }
-  }
-
-  entityFound = entityFound || "missing";
-
-  //First identify the target (class)
-  if (!targetFound || targetFound === "missing") {
-    const targets = Object.keys(DEFAULT_TARGET)
-      .map((item) => item.toLowerCase())
-      .join("|");
-    const reg1 = new RegExp(targets, "g");
-    targetFound = formattedInput.match(reg1)?.join(" ") || "missing";
-  }
-
-  //Second identify the source of the target (url | classification tag)
-  if (targetFound && (!sourceFound || sourceFound === "missing")) {
-    const sources =
-      DEFAULT_TARGET[targetFound] &&
-      DEFAULT_TARGET[targetFound].sources
-        ?.map((item) => item.toLowerCase())
-        .join("|");
-    const reg2 = sources && new RegExp(sources, "g");
-    sourceFound = reg2 && formattedInput.match(reg2)?.join(" ");
-  }
-
-  sourceFound = sourceFound || "missing";
-
-  const criteria = DEFAULT_CRITERIA_OPERATIONS.map((item) =>
-    item.toLowerCase()
-  ).join("|");
-
-  const reg4 = criteria && new RegExp(criteria, "g");
-  const criteriaFound =
-    (reg4 && formattedInput.match(reg4)?.join(" ")) ||
-    currentParams.criteria ||
-    "missing";
-  console.log({ criteria, criteriaFound });
-
-  let slot;
-  if (criteriaFound === "order") {
-    const words = formattedInput.split(" ");
-    const i = words.findIndex((w) => w.toLowerCase().match(/by/g));
-    slot = words[i + 1]; //Slot = next word after 'by'
-  } else if (criteriaFound === "less than") {
-    const words = formattedInput.split(" ");
-    const i = words.findIndex((w) => w.toLowerCase().match(/than/g));
-    slot = words[i + 1]; //Slot = next word after 'less than'
-  }
-
-  slot = slot || currentParams.slot || "missing";
-
-  return {
-    input,
-    action: "search",
-    slot,
+    value: valueFound,
     criteria: criteriaFound,
     entity: entityFound,
     target: targetFound,
@@ -248,7 +172,7 @@ export const findNextStep = ({ params }) => {
 
   //Check if some criteria operation is part of user input
   if (params.criteria !== "missing") {
-    return steps["criteria"];
+    return steps[params.criteria];
   }
 
   //If no missing properties are found, return the result according source requested.
@@ -268,15 +192,16 @@ export const findNextStep = ({ params }) => {
  * @param {Object} currentParams - An object representing the current parameters of the conversation.
  * @return {string} The text of the next step in the conversation.
  */
-export const getText = (nextStep, currentParams) => {
+export const getText = async (nextStep, currentParams, operationResult) => {
   let text = nextStep.text;
   console.log({ nextStep });
-  const { entity, target, source, input, criteria, slot } = currentParams;
+  const { entity, target, source, input, criteria, slot, value } = currentParams;
+  let results; //results={key: {text, price, image, url}}
 
   switch (nextStep.callbackForSlot) {
     case "getNResults":
-      const nResults = getNResults(entity, target);
-      text = text.replace(/@slotForResults/g, nResults);
+      results = await getNResults(entity, target, input);
+      text = text.replace(/@slotForResults/g, Object.entries(results).length);
       break;
     case "getSlot":
       text = text.replace(/@slotForEntity/g, input);
@@ -284,8 +209,13 @@ export const getText = (nextStep, currentParams) => {
     case "oderBySlot":
       text = text.replace(/@slotForOrdering/g, slot);
       break;
-    case "filterWithLess":
-      text = text.replace(/@value/g, slot);
+    case "getAverage":
+      text = text.replace(/@slot/g, slot);
+      text = text.replace(/@value/g, operationResult);
+      break;
+    case "filterWith":
+      text = text.replace(/@slot/g, slot);
+      text = text.replace(/@value/g, value);
       break;
   }
   text = text.replace(/@entity/g, entity);
@@ -293,7 +223,7 @@ export const getText = (nextStep, currentParams) => {
   text = text.replace(/@source/g, source);
   text = text.replace(/@criteria/g, criteria);
 
-  return text;
+  return { text, results };
 };
 
 export const getOptions = (currentParams) => {
@@ -309,15 +239,208 @@ export const getOptions = (currentParams) => {
  * @param {string} slot - The slot to sort the objects by
  * @return {Array} - A sorted array of objects
  */
-export const applyCriteria = (filteredElements, criteria, slot) => {
-  console.log("Before ", filteredElements);
-  if (criteria === "order") {
-    return filteredElements.sort(
-      (firstItem, secondItem) => firstItem["subtitle"] - secondItem["subtitle"]
-    );
+export const applyCriteria = async (filteredElements, criteria, slot, value) => {
+  let orderedElements;
+  let elementsOnlyText = Object.entries(filteredElements).filter(item => {
+    const info = item[1];
+    const prop = info[slot];
+    return prop !== null;
+  });
+
+  if (elementsOnlyText.length === 0) {
+    return filteredElements;
   }
 
-  if (criteria === "less than") {
-    return filteredElements.filter((item) => item["subtitle"] < slot);
+  elementsOnlyText = elementsOnlyText.map((item) => {
+    const key = item[0];
+    const info = item[1];
+    const prop = info[slot];
+    return { [key]: prop }
+  });
+
+  const content = 'You are a helpful assistant. I will give you a list of elements each one in the form {key:value}. I will also provide a criteria to return the elements. For each request you have to apply the criteria and return the elements or a subset of them. For example, "I want them ordered by price", you should return all the list of elements ordered by price. Or "I want the products with price less than 100", you should return only the elements with price less than 100. If no criteria can be applied, just order the elements by key. The response should be a list of elements each one in the form {key:value}';
+  let userRequest;
+  if (criteria === "order by") {
+    userRequest = JSON.stringify(elementsOnlyText) + " " + criteria + " " + slot;
+  } else {
+    userRequest = JSON.stringify(elementsOnlyText) + " " + slot + " " + criteria + " " + value;
   }
+  //First, train GPT to find entity, target and source values from a sentence
+  const trainingMessages = [
+    {
+      role: "system",
+      content,
+    },
+    { role: "user", content: userRequest },
+  ];
+
+  const completion = await openai.createChatCompletion({
+    model: "gpt-3.5-turbo",
+    messages: trainingMessages,
+  });
+
+  const completionResult = completion.data.choices[0].message;
+  orderedElements =
+    completionResult.content && JSON.parse(completionResult.content);
+
+  orderedElements = orderedElements.map((item) => {
+    const key = Object.keys(item)[0];
+    return { [key]: filteredElements[key] };
+  });
+
+  console.log({ completionResult, orderedElements });
+  return orderedElements;
 };
+
+
+export const applyOperation = async (filteredElements, criteria, slot) => {
+  const content = 'You are a helpful assistant. I will give you a list of elements each one in the form {key:value}. You have to apply an operation (which I will provide) with the values of the elements. For example, "I want the price average", you should apply the operation using the prices values and return the result. Only return the result of the operation without explanation.';
+
+  let elementsOnlyText = Object.entries(filteredElements).filter(item => {
+    const info = item[1];
+    const prop = info[slot];
+    return prop !== null;
+  });
+
+  if (elementsOnlyText.length === 0) {
+    return filteredElements;
+  }
+
+  elementsOnlyText = elementsOnlyText.map((item) => {
+    const key = item[0];
+    const info = item[1];
+    const prop = info[slot];
+    return { [key]: prop }
+  });
+
+  //First, train GPT to find entity, target and source values from a sentence
+  const trainingMessages = [
+    {
+      role: "system",
+      content,
+    },
+    { role: "user", content: JSON.stringify(elementsOnlyText) + " " + slot + " " + criteria },
+  ];
+
+  const completion = await openai.createChatCompletion({
+    model: "gpt-3.5-turbo",
+    messages: trainingMessages,
+  });
+
+  const completionResult = completion.data.choices[0].message?.content;
+  return completionResult;
+}
+
+// console.log("Before ", filteredElements);
+// if (criteria === "order") {
+//   return filteredElements.sort(
+//     (firstItem, secondItem) => firstItem["subtitle"] - secondItem["subtitle"]
+//   );
+// }
+
+// if (criteria === "less than") {
+//   return filteredElements.filter((item) => item["subtitle"] < slot);
+// }
+
+
+/**
+ * Parses the input string to extract the target, source, and entity values and constructs an object with the search action.
+ * When some value is missing, returns the string "missing" for the property.
+ *
+ * @param {string} input - the input string to be parsed.
+ * @return {object} an object containing the search action, entity value, target value, and source value.
+ */
+// export const parseRequest = (input, currentParams) => {
+//   const formattedInput = input.toLowerCase();
+//   let entityFound = currentParams.entity;
+//   let targetFound = currentParams.target;
+//   let sourceFound = currentParams.source;
+
+//   //Third, split words from collections objects, in order to find them also by individual words
+//   if (!entityFound || entityFound === "missing") {
+//     for (let target in DEFAULT_TARGET) {
+//       const targetCollection = DEFAULT_TARGET[target].collection;
+//       let entityWords =
+//         targetCollection &&
+//         targetCollection.flatMap((item) => {
+//           return Object.entries(item).flatMap((value) => {
+//             if (value[0] !== "img" && typeof value[1] === "string") {
+//               return value[1].toLowerCase().split(" ").join("|");
+//             }
+//             return [];
+//           });
+//         });
+
+//       console.log(entityWords);
+
+//       entityWords = entityWords && [...new Set(entityWords)].join("|");
+
+//       console.log(entityWords);
+
+//       const reg3 = entityWords && new RegExp(entityWords, "g");
+//       entityFound = reg3 && formattedInput.match(reg3)?.join(" ");
+//       if (entityFound) {
+//         targetFound = target;
+//         break;
+//       }
+//     }
+//   }
+
+//   entityFound = entityFound || "missing";
+
+//   //First identify the target (class)
+//   if (!targetFound || targetFound === "missing") {
+//     const targets = Object.keys(DEFAULT_TARGET)
+//       .map((item) => item.toLowerCase())
+//       .join("|");
+//     const reg1 = new RegExp(targets, "g");
+//     targetFound = formattedInput.match(reg1)?.join(" ") || "missing";
+//   }
+
+//   //Second identify the source of the target (url | classification tag)
+//   if (targetFound && (!sourceFound || sourceFound === "missing")) {
+//     const sources =
+//       DEFAULT_TARGET[targetFound] &&
+//       DEFAULT_TARGET[targetFound].sources
+//         ?.map((item) => item.toLowerCase())
+//         .join("|");
+//     const reg2 = sources && new RegExp(sources, "g");
+//     sourceFound = reg2 && formattedInput.match(reg2)?.join(" ");
+//   }
+
+//   sourceFound = sourceFound || "missing";
+
+//   const criteria = DEFAULT_CRITERIA_OPERATIONS.map((item) =>
+//     item.toLowerCase()
+//   ).join("|");
+
+//   const reg4 = criteria && new RegExp(criteria, "g");
+//   const criteriaFound =
+//     (reg4 && formattedInput.match(reg4)?.join(" ")) ||
+//     currentParams.criteria ||
+//     "missing";
+//   console.log({ criteria, criteriaFound });
+
+//   let slot;
+//   if (criteriaFound === "order") {
+//     const words = formattedInput.split(" ");
+//     const i = words.findIndex((w) => w.toLowerCase().match(/by/g));
+//     slot = words[i + 1]; //Slot = next word after 'by'
+//   } else if (criteriaFound === "less than") {
+//     const words = formattedInput.split(" ");
+//     const i = words.findIndex((w) => w.toLowerCase().match(/than/g));
+//     slot = words[i + 1]; //Slot = next word after 'less than'
+//   }
+
+//   slot = slot || currentParams.slot || "missing";
+
+//   return {
+//     input,
+//     action: "search",
+//     slot,
+//     criteria: criteriaFound,
+//     entity: entityFound,
+//     target: targetFound,
+//     source: sourceFound,
+//   };
+// };
