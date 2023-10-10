@@ -11,6 +11,51 @@ export const getStorageConversations = () => {
   return JSON.parse(localStorage.getItem("conversations")) || {};
 };
 
+const getDataAccordingSource = (source, pos, $) => {
+  let text, price, imageSrc, link;
+  switch (source) {
+    case "Amazon":
+      text = $("span[class='a-size-medium a-color-base a-text-normal']")[pos].firstChild.data;
+      price = $("span[class='a-price']")[pos].firstChild.children[0].data;
+      imageSrc = $("div[class='a-section aok-relative s-image-fixed-height']")[pos].firstChild.attribs.src;
+      link = $("h2[class='a-size-mini a-spacing-none a-color-base s-line-clamp-2']")[pos].firstChild.attribs.href;
+      break;
+    case "MercadoLibre":
+      text = $("h2[class='ui-search-item__title']")[pos].firstChild.data;
+      price = $("span[class='andes-money-amount ui-search-price__part ui-search-price__part--medium andes-money-amount--cents-superscript']")[pos].firstChild.children[0].data;
+      imageSrc = $(".ui-search-result-image__element")[pos].attribs['data-src'];
+      link = $("div[class='andes-carousel-snapped ui-search-result__card andes-carousel-snapped--scroll-hidden']")[pos].firstChild.firstChild.firstChild.attribs.href;
+      break;
+    default:
+      break;
+  }
+
+  return { data: { text, price, imageSrc }, link };
+}
+
+const getDescriptionAccordingSource = async (source, fullLink, $) => {
+  let description;
+  const res = await axios({
+    method: "get",
+    url: fullLink,
+    headers: { "Access-Control-Allow-Origin": "*" },
+  });
+
+  $ = cheerio.load(res.data);
+  let html = $.html();
+  switch (source) {
+    case "Amazon":
+      description = $("li[class='a-spacing-mini']");
+      break;
+    case "MercadoLibre":
+      description = $("li[class='ui-vpp-highlighted-specs__features-list-item ui-pdp-color--BLACK ui-pdp-size--XSMALL ui-pdp-family--REGULAR']");
+      break;
+    default:
+      break;
+  }
+  return description;
+}
+
 /**
  * Returns the number of results in the collection that have a title
  * matching the given entity.
@@ -18,25 +63,66 @@ export const getStorageConversations = () => {
  * @param {string} entity - The entity to match against the titles in the collection
  * @return {number} The number of results in the collection matching the entity
  */
-export const getNResults = async (entity, target, input) => {
-  const param = entity.replaceAll(" ", "+");
+export const getNResults = async (entity, source) => {
+  let param, url, searchParam;
+  switch (source) {
+    case "Amazon":
+      param = entity.replaceAll(" ", "+");
+      url = 'https://www.amazon.com';
+      searchParam = `/s?k=${param}`;
+      break;
+    case "MercadoLibre":
+      param = entity.replaceAll(" ", "-");
+      url = 'https://listado.mercadolibre.com.ar';
+      searchParam = `/${param}`;  //#D[A:${entity}]`;
+      break;
+    default:
+      param = entity.replaceAll(" ", "+");
+      url = 'https://www.amazon.com';
+      searchParam = `/s?k=${param}`;
+      break;
+  }
 
   const response = await axios({
     method: "get",
-    url: `https://www.amazon.com/s?k=${param}`,
+    url: url + searchParam,
     headers: { "Access-Control-Allow-Origin": "*" },
   });
 
-  const $ = cheerio.load(response.data);
+  let $ = cheerio.load(response.data);
+
   // const mainElements = $("div[class='sg-col-20-of-24 s-result-item s-asin sg-col-0-of-12 sg-col-16-of-20 AdHolder sg-col s-widget-spacing-small sg-col-12-of-16']");
   const mainElements = {};
+
+  let n = Object.entries(mainElements).length;
+  if (n !== 5) {
+    n = 0;
+  } else {
+    n = 6;
+  }
+
   for (let i = 0; i < 5; i++) {
-    const text = $("span[class='a-size-medium a-color-base a-text-normal']")[i].firstChild.data;
-    const price = $("span[class='a-price']")[i].firstChild.children[0].data;
-    const imageSrc = $("div[class='a-section aok-relative s-image-fixed-height']")[i].firstChild.attribs.src;
-    const link = $("h2[class='a-size-mini a-spacing-none a-color-base s-line-clamp-2']")[i].firstChild.attribs.href;
-    const fullLink = `http://www.amazon.com${link}`;
-    mainElements[i] = { text, imageSrc, fullLink, price };
+    const { data, link } = getDataAccordingSource(source, i, $);
+    const fullLink = `${url}${link}`;
+
+    let description = await getDescriptionAccordingSource(source, fullLink, $);
+    let desc = [];
+    let d;
+    for (let p = 0; p < description.length; p++) {
+      switch (source) {
+        case 'Amazon':
+          d = description[p].children[0].children[0].data;
+          break;
+        case 'MercadoLibre':
+          d = description[p].children[0].data;
+          break;
+        default:
+          break;
+      }
+      desc = [...desc, d];
+    }
+    $ = cheerio.load(response.data);
+    mainElements[n + i] = { ...data, fullLink, source: 'Amazon', desc };
   }
   return mainElements;
 };
@@ -50,8 +136,8 @@ const TRAINING_MESSAGES = {
     'You are a helpful assistant. You need to recognize 1 concept (target) in the following sentences and return it in the form {key:value}. In next example: "I want to buy a wireless headphone", the target is "product". In next example: "I want to buy a book from Amazon", the target is "product".',
   sourceMissing:
     'You are a helpful assistant. You need to recognize 1 concept (source) in the following sentences and return it in the form {key:value}. In next example: "I want to buy a wireless headphone", the source is "missing". In next example: "I want to buy a book from Amazon", the source is "Amazon".',
-  criteriaMissing:
-    'You are a helpful assistant. You need to recognize 2 concepts (criteria, slot) in the following sentences and return it in the form {key:value}. "I want headphones from Amazon ordered by price", the entity is "headphones", the target is "product", the source is "Amazon" and the criteria is "order by" where "price" is the "slot". Or "I want the products with price less than 100", the criteria is "less than", the slot is "price" and the value is "100".',
+  // criteriaMissing:
+  //   'You are a helpful assistant. You need to recognize 2 concepts (criteria, slot) in the following sentences and return it in the form {key:value}. "I want headphones from Amazon ordered by price", the entity is "headphones", the target is "product", the source is "Amazon" and the criteria is "order by" where "price" is the "slot". Or "I want the products with price less than 100", the criteria is "less than", the slot is "price" and the value is "100".',
 };
 
 /**
@@ -63,19 +149,19 @@ const TRAINING_MESSAGES = {
  */
 export const parseRequestWithGpt = async (input, currentParams) => {
   // const formattedInput = input.toLowerCase();
-  const criteriaMissing = currentParams.criteria === "missing";
+  // const criteriaMissing = currentParams.criteria === "missing";
   const entityMissing = currentParams.entity === "missing";
   const targetMissing = currentParams.target === "missing";
   const sourceMissing = currentParams.source === "missing";
-  const allMissing = entityMissing && targetMissing && sourceMissing && criteriaMissing;
-  let entity, target, source, criteria, slot, value;
+  const allMissing = entityMissing && targetMissing && sourceMissing; // && criteriaMissing;
+  let entity, target, source, content, criteria, slot, value;
 
   const searchPropsForMissing = {
-    allMissing,
+    // allMissing,
     entityMissing,
     targetMissing,
     sourceMissing,
-    criteriaMissing,
+    // criteriaMissing,
   };
   const missingIndex = Object.entries(searchPropsForMissing).findIndex(
     (searchProp) => !!searchProp[1]
@@ -85,56 +171,69 @@ export const parseRequestWithGpt = async (input, currentParams) => {
 
   const messagePosition = propMissing[0];
 
+  //If some prop is missing
   if (messagePosition) {
-    const content = TRAINING_MESSAGES[messagePosition];
-    console.log({ content, currentParams });
-
-    //First, train GPT to find entity, target and source values from a sentence
-    const trainingMessages = [
-      {
-        role: "system",
-        content,
-      },
-      { role: "user", content: input },
-    ];
-
-    const completion = await openai.createChatCompletion({
-      model: "gpt-3.5-turbo",
-      messages: trainingMessages,
-    });
-
-    const completionResult = completion.data.choices[0].message;
-    const data =
-      completionResult.content && JSON.parse(completionResult.content);
-
-    entity = data.entity;
-    target = data.target;
-    source = data.source;
-    criteria = data.criteria;
-    slot = data.slot;
-    value = data.value;
-    console.log({ data });
+    content = TRAINING_MESSAGES[messagePosition];
+  } else {
+    //Identify again the necessary props
+    content = TRAINING_MESSAGES['allMissing'];
   }
 
-  const entityFound =
-    (!entityMissing && currentParams.entity) || entity || "missing";
-  const targetFound =
-    (!targetMissing && currentParams.target) || target || "missing";
-  const sourceFound =
-    (!sourceMissing && currentParams.source) || source || "missing";
-  const criteriaFound =
-    criteria || (!criteriaMissing && currentParams.criteria) || "missing";
-  const slotFound =
-    slot || (!criteriaMissing && currentParams.slot) || "missing";
-  const valueFound =
-    value || (!criteriaMissing && currentParams.value) || "missing";
+  console.log({ content, currentParams });
+
+  //First, train GPT to find entity, target and source values from a sentence
+  const trainingMessages = [
+    {
+      role: "system",
+      content,
+    },
+    { role: "user", content: input },
+  ];
+
+  const completion = await openai.createChatCompletion({
+    model: "gpt-3.5-turbo",
+    messages: trainingMessages,
+  });
+
+  const completionResult = completion.data.choices[0].message;
+  const data =
+    completionResult.content && JSON.parse(completionResult.content);
+
+  entity = data.entity;
+  target = data.target;
+  source = data.source.replaceAll(' ', '');
+  source = source[0].toUpperCase() + source.slice(1, source.length);
+
+  // criteria = data.criteria;
+  // slot = data.slot;
+  // value = data.value;
+  console.log({ data });
+
+  //If only some data is missing, don't replace the data already collected
+  if (messagePosition) {
+    entityFound = ((currentParams.entity !== "missing") && currentParams.entity) || entity || "missing";
+    targetFound = ((currentParams.target !== "missing") && currentParams.target) || target || "missing";
+    sourceFound = ((currentParams.source !== "missing") && currentParams.source) || source || "missing";
+  } else {
+    //Otherwise, get all data again
+    entityFound = entity || currentParams.entity || "missing";
+    targetFound = target || currentParams.target || "missing";
+    sourceFound = source || currentParams.source || "missing";
+  }
+
+  // const criteriaFound =
+  //   criteria || (!criteriaMissing && currentParams.criteria) || "missing";
+  // const slotFound =
+  //   slot || (!criteriaMissing && currentParams.slot) || "missing";
+  // const valueFound =
+  //   value || (!criteriaMissing && currentParams.value) || "missing";
 
   return {
     input,
     action: "search",
-    slot: slotFound,
-    value: valueFound,
-    criteria: criteriaFound,
+    // slot: slotFound,
+    // value: valueFound,
+    // criteria: criteriaFound,
     entity: entityFound,
     target: targetFound,
     source: sourceFound,
@@ -147,7 +246,8 @@ export const parseRequestWithGpt = async (input, currentParams) => {
  * @param {Object} params - An object containing the entity, target, and source.
  * @return {string} The next step, or the result if no missing properties are found.
  */
-export const findNextStep = ({ params }) => {
+export const findNextStep = (lastRequest, lastStep) => {
+  const { params } = lastRequest;
   const missingProps = Object.keys(params).filter(
     (prop) => params[prop] === "missing"
   );
@@ -170,9 +270,17 @@ export const findNextStep = ({ params }) => {
     return steps["source"];
   }
 
-  //Check if some criteria operation is part of user input
-  if (params.criteria !== "missing") {
-    return steps[params.criteria];
+  // //Check if some criteria operation is part of user input
+  // if (params.criteria !== "missing") {
+  //   return steps[params.criteria];
+  // }
+
+  if (lastStep.step === 5) {
+    return steps["explore"];
+  }
+
+  if (lastStep.step === 6) {
+    return steps["default"];
   }
 
   //If no missing properties are found, return the result according source requested.
@@ -181,8 +289,6 @@ export const findNextStep = ({ params }) => {
   if (productRequested) {
     return steps["results"];
   }
-
-  return steps["explore"];
 };
 
 /**
@@ -200,7 +306,7 @@ export const getText = async (nextStep, currentParams, operationResult) => {
 
   switch (nextStep.callbackForSlot) {
     case "getNResults":
-      results = await getNResults(entity, target, input);
+      results = await getNResults(entity, source);
       text = text.replace(/@slotForResults/g, Object.entries(results).length);
       break;
     case "getSlot":
@@ -217,6 +323,10 @@ export const getText = async (nextStep, currentParams, operationResult) => {
       text = text.replace(/@slot/g, slot);
       text = text.replace(/@value/g, value);
       break;
+    case "default":
+      text = text.replace(/@value/g, operationResult.msg);
+      results = operationResult.elem;
+      break;
   }
   text = text.replace(/@entity/g, entity);
   text = text.replace(/@target/g, target);
@@ -230,6 +340,62 @@ export const getOptions = (currentParams) => {
   const { target } = currentParams;
   return DEFAULT_TARGET[target].sources;
 };
+
+/**
+ * Apply an operation to a collection of elements based on user request.
+ *
+ * @param {Array} collection - The list of elements.
+ * @return {Object} - An object with a response message and the list of elements after applying the operation.
+ */
+export const sendPromptToGpt = async (collection, { text }) => {
+  const content = 'You are a helpful assistant. I will give you a list of elements each one in the way {key:value}. I will also ask you to answer with some information about the values from the elements. For example, I can ask you to filter elements searching for some word in the text. Or filter elements by some specific value for number data. Return only the elements asked as an array with elements in the way {key:value}';
+
+  let filteredElements = Object.entries(collection).filter(item => {
+    const info = item[1];
+    return info.text && info.price && info.source;
+  });
+
+  if (filteredElements.length === 0) {
+    return collection;
+  }
+
+  filteredElements = filteredElements.map((item) => {
+    const key = item[0];
+    const info = item[1];
+    return { [key]: { text: info.text, price: info.price, source: info.source } }
+  });
+
+  //First, train GPT to find entity, target and source values from a sentence
+  const trainingMessages = [
+    {
+      role: "system",
+      content,
+    },
+    { role: "user", content: "From this list " + JSON.stringify(filteredElements) + " " + text },
+  ];
+
+  const completion = await openai.createChatCompletion({
+    model: "gpt-3.5-turbo",
+    messages: trainingMessages,
+  });
+
+  const completionResult = completion.data.choices[0].message?.content;
+  const msg = completionResult.split(":")[0];
+  let elements = completionResult.match(/\[(.*?)\]/, "g");
+  elements = elements || completionResult.split(":")[1];
+  // const elements = completionResult.match(/\{(.*?)\}/, "g");
+  let parsedElements = elements ? JSON.parse(elements[0]) : JSON.parse(completionResult);
+  // parsedElements = parsedElements.map(item => item[1]);
+  let elem = {};
+  let pos = 0;
+  for (let item of parsedElements) {
+    const key = Object.keys(item)[0];
+    elem[pos] = collection[key]
+    pos++;
+  }
+
+  return { msg, elem };
+}
 
 /**
  * Sorts an array of objects based on a specified slot using a provided criteria.

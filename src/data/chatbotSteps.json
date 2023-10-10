@@ -36,37 +36,44 @@
         "text": "Do you want to explore more about them? You can filter results by some feature, get them ordered, or do operations like get the average, etc.",
         "step": 6
     },
-    "order by": {
+    "default": {
         "type": "Chatbot",
         "step": 7,
+        "text": "@value",
+        "callbackForSlot": "default",
+        "carousel": true
+    },
+    "order by": {
+        "type": "Chatbot",
+        "step": 8,
         "text": "Here you have the results from \"@source\" @criteria @slotForOrdering. Do you want to explore more about them?",
         "carousel": true,
         "callbackForSlot": "oderBySlot"
     },
     "less than": {
         "type": "Chatbot",
-        "step": 8,
+        "step": 9,
         "text": "Here you have the results from \"@source\" with @slot @criteria @value. Do you want to explore more about them?",
         "carousel": true,
         "callbackForSlot": "filterWith"
     },
     "greater than": {
         "type": "Chatbot",
-        "step": 8,
+        "step": 9,
         "text": "Here you have the results from \"@source\" with @slot @criteria @value. Do you want to explore more about them?",
         "carousel": true,
         "callbackForSlot": "filterWith"
     },
     "includes": {
         "type": "Chatbot",
-        "step": 9,
+        "step": 10,
         "text": "Here you have the results from \"@source\" that @criteria @value. Do you want to explore more about them?",
         "carousel": true,
         "callbackForSlot": "filterWith"
     },
     "average": {
         "type": "Chatbot",
-        "step": 10,
+        "step": 11,
         "text": "The @slot @criteria is @value. Do you want to explore more about them?",
         "callbackForSlot": "getAverage"
     }

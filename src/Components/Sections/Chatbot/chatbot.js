@@ -15,6 +15,7 @@ import {
   applyCriteria,
   getOptions,
   applyOperation,
+  sendPromptToGpt
 } from "./utils";
 import { HistoryBox } from "./historyBox";
 
@@ -49,24 +50,27 @@ export default function Chatbot() {
   }, [steps]);
 
   useEffect(() => {
-
     const getResultsFromRequest = async () => {
       const lastRequest = requests[requests.length - 1];
       if (lastRequest) {
+        const lastStep = steps[steps.length - 1];
         let operationResult;
-        const nextStep = findNextStep(lastRequest);
+        const nextStep = findNextStep(lastRequest, lastStep);
         console.log({ requestParams, nextStep });
 
-        if (nextStep.callbackForSlot === "getAverage") {
-          const { criteria, entity, slot, value } = requestParams.current;
-          if (criteria) {
-            operationResult = await applyOperation(collection.current, criteria, slot);
-          }
+        // if (nextStep.callbackForSlot === "getAverage") {
+        //   const { criteria, entity, slot, value } = requestParams.current;
+        //   if (criteria) {
+        //     operationResult = await applyOperation(collection.current, criteria, slot);
+        //   }
+        // }
+        if (lastStep.step === 6) { //steps["explore"]
+          operationResult = await sendPromptToGpt(collection.current, lastRequest);
         }
 
         const { text, results } = await getText(nextStep, requestParams.current, operationResult);
         if (results) {
-          collection.current = results;
+          collection.current = { ...collection.current, ...results };
         }
         let nextStepModified = { ...nextStep, text };
         if (nextStep.options) {
@@ -90,7 +94,7 @@ export default function Chatbot() {
   }, [requests]);
 
   useEffect(() => {
-    if (steps[steps.length - 1].callbackForSlot === "getNResults") {
+    if (steps[steps.length - 1].callbackForSlot === "getNResults" || steps[steps.length - 1].step === 7) {
       const newSteps = [...steps, chatbotSteps.explore];
       setSteps(newSteps);
     }
@@ -143,9 +147,14 @@ export default function Chatbot() {
     //Returns an array of items based on user input
     const { criteria, entity, slot, value } = requestParams.current;
     let carouselItems = results || steps[steps.length - 1].elements || productsCollection;
-
-    //Get items where their title or category matches the entity
-    carouselItems = Object.entries(carouselItems).map(item => { return { [item[0]]: item[1] } });
+    // if (!carouselItems.length) {
+    //   carouselItems = Object.entries(carouselItems).map(item => { return { [item[0]]: item[1] } });
+    // }
+    // else {
+    //   // carouselItems = carouselItems.map(item => item[1]);
+    //   //Get items where their title or category matches the entity
+    //   carouselItems = carouselItems.map(item => { return { [item[0]]: item[1] } });
+    // }
 
     // .filter((item) => {
     //   // const reg = new RegExp(entity, "g");
@@ -158,9 +167,9 @@ export default function Chatbot() {
     // });
 
     //Applies an additional criteria if was requested by user (ex. order, price less than, etc.)
-    if (criteria !== "missing" && slot !== "missing") {
-      carouselItems = await applyCriteria(results, criteria, slot, value);
-    }
+    // if (criteria !== "missing" && slot !== "missing") {
+    //   carouselItems = await applyCriteria(results, criteria, slot, value);
+    // }
     console.log("After ", carouselItems);
     return carouselItems;
   };

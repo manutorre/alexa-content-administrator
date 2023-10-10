@@ -11,11 +11,53 @@ import SwipeableViews from "react-swipeable-views";
 import { autoPlay } from "react-swipeable-views-utils";
 import TitlebarImageList from "./titleBarImageList";
 // const AutoPlaySwipeableViews = autoPlay(SwipeableViews);
+import Popper from '@mui/material/Popper';
+
+const SimplePopper = ({ description }) => {
+  const [anchorEl, setAnchorEl] = React.useState(null);
+  const [open, setOpen] = React.useState(false);
+  const [placement, setPlacement] = React.useState();
+
+  // const handleClick = (event) => {
+  //   setAnchorEl(anchorEl ? null : event.currentTarget);
+  // };
+
+  const handleClick = (newPlacement) => (event) => {
+    setAnchorEl(event.currentTarget);
+    setOpen((prev) => placement !== newPlacement || !prev);
+    setPlacement(newPlacement);
+  };
+
+  // const open = Boolean(anchorEl);
+  const id = open ? 'simple-popper' : undefined;
+
+  if (description.length === 0) {
+    return null;
+  }
+
+  return (
+    <div>
+      <Button size="small" variant="contained" onClick={handleClick('bottom')}> {!open ? "Show more" : "Show less"}</Button>
+      <Popper sx={{ borderRadius: 3, border: 1, p: 2, bgcolor: 'background.paper', width: "60%", height: "40%", overflowY: "scroll" }} id={id} open={open} anchorEl={anchorEl} placement={placement} >
+        <Box>
+          {description.map((paragraph) => {
+            return (
+              <Typography paragraph>
+                {paragraph}
+              </Typography>
+            )
+          })}
+        </Box>
+      </Popper>
+    </div >
+  );
+}
+
 
 const Carousel = ({ carousel }) => {
   //   const theme = useTheme();
   const [activeStep, setActiveStep] = useState(0);
-  const maxSteps = carousel.length;
+  const maxSteps = Object.entries(carousel).length;
 
   const handleNext = () => {
     setActiveStep((prevActiveStep) => prevActiveStep + 1);
@@ -30,7 +72,7 @@ const Carousel = ({ carousel }) => {
   };
 
   const redirectToUrl = () => {
-    const url = Object.values(carousel[activeStep])[0].fullLink;
+    const url = carousel[activeStep].fullLink;
     window.open(url);
   }
 
@@ -48,11 +90,14 @@ const Carousel = ({ carousel }) => {
           mt: 1,
         }}
       >
+
         <a>
-        <Typography onClick={redirectToUrl} variant="subtitle1" sx={{}}>
-          {Object.values(carousel[activeStep])[0].text} - <b>{Object.values(carousel[activeStep])[0].price}</b>
-        </Typography>
+          <Typography onClick={redirectToUrl} variant="subtitle1" sx={{}}>
+            {carousel[activeStep].text} - <b>{carousel[activeStep].price}</b>
+          </Typography>
         </a>
+
+        <SimplePopper description={carousel[activeStep].desc} />
 
       </Paper>
       <SwipeableViews
@@ -62,7 +107,7 @@ const Carousel = ({ carousel }) => {
         enableMouseEvents
       >
         {/* <TitlebarImageList item={carousel[activeStep]} /> */}
-        {carousel.map((step, index) => (
+        {Object.values(carousel).map((step, index) => (
           <div key={index}>
             {Math.abs(activeStep - index) <= 2 ? (
               <Box
@@ -75,8 +120,8 @@ const Carousel = ({ carousel }) => {
                   width: "40%",
                   margin: "auto",
                 }}
-                src={Object.values(step)[0].imageSrc}
-                alt={Object.values(step)[0].text}
+                src={step.imageSrc}
+                alt={step.text}
               />
             ) : null}
           </div>

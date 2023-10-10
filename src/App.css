@@ -139,3 +139,7 @@ span.ant-spin-dot.ant-spin-dot-spin{
     width: 72px;
     height: 72px;
 }
+
+::-webkit-scrollbar {
+  display: none;
+}

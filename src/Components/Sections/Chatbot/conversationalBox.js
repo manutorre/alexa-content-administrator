@@ -155,7 +155,7 @@ const ConversationalItem = ({
           {options && (
             <UsertItem options={options} onOptionSelected={onOptionSelected} />
           )}
-          {!!carousel && carousel.length > 0 && (
+          {!!carousel && Object.entries(carousel).length > 0 && (
             <ChatbotItem carousel={carousel} />
           )}
         </>
