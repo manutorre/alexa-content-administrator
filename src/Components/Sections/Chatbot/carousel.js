@@ -79,24 +79,25 @@ const Carousel = ({ carousel }) => {
   // console.log({ activeStep });
 
   return (
-    <Box sx={{ bgcolor: "background.default" }}>
+    <Box sx={{ bgcolor: "background.default", width: "90%", ml: 2 }}>
       <Paper
         square
         elevation={0}
         sx={{
           display: "flex",
-          justifyContent: "center",
+          justifyContent: "space-between",
           // height: 50,
           mt: 1,
+          px: 2
         }}
       >
-
-        <a>
-          <Typography onClick={redirectToUrl} variant="subtitle1" sx={{}}>
-            {carousel[activeStep].text} - <b>{carousel[activeStep].price}</b>
-          </Typography>
-        </a>
-
+        <Box sx={{ flex: 1 }}>
+          <a style={{ textAlign: "center" }}>
+            <Typography onClick={redirectToUrl} variant="subtitle1">
+              {carousel[activeStep].text} - <b>{carousel[activeStep].price}</b>
+            </Typography>
+          </a>
+        </Box>
         <SimplePopper description={carousel[activeStep].desc} />
 
       </Paper>
@@ -117,7 +118,7 @@ const Carousel = ({ carousel }) => {
                   display: "block",
                   // maxWidth: 400,
                   overflow: "hidden",
-                  width: "40%",
+                  width: "20%",
                   margin: "auto",
                 }}
                 src={step.imageSrc}

@@ -11,26 +11,28 @@ export const getStorageConversations = () => {
   return JSON.parse(localStorage.getItem("conversations")) || {};
 };
 
-const getDataAccordingSource = (source, pos, $) => {
-  let text, price, imageSrc, link;
+const getDataAccordingSource = (source, url, pos, $) => {
+  let text, price, imageSrc, link, fullLink;
   switch (source) {
     case "Amazon":
       text = $("span[class='a-size-medium a-color-base a-text-normal']")[pos].firstChild.data;
       price = $("span[class='a-price']")[pos].firstChild.children[0].data;
       imageSrc = $("div[class='a-section aok-relative s-image-fixed-height']")[pos].firstChild.attribs.src;
       link = $("h2[class='a-size-mini a-spacing-none a-color-base s-line-clamp-2']")[pos].firstChild.attribs.href;
+      fullLink = `${url}${link}`;
       break;
     case "MercadoLibre":
       text = $("h2[class='ui-search-item__title']")[pos].firstChild.data;
       price = $("span[class='andes-money-amount ui-search-price__part ui-search-price__part--medium andes-money-amount--cents-superscript']")[pos].firstChild.children[0].data;
       imageSrc = $(".ui-search-result-image__element")[pos].attribs['data-src'];
       link = $("div[class='andes-carousel-snapped ui-search-result__card andes-carousel-snapped--scroll-hidden']")[pos].firstChild.firstChild.firstChild.attribs.href;
+      fullLink = `${link}`;
       break;
     default:
       break;
   }
 
-  return { data: { text, price, imageSrc }, link };
+  return { data: { text, price, imageSrc }, fullLink };
 }
 
 const getDescriptionAccordingSource = async (source, fullLink, $) => {
@@ -102,9 +104,7 @@ export const getNResults = async (entity, source) => {
   }
 
   for (let i = 0; i < 5; i++) {
-    const { data, link } = getDataAccordingSource(source, i, $);
-    const fullLink = `${url}${link}`;
-
+    const { data, fullLink } = getDataAccordingSource(source, url, i, $);
     let description = await getDescriptionAccordingSource(source, fullLink, $);
     let desc = [];
     let d;
@@ -129,7 +129,7 @@ export const getNResults = async (entity, source) => {
 
 const TRAINING_MESSAGES = {
   allMissing:
-    'You are a helpful assistant. You need to recognize 5 kind of concepts (entity, target, source, criteria, slot) in the following sentences and return them in the form {key:value}. In next example: "I want to buy a wireless headphone", the entity is "wireless headphone", the target is "product" and the source is "missing". In next example: "I want to buy a book from Amazon", the entity is "book", the target is "product" and the source is "Amazon". In next example: "I want headphones from Amazon ordered by price", the entity is "headphones", the target is "product", the source is "Amazon" and the criteria is "order by" where "price" is the "slot".',
+    'You are a helpful assistant. You need to recognize 4 kind of concepts (entity, target, source, action) in the following sentences and return them in the form {key:value}. In next example: "I want to buy a wireless headphone", the entity is "wireless headphone", the target is "product" and the source is "missing". In next example: "I want to buy a book from Amazon", the entity is "book", the target is "product" and the source is "Amazon". In next example: "I want to add headphones from MercadoLibre", the entity is "headphones", the target is "product", the source is "MercadoLibre" and the action is "add".',
   entityMissing:
     'You are a helpful assistant. You need to recognize 1 concept (entity) in the following sentences and return it in the form {key:value}. In next example: "I want to buy a wireless headphone", the entity is "wireless headphone". In next example: "I want to buy a book from Amazon", the entity is "book".',
   targetMissing:
@@ -154,10 +154,10 @@ export const parseRequestWithGpt = async (input, currentParams) => {
   const targetMissing = currentParams.target === "missing";
   const sourceMissing = currentParams.source === "missing";
   const allMissing = entityMissing && targetMissing && sourceMissing; // && criteriaMissing;
-  let entity, target, source, content, criteria, slot, value;
+  let entity, target, source, content, action, entityFound, targetFound, sourceFound, actionFound;
 
   const searchPropsForMissing = {
-    // allMissing,
+    allMissing,
     entityMissing,
     targetMissing,
     sourceMissing,
@@ -201,6 +201,7 @@ export const parseRequestWithGpt = async (input, currentParams) => {
 
   entity = data.entity;
   target = data.target;
+  action = data.action;
   source = data.source.replaceAll(' ', '');
   source = source[0].toUpperCase() + source.slice(1, source.length);
 
@@ -214,11 +215,13 @@ export const parseRequestWithGpt = async (input, currentParams) => {
     entityFound = ((currentParams.entity !== "missing") && currentParams.entity) || entity || "missing";
     targetFound = ((currentParams.target !== "missing") && currentParams.target) || target || "missing";
     sourceFound = ((currentParams.source !== "missing") && currentParams.source) || source || "missing";
+    actionFound = ((currentParams.action !== "missing") && currentParams.action) || action || "missing";
   } else {
     //Otherwise, get all data again
     entityFound = entity || currentParams.entity || "missing";
     targetFound = target || currentParams.target || "missing";
     sourceFound = source || currentParams.source || "missing";
+    actionFound = action || currentParams.action || "missing";
   }
 
   // const criteriaFound =
@@ -234,6 +237,7 @@ export const parseRequestWithGpt = async (input, currentParams) => {
     // slot: slotFound,
     // value: valueFound,
     // criteria: criteriaFound,
+    action: actionFound,
     entity: entityFound,
     target: targetFound,
     source: sourceFound,
@@ -270,25 +274,18 @@ export const findNextStep = (lastRequest, lastStep) => {
     return steps["source"];
   }
 
-  // //Check if some criteria operation is part of user input
-  // if (params.criteria !== "missing") {
-  //   return steps[params.criteria];
-  // }
-
-  if (lastStep.step === 5) {
-    return steps["explore"];
+  const productRequested = params.target === "product";
+  if (params.action?.match("add") || productRequested) {
+    return steps["results"];
   }
 
   if (lastStep.step === 6) {
     return steps["default"];
   }
 
-  //If no missing properties are found, return the result according source requested.
-  const productRequested = params.target === "product";
-
-  if (productRequested) {
-    return steps["results"];
-  }
+  // if (lastStep.step === 5) {
+  //   return steps["explore"];
+  // }
 };
 
 /**

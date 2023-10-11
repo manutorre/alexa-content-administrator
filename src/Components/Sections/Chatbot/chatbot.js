@@ -64,7 +64,7 @@ export default function Chatbot() {
         //     operationResult = await applyOperation(collection.current, criteria, slot);
         //   }
         // }
-        if (lastStep.step === 6) { //steps["explore"]
+        if (nextStep.step !== 5 && lastStep.step === 6) { //steps["explore"]
           operationResult = await sendPromptToGpt(collection.current, lastRequest);
         }
 
@@ -180,50 +180,58 @@ export default function Chatbot() {
         <Grid
           item
           xs={1}
-          sm={3}
+          sm={2.5}
           sx={{
-            overflowY: "scroll",
-            height: (window.innerHeight * 3) / 4,
-            maxHeight: (window.innerHeight * 3) / 4,
+            height: (window.innerHeight * 4) / 5,
+            maxHeight: (window.innerHeight * 4) / 5,
             bgcolor: "lightgrey",
             py: 2,
             my: 2,
-            mr: 4,
+            mx: 2,
           }}
         >
-          <Typography sx={{ textAlign: "center" }} variant="h5">
+          <Typography sx={{ textAlign: "center", mb: 1 }} variant="h5">
             Historial
           </Typography>
-
-          {Object.keys(conversations).length > 0 &&
-            Object.keys(conversations).map((text, index) => {
-              return (
-                <Grid item xs={12} sm={12} key={index}>
-                  <HistoryBox
-                    text={text}
-                    onPressHistoryItem={onPressHistoryItem}
-                  // options={options}
-                  // carousel={carousel && collection}
-                  // // editable={editable}
-                  // // onEdit={onEdit}
-                  // id={id}
-                  // // onSubmit={onSubmitEdit}
-                  // onOptionSelected={onOptionSelected}
-                  // // requestEdited={requestEdited}
-                  // selectedOptions={selectedOptions}
-                  />
-                </Grid>
-              );
-            })}
+          <Grid
+            item
+            xs={12}
+            sm={12}
+            sx={{
+              overflowY: "scroll",
+              height: "90%",
+            }}
+          >
+            {Object.keys(conversations).length > 0 &&
+              Object.keys(conversations).map((text, index) => {
+                return (
+                  <Grid item xs={12} sm={12} key={index}>
+                    <HistoryBox
+                      text={text}
+                      onPressHistoryItem={onPressHistoryItem}
+                    // options={options}
+                    // carousel={carousel && collection}
+                    // // editable={editable}
+                    // // onEdit={onEdit}
+                    // id={id}
+                    // // onSubmit={onSubmitEdit}
+                    // onOptionSelected={onOptionSelected}
+                    // // requestEdited={requestEdited}
+                    // selectedOptions={selectedOptions}
+                    />
+                  </Grid>
+                );
+              })}
+          </Grid>
         </Grid>
         <Grid
           item
           xs={12}
-          sm={5}
+          sm={8.5}
           sx={{
             overflowY: "scroll",
-            height: (window.innerHeight * 3) / 4,
-            maxHeight: (window.innerHeight * 3) / 4,
+            height: (window.innerHeight * 4) / 5,
+            maxHeight: (window.innerHeight * 4) / 5,
             bgcolor: "lightblue",
             py: 2,
             m: 2,
@@ -255,14 +263,12 @@ export default function Chatbot() {
               }
             )}
         </Grid>
-        <Grid item xs={1} sm={4} />
       </Grid>
       <Grid container>
-        <Grid item xs={1} sm={3} />
-        <Grid item xs={12} sm={5} sx={{ ml: 4 }}>
+        <Grid item xs={1} sm={2.5} />
+        <Grid item xs={12} sm={8.7} sx={{ ml: 4 }}>
           <Input onSubmit={onSubmit} />
         </Grid>
-        <Grid item xs={1} sm={4} />
       </Grid>
     </React.Fragment>
   );
