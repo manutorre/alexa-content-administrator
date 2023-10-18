@@ -36,8 +36,8 @@ const SimplePopper = ({ description }) => {
   }
 
   return (
-    <div>
-      <Button size="small" variant="contained" onClick={handleClick('bottom')}> {!open ? "Show more" : "Show less"}</Button>
+    <div style={{}}>
+      <Button sx={{}} size="small" variant="contained" onClick={handleClick('left')}> {!open ? "Show more" : "Show less"}</Button>
       <Popper sx={{ borderRadius: 3, border: 1, p: 2, bgcolor: 'background.paper', width: "60%", height: "40%", overflowY: "scroll" }} id={id} open={open} anchorEl={anchorEl} placement={placement} >
         <Box>
           {description.map((paragraph) => {
@@ -79,20 +79,21 @@ const Carousel = ({ carousel }) => {
   // console.log({ activeStep });
 
   return (
-    <Box sx={{ bgcolor: "background.default", width: "90%", ml: 2 }}>
+    <Box sx={{ flex: 1, bgcolor: "background.default", width: "90%", ml: 2 }}>
       <Paper
         square
         elevation={0}
         sx={{
+          flex: 1,
           display: "flex",
           justifyContent: "space-between",
           // height: 50,
           mt: 1,
-          px: 2
+          px: 1
         }}
       >
-        <Box sx={{ flex: 1 }}>
-          <a style={{ textAlign: "center" }}>
+        <Box sx={{ flex: 1, height: 100 }}>
+          <a style={{}}>
             <Typography onClick={redirectToUrl} variant="subtitle1">
               {carousel[activeStep].text} - <b>{carousel[activeStep].price}</b>
             </Typography>
@@ -104,22 +105,25 @@ const Carousel = ({ carousel }) => {
       <SwipeableViews
         // axis={theme.direction === "rtl" ? "x-reverse" : "x"}
         index={activeStep}
+        containerStyle={{ alignItems: 'center' }}
+        style={{}}
         onChangeIndex={handleStepChange}
         enableMouseEvents
       >
         {/* <TitlebarImageList item={carousel[activeStep]} /> */}
         {Object.values(carousel).map((step, index) => (
-          <div key={index}>
+          <div style={{}} key={index}>
             {Math.abs(activeStep - index) <= 2 ? (
               <Box
                 component="img"
                 sx={{
+                  // alignSelf: 'center',
                   height: 200,
                   display: "block",
-                  // maxWidth: 400,
-                  overflow: "hidden",
-                  width: "20%",
-                  margin: "auto",
+                  // overflow: "hidden",
+                  width: "auto",
+                  mx: "auto",
+                  // mt: 4
                 }}
                 src={step.imageSrc}
                 alt={step.text}

@@ -65,7 +65,7 @@ const getDescriptionAccordingSource = async (source, fullLink, $) => {
  * @param {string} entity - The entity to match against the titles in the collection
  * @return {number} The number of results in the collection matching the entity
  */
-export const getNResults = async (entity, source) => {
+export const getNResults = async (entity, source, collection) => {
   let param, url, searchParam;
   switch (source) {
     case "Amazon":
@@ -94,16 +94,11 @@ export const getNResults = async (entity, source) => {
   let $ = cheerio.load(response.data);
 
   // const mainElements = $("div[class='sg-col-20-of-24 s-result-item s-asin sg-col-0-of-12 sg-col-16-of-20 AdHolder sg-col s-widget-spacing-small sg-col-12-of-16']");
-  const mainElements = {};
+  const mainElements = { ...collection };
 
   let n = Object.entries(mainElements).length;
-  if (n !== 5) {
-    n = 0;
-  } else {
-    n = 6;
-  }
 
-  for (let i = 0; i < 5; i++) {
+  for (let i = n; i < n + 5; i++) {
     const { data, fullLink } = getDataAccordingSource(source, url, i, $);
     let description = await getDescriptionAccordingSource(source, fullLink, $);
     let desc = [];
@@ -122,7 +117,7 @@ export const getNResults = async (entity, source) => {
       desc = [...desc, d];
     }
     $ = cheerio.load(response.data);
-    mainElements[n + i] = { ...data, fullLink, source: 'Amazon', desc };
+    mainElements[i] = { ...data, fullLink, source, desc };
   }
   return mainElements;
 };
@@ -202,8 +197,8 @@ export const parseRequestWithGpt = async (input, currentParams) => {
   entity = data.entity;
   target = data.target;
   action = data.action;
-  source = data.source.replaceAll(' ', '');
-  source = source[0].toUpperCase() + source.slice(1, source.length);
+  source = data.source?.replaceAll(' ', '');
+  source = source && (source[0].toUpperCase() + source.slice(1, source.length));
 
   // criteria = data.criteria;
   // slot = data.slot;
@@ -212,16 +207,16 @@ export const parseRequestWithGpt = async (input, currentParams) => {
 
   //If only some data is missing, don't replace the data already collected
   if (messagePosition) {
-    entityFound = ((currentParams.entity !== "missing") && currentParams.entity) || entity || "missing";
-    targetFound = ((currentParams.target !== "missing") && currentParams.target) || target || "missing";
-    sourceFound = ((currentParams.source !== "missing") && currentParams.source) || source || "missing";
-    actionFound = ((currentParams.action !== "missing") && currentParams.action) || action || "missing";
+    entityFound = (currentParams.entity !== "missing" && currentParams.entity) || entity || "missing";
+    targetFound = (currentParams.target !== "missing" && currentParams.target) || target || "missing";
+    sourceFound = (currentParams.source !== "missing" && currentParams.source) || source || "missing";
+    actionFound = (currentParams.action !== "missing" && currentParams.action) || action || "missing";
   } else {
     //Otherwise, get all data again
-    entityFound = entity || currentParams.entity || "missing";
-    targetFound = target || currentParams.target || "missing";
-    sourceFound = source || currentParams.source || "missing";
-    actionFound = action || currentParams.action || "missing";
+    entityFound = (entity !== "missing" && entity) || currentParams.entity || "missing";
+    targetFound = (target !== "missing" && target) || currentParams.target || "missing";
+    sourceFound = (source !== "missing" && source) || currentParams.source || "missing";
+    actionFound = (action !== "missing" && action) || currentParams.action || "missing";
   }
 
   // const criteriaFound =
@@ -295,7 +290,7 @@ export const findNextStep = (lastRequest, lastStep) => {
  * @param {Object} currentParams - An object representing the current parameters of the conversation.
  * @return {string} The text of the next step in the conversation.
  */
-export const getText = async (nextStep, currentParams, operationResult) => {
+export const getText = async (nextStep, currentParams, operationResult, collection) => {
   let text = nextStep.text;
   console.log({ nextStep });
   const { entity, target, source, input, criteria, slot, value } = currentParams;
@@ -303,7 +298,7 @@ export const getText = async (nextStep, currentParams, operationResult) => {
 
   switch (nextStep.callbackForSlot) {
     case "getNResults":
-      results = await getNResults(entity, source);
+      results = await getNResults(entity, source, collection);
       text = text.replace(/@slotForResults/g, Object.entries(results).length);
       break;
     case "getSlot":

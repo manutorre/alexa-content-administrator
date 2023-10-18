@@ -18,10 +18,21 @@ import {
   sendPromptToGpt
 } from "./utils";
 import { HistoryBox } from "./historyBox";
+import { createTheme, ThemeProvider } from '@mui/material/styles';
+
+const theme = createTheme({
+  typography: {
+    button: {
+      textTransform: 'none',
+      textAlign: "left",
+      // fontSize: 10
+    }
+  }
+});
 
 export default function Chatbot() {
   const [requests, setRequests] = useState([]);
-  const collection = useRef(null);
+  const collection = useRef({});
   const [steps, setSteps] = useState([chatbotSteps["welcome"]]);
   const [conversations, setConversations] = useState(getStorageConversations());
   const lastStep = useRef("welcome");
@@ -68,7 +79,7 @@ export default function Chatbot() {
           operationResult = await sendPromptToGpt(collection.current, lastRequest);
         }
 
-        const { text, results } = await getText(nextStep, requestParams.current, operationResult);
+        const { text, results } = await getText(nextStep, requestParams.current, operationResult, collection.current);
         if (results) {
           collection.current = { ...collection.current, ...results };
         }
@@ -175,102 +186,106 @@ export default function Chatbot() {
   };
 
   return (
-    <React.Fragment>
-      <Grid container sx={{}}>
-        <Grid
-          item
-          xs={1}
-          sm={2.5}
-          sx={{
-            height: (window.innerHeight * 4) / 5,
-            maxHeight: (window.innerHeight * 4) / 5,
-            bgcolor: "lightgrey",
-            py: 2,
-            my: 2,
-            mx: 2,
-          }}
-        >
-          <Typography sx={{ textAlign: "center", mb: 1 }} variant="h5">
-            Historial
-          </Typography>
+    <ThemeProvider theme={theme}>
+      <React.Fragment>
+        <Grid container sx={{}}>
+          <Grid
+            item
+            xs={1}
+            sm={2.5}
+            sx={{
+              height: (window.innerHeight * 4) / 5,
+              maxHeight: (window.innerHeight * 4) / 5,
+              bgcolor: "black",
+              opacity: 0.8,
+              py: 2,
+              my: 2,
+              ml: 2,
+              borderRadius: 2
+            }}
+          >
+            <Typography sx={{ textAlign: "center", mb: 1, color: "white" }} variant="h5">
+              History
+            </Typography>
+            <Grid
+              item
+              xs={12}
+              sm={12}
+              sx={{
+                overflowY: "scroll",
+                height: "90%",
+              }}
+            >
+              {Object.values(conversations).length > 0 &&
+                Object.values(conversations).map(({ steps }, index) => {
+                  return (
+                    <Grid item xs={12} sm={12} key={index}>
+                      <HistoryBox
+                        steps={steps}
+                        onPressHistoryItem={onPressHistoryItem}
+                      // options={options}
+                      // carousel={carousel && collection}
+                      // // editable={editable}
+                      // // onEdit={onEdit}
+                      // id={id}
+                      // // onSubmit={onSubmitEdit}
+                      // onOptionSelected={onOptionSelected}
+                      // // requestEdited={requestEdited}
+                      // selectedOptions={selectedOptions}
+                      />
+                    </Grid>
+                  );
+                })}
+            </Grid>
+          </Grid>
           <Grid
             item
             xs={12}
-            sm={12}
+            sm={8.5}
             sx={{
               overflowY: "scroll",
-              height: "90%",
+              height: (window.innerHeight * 4) / 5,
+              maxHeight: (window.innerHeight * 4) / 5,
+              bgcolor: "white",
+              // py: 2,
+              my: 2,
             }}
           >
-            {Object.keys(conversations).length > 0 &&
-              Object.keys(conversations).map((text, index) => {
-                return (
-                  <Grid item xs={12} sm={12} key={index}>
-                    <HistoryBox
-                      text={text}
-                      onPressHistoryItem={onPressHistoryItem}
-                    // options={options}
-                    // carousel={carousel && collection}
-                    // // editable={editable}
-                    // // onEdit={onEdit}
-                    // id={id}
-                    // // onSubmit={onSubmitEdit}
-                    // onOptionSelected={onOptionSelected}
-                    // // requestEdited={requestEdited}
-                    // selectedOptions={selectedOptions}
-                    />
-                  </Grid>
-                );
-              })}
-          </Grid>
-        </Grid>
-        <Grid
-          item
-          xs={12}
-          sm={8.5}
-          sx={{
-            overflowY: "scroll",
-            height: (window.innerHeight * 4) / 5,
-            maxHeight: (window.innerHeight * 4) / 5,
-            bgcolor: "lightblue",
-            py: 2,
-            m: 2,
-          }}
-        >
-          {/* <Grid item xs={12} sm={12}>
+            {/* <Grid item xs={12} sm={12}>
           <ConversationalBox {...DEFAULT_DATA["step1"]} />
         </Grid> */}
-          {steps.length > 0 &&
-            steps.map(
-              ({ type, text, options, carousel, elements, id }, index) => {
-                return (
-                  <Grid item xs={12} sm={12} key={index}>
-                    <ConversationalBox
-                      type={type}
-                      text={text}
-                      options={options}
-                      carousel={carousel && elements}
-                      // editable={editable}
-                      // onEdit={onEdit}
-                      id={id}
-                      // onSubmit={onSubmitEdit}
-                      onOptionSelected={onOptionSelected}
-                      // requestEdited={requestEdited}
-                      selectedOptions={selectedOptions}
-                    />
-                  </Grid>
-                );
-              }
-            )}
+            {steps.length > 0 &&
+              steps.map(
+                ({ type, text, options, carousel, elements, id }, index) => {
+                  return (
+                    <Grid item xs={12} sm={12} key={index}>
+                      <ConversationalBox
+                        type={type}
+                        text={text}
+                        options={options}
+                        carousel={carousel && elements}
+                        // editable={editable}
+                        // onEdit={onEdit}
+                        id={id}
+                        // onSubmit={onSubmitEdit}
+                        onOptionSelected={onOptionSelected}
+                        // requestEdited={requestEdited}
+                        selectedOptions={selectedOptions}
+                      />
+                    </Grid>
+                  );
+                }
+              )}
+          </Grid>
         </Grid>
-      </Grid>
-      <Grid container>
-        <Grid item xs={1} sm={2.5} />
-        <Grid item xs={12} sm={8.7} sx={{ ml: 4 }}>
-          <Input onSubmit={onSubmit} />
+        <Grid container>
+          <Grid item xs={1} sm={2.5} />
+          <Grid item xs={12} sm={8.6} sx={{ ml: 4 }}>
+            <Input onSubmit={onSubmit} />
+          </Grid>
         </Grid>
-      </Grid>
-    </React.Fragment>
+      </React.Fragment>
+    </ThemeProvider>
   );
 }
 

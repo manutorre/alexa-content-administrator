@@ -1,56 +1,54 @@
 import React, { useState, useRef, useEffect } from "react";
 import { styled } from "@mui/material/styles";
-import AccountCircle from "@mui/icons-material/AccountCircle";
-import SmartToyRoundedIcon from "@mui/icons-material/SmartToyRounded";
 import {
   Box,
   Stack,
   Paper,
   Button,
-  IconButton,
-  TextField,
+  Typography,
 } from "@mui/material";
-import Carousel from "./carousel";
-import BorderColorIcon from "@mui/icons-material/BorderColor";
-import Grid from "antd/lib/card/Grid";
-import SendIcon from "@mui/icons-material/Send";
 
 const Item = styled(Paper)(({ theme, sx }) => ({
   ...sx,
-  ...theme.typography.body2,
-  padding: theme.spacing(3),
-  // textAlign: "center",
-  display: "flex",
-  alignItems: "center",
-  color: theme.palette.text.primary,
+  // ...theme.typography.body2,
+  // padding: theme.spacing(3),
+  // textAlign: "start",
+  // display: "flex",
+  // alignItems: "flex-start",
+  // color: theme.palette.text.primary,
 }));
 
-const HistoryItem = ({ text, onPressHistoryItem }) => {
+const HistoryItem = ({ step, onPressHistoryItem }) => {
   const onButtonClicked = () => {
     onPressHistoryItem();
   };
 
   return (
     <Item sx={{ backgroundColor: "whitesmoke" }}>
-      <Button onClick={onButtonClicked} variant="text">
-        {" "}
-        {!!text && text}
+      <Button onClick={onButtonClicked}>
+        <Typography sx={{ fontSize: 14 }}>
+          {!!step && step.text?.slice(0, 40)} ...
+        </Typography>
       </Button>
     </Item>
   );
 };
 
-export const HistoryBox = ({ text, onPressHistoryItem }) => {
+export const HistoryBox = ({ steps, onPressHistoryItem }) => {
   const boxRef = useRef(null);
 
   useEffect(() => {
-    boxRef.current.scrollIntoView({ behavior: "smooth" });
+    boxRef.current?.scrollIntoView({ behavior: "smooth" });
   });
+
+  if (!steps[1]) {
+    return null;
+  }
 
   return (
     <Box ref={boxRef} sx={{ width: "100%" }}>
       <Stack spacing={2} sx={{ marginX: 4, marginY: 1 }}>
-        <HistoryItem text={text} onPressHistoryItem={onPressHistoryItem} />
+        <HistoryItem step={steps[1]} onPressHistoryItem={onPressHistoryItem} />
       </Stack>
     </Box>
   );

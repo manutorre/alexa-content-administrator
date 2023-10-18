@@ -33,8 +33,8 @@ const ChatbotItem = ({ text, options, carousel }) => {
 
   return (
     <Item sx={{ backgroundColor: "whitesmoke" }}>
-      <SmartToyRoundedIcon sx={{ color: "lightblue", mr: 1 }} />
-      {!!text && <Typography variant="body1">{text}</Typography>}
+      <SmartToyRoundedIcon fontSize="large" sx={{ color: "tomato", mr: 1 }} />
+      {!!text && <Typography sx={{ fontSize: 16 }} variant="body1">{text}</Typography>}
       {!!options && (
         <Stack direction="row" spacing={2}>
           {options.map((option, index) => (
@@ -87,10 +87,10 @@ const UsertItem = ({
   };
 
   return (
-    <Item sx={{ justifyContent: "space-between" }}>
+    <Item sx={{ justifyContent: "space-between", bgcolor: "white" }}>
       <Box sx={{ display: "flex", alignItems: "center" }}>
-        <AccountCircle sx={{ mr: 1, color: "lightgreen" }} />
-        {!editable && <Typography variant="body2">{text}</Typography>}
+        <AccountCircle fontSize="large" sx={{ mr: 1, color: "dodgerblue" }} />
+        {!editable && <Typography sx={{ fontSize: 16 }} variant="body2">{text}</Typography>}
         {editable && (
           <TextField
             label="Input"
