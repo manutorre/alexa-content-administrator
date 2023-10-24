@@ -40,7 +40,7 @@ export default function Chatbot() {
     entity: "missing",
     target: "missing",
     source: "missing",
-    criteria: "missing",
+    action: "missing",
   });
   // const [requestAdded, setRequestAdded] = useState(false);
   const [requestEdited, setRequestEdited] = useState(false);
@@ -66,7 +66,7 @@ export default function Chatbot() {
       if (lastRequest) {
         const lastStep = steps[steps.length - 1];
         let operationResult;
-        const nextStep = findNextStep(lastRequest, lastStep);
+        const nextStep = findNextStep(requestParams.current, lastRequest, lastStep);
         console.log({ requestParams, nextStep });
 
         // if (nextStep.callbackForSlot === "getAverage") {
@@ -75,13 +75,14 @@ export default function Chatbot() {
         //     operationResult = await applyOperation(collection.current, criteria, slot);
         //   }
         // }
-        if (nextStep.step !== 5 && lastStep.step === 6) { //steps["explore"]
+        if (nextStep.step === 7) { //steps["explore"]
           operationResult = await sendPromptToGpt(collection.current, lastRequest);
+          requestParams.current.action = "missing";
         }
 
         const { text, results } = await getText(nextStep, requestParams.current, operationResult, collection.current);
         if (results) {
-          collection.current = { ...collection.current, ...results };
+          collection.current = results; //{ ...collection.current, ...results };
         }
         let nextStepModified = { ...nextStep, text };
         if (nextStep.options) {
@@ -92,10 +93,9 @@ export default function Chatbot() {
           const elements = await getCarouselItems(collection.current, lastRequest);
           nextStepModified = { ...nextStepModified, elements };
         }
-        requestParams.current.criteria = "missing";
 
         // setTimeout(() => {
-        const newSteps = [...steps, lastRequest, nextStepModified];
+        const newSteps = [...steps, nextStepModified];
         setSteps(newSteps);
         // }, 1000);
       }
@@ -123,12 +123,14 @@ export default function Chatbot() {
     if (getLastStepType() === "User") {
       return;
     }
-    const params = await parseRequestWithGpt(inputValue, requestParams.current);
+    const params = await parseRequestWithGpt(inputValue, requestParams.current, requests);
     console.log({ params });
     const newRequest = { type: "User", text: inputValue, params }; //, id };
     const newRequests = [...requests, newRequest];
     requestParams.current = { ...requestParams.current, ...params };
 
+    const newSteps = [...steps, newRequest];
+    setSteps(newSteps);
     setRequests(newRequests);
   };
 

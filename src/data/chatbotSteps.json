@@ -27,7 +27,7 @@
     "results": {
         "type": "Chatbot",
         "step": 5,
-        "text": "I found @slotForResults results from \"@source\". I will show you the first results.",
+        "text": "I found @slotForResults results from \"@source\".",
         "carousel": true,
         "callbackForSlot": "getNResults"
     },

@@ -92,7 +92,24 @@ const Carousel = ({ carousel }) => {
           px: 1
         }}
       >
+        <Box
+          component="img"
+          sx={{
+            // alignSelf: 'center',
+            height: 20,
+            display: "block",
+            // overflow: "hidden",
+            width: "auto",
+            m: 1,
+
+            // mx: "auto",
+            // mt: 4
+          }}
+          src={carousel[activeStep].favicon}
+        // alt={step.text}
+        />
         <Box sx={{ flex: 1, height: 100 }}>
+
           <a style={{}}>
             <Typography onClick={redirectToUrl} variant="subtitle1">
               {carousel[activeStep].text} - <b>{carousel[activeStep].price}</b>

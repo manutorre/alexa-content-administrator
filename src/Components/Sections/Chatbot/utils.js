@@ -23,7 +23,7 @@ const getDataAccordingSource = (source, url, pos, $) => {
       break;
     case "MercadoLibre":
       text = $("h2[class='ui-search-item__title']")[pos].firstChild.data;
-      price = $("span[class='andes-money-amount ui-search-price__part ui-search-price__part--medium andes-money-amount--cents-superscript']")[pos].firstChild.children[0].data;
+      price = $("span[class='andes-money-amount ui-search-price__part ui-search-price__part--medium andes-money-amount--cents-superscript']")[pos].children[1].children[0].data;
       imageSrc = $(".ui-search-result-image__element")[pos].attribs['data-src'];
       link = $("div[class='andes-carousel-snapped ui-search-result__card andes-carousel-snapped--scroll-hidden']")[pos].firstChild.firstChild.firstChild.attribs.href;
       fullLink = `${link}`;
@@ -58,6 +58,25 @@ const getDescriptionAccordingSource = async (source, fullLink, $) => {
   return description;
 }
 
+const getSourceParams = (entity, source) => {
+  const DEFAULT_PARAMS = {
+    Amazon: {
+      param: entity.replaceAll(" ", "+"),
+      url: 'https://www.amazon.com',
+      searchParam: `/s?k=`,
+      favicon: 'https://www.amazon.com/favicon.ico'
+    },
+    MercadoLibre: {
+      param: entity.replaceAll(" ", "-"),
+      url: 'https://listado.mercadolibre.com.ar',
+      searchParam: `/`,  //#D[A:${entity}]`;
+      favicon: 'https://listado.mercadolibre.com.ar/favicon.ico'
+    }
+  }
+
+  return DEFAULT_PARAMS[source];
+}
+
 /**
  * Returns the number of results in the collection that have a title
  * matching the given entity.
@@ -65,74 +84,75 @@ const getDescriptionAccordingSource = async (source, fullLink, $) => {
  * @param {string} entity - The entity to match against the titles in the collection
  * @return {number} The number of results in the collection matching the entity
  */
-export const getNResults = async (entity, source, collection) => {
-  let param, url, searchParam;
-  switch (source) {
-    case "Amazon":
-      param = entity.replaceAll(" ", "+");
-      url = 'https://www.amazon.com';
-      searchParam = `/s?k=${param}`;
-      break;
-    case "MercadoLibre":
-      param = entity.replaceAll(" ", "-");
-      url = 'https://listado.mercadolibre.com.ar';
-      searchParam = `/${param}`;  //#D[A:${entity}]`;
-      break;
-    default:
-      param = entity.replaceAll(" ", "+");
-      url = 'https://www.amazon.com';
-      searchParam = `/s?k=${param}`;
-      break;
+export const getNResults = async (entity, sources, collection) => {
+  let sourceParams = {};
+  let mainElements = {};
+  const n = Object.entries(collection).length;
+  let pos = 0;
+
+  if (!Array.isArray(sources)) {
+    sources = [sources];
   }
 
-  const response = await axios({
-    method: "get",
-    url: url + searchParam,
-    headers: { "Access-Control-Allow-Origin": "*" },
-  });
+  for (let source of sources) {
+    let newParams = getSourceParams(entity, source);
+    let { param, url, searchParam, favicon } = newParams;
 
-  let $ = cheerio.load(response.data);
+    searchParam += param;
+    sourceParams = { ...sourceParams, ...newParams };
 
-  // const mainElements = $("div[class='sg-col-20-of-24 s-result-item s-asin sg-col-0-of-12 sg-col-16-of-20 AdHolder sg-col s-widget-spacing-small sg-col-12-of-16']");
-  const mainElements = { ...collection };
+    const response = await axios({
+      method: "get",
+      url: url + searchParam,
+      headers: { "Access-Control-Allow-Origin": "*" },
+    });
 
-  let n = Object.entries(mainElements).length;
+    let $ = cheerio.load(response.data);
 
-  for (let i = n; i < n + 5; i++) {
-    const { data, fullLink } = getDataAccordingSource(source, url, i, $);
-    let description = await getDescriptionAccordingSource(source, fullLink, $);
-    let desc = [];
-    let d;
-    for (let p = 0; p < description.length; p++) {
-      switch (source) {
-        case 'Amazon':
-          d = description[p].children[0].children[0].data;
-          break;
-        case 'MercadoLibre':
-          d = description[p].children[0].data;
-          break;
-        default:
-          break;
+    // console.log($.html());
+
+    // const mainElements = $("div[class='sg-col-20-of-24 s-result-item s-asin sg-col-0-of-12 sg-col-16-of-20 AdHolder sg-col s-widget-spacing-small sg-col-12-of-16']");
+
+    for (let i = 0; i < 5; i++) {
+      const { data, fullLink } = getDataAccordingSource(source, url, i, $);
+      let description = await getDescriptionAccordingSource(source, fullLink, $);
+      let desc = [];
+      let d;
+
+      for (let p = 0; p < description.length; p++) {
+        switch (source) {
+          case 'Amazon':
+            d = description[p].children[0].children[0].data;
+            break;
+          case 'MercadoLibre':
+            d = description[p].children[0].data;
+            break;
+          default:
+            break;
+        }
+        desc = [...desc, d];
       }
-      desc = [...desc, d];
+      $ = cheerio.load(response.data);
+
+      mainElements[pos] = { ...data, fullLink, source, desc, favicon };
+      pos++;
     }
-    $ = cheerio.load(response.data);
-    mainElements[i] = { ...data, fullLink, source, desc };
   }
+
   return mainElements;
 };
 
 const TRAINING_MESSAGES = {
   allMissing:
-    'You are a helpful assistant. You need to recognize 4 kind of concepts (entity, target, source, action) in the following sentences and return them in the form {key:value}. In next example: "I want to buy a wireless headphone", the entity is "wireless headphone", the target is "product" and the source is "missing". In next example: "I want to buy a book from Amazon", the entity is "book", the target is "product" and the source is "Amazon". In next example: "I want to add headphones from MercadoLibre", the entity is "headphones", the target is "product", the source is "MercadoLibre" and the action is "add".',
+    'You are a helpful assistant. You need to recognize 4 kind of concepts (entity, target, source, action) in the following sentences and return them in the form {key:value}. In next example: "I want to buy a wireless headphone", the entity is "wireless headphone", the target is "product" and the source is "missing". In next example: "I want to buy a book from Amazon", the entity is "book", the target is "product" and the source is "Amazon". In next example: "I want headphones from Amazon and MercadoLibre", the entity is "headphones", the target is "product", the source is ["Amazon", "MercadoLibre"]. In next example: "I want the products with price less than 100", the action is "filter".',
   entityMissing:
     'You are a helpful assistant. You need to recognize 1 concept (entity) in the following sentences and return it in the form {key:value}. In next example: "I want to buy a wireless headphone", the entity is "wireless headphone". In next example: "I want to buy a book from Amazon", the entity is "book".',
   targetMissing:
     'You are a helpful assistant. You need to recognize 1 concept (target) in the following sentences and return it in the form {key:value}. In next example: "I want to buy a wireless headphone", the target is "product". In next example: "I want to buy a book from Amazon", the target is "product".',
   sourceMissing:
-    'You are a helpful assistant. You need to recognize 1 concept (source) in the following sentences and return it in the form {key:value}. In next example: "I want to buy a wireless headphone", the source is "missing". In next example: "I want to buy a book from Amazon", the source is "Amazon".',
-  // criteriaMissing:
-  //   'You are a helpful assistant. You need to recognize 2 concepts (criteria, slot) in the following sentences and return it in the form {key:value}. "I want headphones from Amazon ordered by price", the entity is "headphones", the target is "product", the source is "Amazon" and the criteria is "order by" where "price" is the "slot". Or "I want the products with price less than 100", the criteria is "less than", the slot is "price" and the value is "100".',
+    'You are a helpful assistant. You need to recognize 1 concept (source) in the following sentences and return it in the form {key:value}. In next example: "I want to buy a wireless headphone", the source is "missing". In next example: "I want to buy a book from Amazon", the source is "Amazon". In next example: "I want headphones from Amazon and MercadoLibre", the entity is "headphones", the target is "product", the source is ["Amazon", "MercadoLibre"].',
+  actionMissing:
+    'You are a helpful assistant. You need to recognize 1 concept (action) in the following sentences and return it in the form {key:value}. "I want results ordered by price", the action is "order". In next example: "I want the products with price less than 100", the action is "filter".',
 };
 
 /**
@@ -142,12 +162,16 @@ const TRAINING_MESSAGES = {
  * @param {string} input - the input string to be parsed.
  * @return {object} an object containing the search action, entity value, target value, and source value.
  */
-export const parseRequestWithGpt = async (input, currentParams) => {
+export const parseRequestWithGpt = async (input, currentParams, requests) => {
   // const formattedInput = input.toLowerCase();
   // const criteriaMissing = currentParams.criteria === "missing";
+  // const lastIndex = requests.length - 1;
+  // const lastRequest = requests[lastIndex];
+
   const entityMissing = currentParams.entity === "missing";
   const targetMissing = currentParams.target === "missing";
   const sourceMissing = currentParams.source === "missing";
+  const actionMissing = currentParams.action === "missing";
   const allMissing = entityMissing && targetMissing && sourceMissing; // && criteriaMissing;
   let entity, target, source, content, action, entityFound, targetFound, sourceFound, actionFound;
 
@@ -156,7 +180,7 @@ export const parseRequestWithGpt = async (input, currentParams) => {
     entityMissing,
     targetMissing,
     sourceMissing,
-    // criteriaMissing,
+    actionMissing,
   };
   const missingIndex = Object.entries(searchPropsForMissing).findIndex(
     (searchProp) => !!searchProp[1]
@@ -166,65 +190,43 @@ export const parseRequestWithGpt = async (input, currentParams) => {
 
   const messagePosition = propMissing[0];
 
-  //If some prop is missing
+  //If some prop is still missing in current request
   if (messagePosition) {
     content = TRAINING_MESSAGES[messagePosition];
-  } else {
-    //Identify again the necessary props
-    content = TRAINING_MESSAGES['allMissing'];
+    console.log({ content, currentParams });
+
+    //First, train GPT to find entity, target and source values from a sentence
+    const trainingMessages = [
+      {
+        role: "system",
+        content,
+      },
+      { role: "user", content: input },
+    ];
+
+    const completion = await openai.createChatCompletion({
+      model: "gpt-3.5-turbo",
+      messages: trainingMessages,
+    });
+
+    const completionResult = completion.data.choices[0].message;
+    const data =
+      completionResult.content && JSON.parse(completionResult.content);
+
+    console.log({ data });
+
+    entity = data.entity;
+    target = data.target;
+    source = data.source; //?.replaceAll(' ', '');
+    action = data.action;
+    // source = source && (source[0].toUpperCase() + source.slice(1, source.length));
   }
-
-  console.log({ content, currentParams });
-
-  //First, train GPT to find entity, target and source values from a sentence
-  const trainingMessages = [
-    {
-      role: "system",
-      content,
-    },
-    { role: "user", content: input },
-  ];
-
-  const completion = await openai.createChatCompletion({
-    model: "gpt-3.5-turbo",
-    messages: trainingMessages,
-  });
-
-  const completionResult = completion.data.choices[0].message;
-  const data =
-    completionResult.content && JSON.parse(completionResult.content);
-
-  entity = data.entity;
-  target = data.target;
-  action = data.action;
-  source = data.source?.replaceAll(' ', '');
-  source = source && (source[0].toUpperCase() + source.slice(1, source.length));
-
-  // criteria = data.criteria;
-  // slot = data.slot;
-  // value = data.value;
-  console.log({ data });
 
   //If only some data is missing, don't replace the data already collected
-  if (messagePosition) {
-    entityFound = (currentParams.entity !== "missing" && currentParams.entity) || entity || "missing";
-    targetFound = (currentParams.target !== "missing" && currentParams.target) || target || "missing";
-    sourceFound = (currentParams.source !== "missing" && currentParams.source) || source || "missing";
-    actionFound = (currentParams.action !== "missing" && currentParams.action) || action || "missing";
-  } else {
-    //Otherwise, get all data again
-    entityFound = (entity !== "missing" && entity) || currentParams.entity || "missing";
-    targetFound = (target !== "missing" && target) || currentParams.target || "missing";
-    sourceFound = (source !== "missing" && source) || currentParams.source || "missing";
-    actionFound = (action !== "missing" && action) || currentParams.action || "missing";
-  }
-
-  // const criteriaFound =
-  //   criteria || (!criteriaMissing && currentParams.criteria) || "missing";
-  // const slotFound =
-  //   slot || (!criteriaMissing && currentParams.slot) || "missing";
-  // const valueFound =
-  //   value || (!criteriaMissing && currentParams.value) || "missing";
+  entityFound = (currentParams.entity !== "missing" && currentParams.entity) || entity || "missing";
+  targetFound = (currentParams.target !== "missing" && currentParams.target) || target || "missing";
+  sourceFound = (currentParams.source !== "missing" && currentParams.source) || source || "missing";
+  actionFound = (currentParams.action !== "missing" && currentParams.action) || action || "missing";
 
   return {
     input,
@@ -245,7 +247,7 @@ export const parseRequestWithGpt = async (input, currentParams) => {
  * @param {Object} params - An object containing the entity, target, and source.
  * @return {string} The next step, or the result if no missing properties are found.
  */
-export const findNextStep = (lastRequest, lastStep) => {
+export const findNextStep = (requestParams, lastRequest, lastStep) => {
   const { params } = lastRequest;
   const missingProps = Object.keys(params).filter(
     (prop) => params[prop] === "missing"
@@ -269,13 +271,13 @@ export const findNextStep = (lastRequest, lastStep) => {
     return steps["source"];
   }
 
-  const productRequested = params.target === "product";
-  if (params.action?.match("add") || productRequested) {
-    return steps["results"];
+  if (!missingProps.includes("action")) {
+    return steps["default"];
   }
 
-  if (lastStep.step === 6) {
-    return steps["default"];
+  const productRequested = params.target === "product";
+  if (productRequested) {
+    return steps["results"];
   }
 
   // if (lastStep.step === 5) {
@@ -340,7 +342,7 @@ export const getOptions = (currentParams) => {
  * @return {Object} - An object with a response message and the list of elements after applying the operation.
  */
 export const sendPromptToGpt = async (collection, { text }) => {
-  const content = 'You are a helpful assistant. I will give you a list of elements each one in the way {key:value}. I will also ask you to answer with some information about the values from the elements. For example, I can ask you to filter elements searching for some word in the text. Or filter elements by some specific value for number data. Return only the elements asked as an array with elements in the way {key:value}';
+  const content = 'You are a helpful assistant. I will give you a list of elements each one in the way {key:value}. I will also ask you to answer with some information about the values from the elements. For example, I can ask you to filter elements searching for some word in the text. Or filter elements by some specific value for number data. Return only the elements asked as an array with elements in the way {key:value} without any text after the array.';
 
   let filteredElements = Object.entries(collection).filter(item => {
     const info = item[1];
@@ -372,7 +374,7 @@ export const sendPromptToGpt = async (collection, { text }) => {
   });
 
   const completionResult = completion.data.choices[0].message?.content;
-  const msg = completionResult.split(":")[0];
+  const msg = 'Okay! Here you have'; //completionResult.split(":")[0];
   let elements = completionResult.match(/\[(.*?)\]/, "g");
   elements = elements || completionResult.split(":")[1];
   // const elements = completionResult.match(/\{(.*?)\}/, "g");
